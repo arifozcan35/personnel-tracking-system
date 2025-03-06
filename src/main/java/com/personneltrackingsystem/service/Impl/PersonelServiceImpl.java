@@ -1,4 +1,4 @@
-package com.personneltrackingsystem.service;
+package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Gate;
@@ -8,19 +8,18 @@ import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
+import com.personneltrackingsystem.service.IPersonelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PersonelService {
+public class PersonelServiceImpl implements IPersonelService {
     @Autowired
     private PersonelRepository personelRepository;
 
@@ -28,7 +27,7 @@ public class PersonelService {
     private WorkRepository workRepository;
 
     @Autowired
-    private WorkService workService;
+    private WorkServiceImpl workServiceImpl;
 
     @Autowired
     private UnitRepository unitRepository;
@@ -36,10 +35,12 @@ public class PersonelService {
     @Autowired
     private GateRepository gateRepository;
 
+    @Override
     public List<Personel> getAllPersonels() {
         return personelRepository.findAll();
     }
 
+    @Override
     public Personel getAOnePersonel(Long personelId) {
         return personelRepository.findById(personelId).orElse(null);
     }
@@ -58,6 +59,7 @@ public class PersonelService {
     }
 */
 
+    @Override
     public ResponseEntity<String> saveOnePersonel(Personel newPersonel) {
 
         // Unit control (a mandatory field)
@@ -125,7 +127,7 @@ public class PersonelService {
             if (checkIn == null && checkOut == null && checkOut.isBefore(checkIn)) {
                 return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
             } else {
-                workService.workHoursCalculate2(newPersonel);
+                workServiceImpl.workHoursCalculate2(newPersonel);
 
                 Work savedWork = workRepository.save(newPersonel.getWork());
                 newPersonel.setWork(savedWork);
@@ -137,6 +139,7 @@ public class PersonelService {
     }
 
 
+    @Override
     public ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel) {
         Optional<Personel> personel = personelRepository.findById(id);
 
@@ -154,13 +157,13 @@ public class PersonelService {
             if(newPersonel.getAdministrator() != null){
                     foundPersonel.setAdministrator(newPersonel.getAdministrator());
 
-                Personel pYonetici = new Personel(newPersonel.getAdministrator());
-                foundPersonel.setSalary(pYonetici.getSalary());
+                Personel pAdmin = new Personel(newPersonel.getAdministrator());
+                foundPersonel.setSalary(pAdmin.getSalary());
             }
             else if(newPersonel.getSalary() != null){
-                Personel pMaas = new Personel(newPersonel.getSalary());
-                foundPersonel.setAdministrator(pMaas.getAdministrator());
-                foundPersonel.setSalary(pMaas.getSalary());
+                Personel pSalary = new Personel(newPersonel.getSalary());
+                foundPersonel.setAdministrator(pSalary.getAdministrator());
+                foundPersonel.setSalary(pSalary.getSalary());
             }
 
             // Unit control
@@ -212,6 +215,7 @@ public class PersonelService {
     }
 
 
+    @Override
     public void deleteOnePersonel(Long id) {
         Optional<Personel> personel = personelRepository.findById(id);
         if (personel.isPresent()) {
@@ -228,8 +232,9 @@ public class PersonelService {
     }
 
 
+    @Override
     public void workHoursCalculate(Long personelId) {
-        workService.workHoursCalculate(personelId);
+        workServiceImpl.workHoursCalculate(personelId);
     }
 
 

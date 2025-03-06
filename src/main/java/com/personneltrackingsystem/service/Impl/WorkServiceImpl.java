@@ -1,4 +1,4 @@
-package com.personneltrackingsystem.service;
+package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
@@ -11,7 +11,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 
 @Service
-public class WorkService {
+public class WorkServiceImpl {
     @Autowired
     private WorkRepository workRepository;
     @Autowired

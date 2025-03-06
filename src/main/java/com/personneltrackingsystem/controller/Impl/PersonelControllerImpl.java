@@ -1,8 +1,10 @@
-package com.personneltrackingsystem.controller;
+package com.personneltrackingsystem.controller.Impl;
 
+import com.personneltrackingsystem.controller.IPersonelController;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.service.WorkService;
-import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.IPersonelService;
+import com.personneltrackingsystem.service.Impl.WorkServiceImpl;
+import com.personneltrackingsystem.service.Impl.PersonelServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +13,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/personel")
-public class PersonelController {
-    @Autowired
-    private PersonelService personelService;
+public class PersonelControllerImpl implements IPersonelController {
 
     @Autowired
-    private WorkService workService;
+    private IPersonelService personelServiceImpl;
+
+    @Autowired
+    private WorkServiceImpl workServiceImpl;
 
     @GetMapping
+    @Override
     public List<Personel> getAllPersonels() {
-        return personelService.getAllPersonels();
+        return personelServiceImpl.getAllPersonels();
     }
 
     /*
@@ -32,30 +36,33 @@ public class PersonelController {
 
     // the same usage above function
     @GetMapping("/{personelId}")
-    public Personel getOnePersonel(@PathVariable(name="id", required = true) Long personelId){
-        return personelService.getAOnePersonel(personelId);
+    @Override
+    public Personel getOnePersonel(@PathVariable Long personelId){
+        return personelServiceImpl.getAOnePersonel(personelId);
     }
 
-
-
     @PostMapping
+    @Override
     public ResponseEntity<String> createPersonel(@RequestBody Personel newPersonel) {
-        return personelService.saveOnePersonel(newPersonel);
+        return personelServiceImpl.saveOnePersonel(newPersonel);
     }
 
     @PutMapping("/{personelId}")
+    @Override
     public ResponseEntity<String> updatePersonel(@PathVariable Long personelId, @RequestBody Personel newPersonel) {
-        return personelService.updateOnePersonel(personelId, newPersonel);
+        return personelServiceImpl.updateOnePersonel(personelId, newPersonel);
     }
 
     @DeleteMapping("/{personelId}")
+    @Override
     public void deletePersonel(@PathVariable Long personelId) {
-        personelService.deleteOnePersonel(personelId);
+        personelServiceImpl.deleteOnePersonel(personelId);
     }
 
     @GetMapping("/salary/{personelId}")
+    @Override
     public void seeSalary(@PathVariable Long personelId) {
-        personelService.workHoursCalculate(personelId);
+        personelServiceImpl.workHoursCalculate(personelId);
     }
 
 }

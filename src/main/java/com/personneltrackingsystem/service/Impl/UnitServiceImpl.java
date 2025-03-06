@@ -1,9 +1,10 @@
-package com.personneltrackingsystem.service;
+package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
+import com.personneltrackingsystem.service.IUnitService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UnitService {
+public class UnitServiceImpl implements IUnitService {
     @Autowired
     private UnitRepository unitRepository;
 
@@ -34,16 +35,19 @@ public class UnitService {
     }
     */
 
+    @Override
     public List<Unit> getAllUnits(){
         return unitRepository.findAll();
     }
 
 
+    @Override
     public Unit getOneUnit(Long unitId){
         return unitRepository.findById(unitId).orElse(null);
     }
 
 
+    @Override
     public Unit saveOneUnit(Unit unit) {
         if(unit.getUnitName() != null){
             return unitRepository.save(unit);
@@ -52,6 +56,7 @@ public class UnitService {
         }
     }
 
+    @Override
     public Unit updateOneUnit(Long id, Unit newUnit) {
         Optional<Unit> unit = unitRepository.findById(id);
 
@@ -65,6 +70,7 @@ public class UnitService {
 
     }
 
+    @Override
     public void deleteOneUnit(Long unitId) {
         Unit unit = unitRepository.findById(unitId)
                 .orElseThrow(() -> new EntityNotFoundException("Unit not found!"));
@@ -79,6 +85,7 @@ public class UnitService {
         unitRepository.delete(unit);
     }
 
+    @Override
     public List<Personel> getPersonelsByUnitId(Long unitId){
 
         List<Personel> personels = new ArrayList<>();
