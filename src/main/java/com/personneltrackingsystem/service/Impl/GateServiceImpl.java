@@ -1,56 +1,92 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.dto.DtoGate;
+import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.IGateService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class GateServiceImpl implements IGateService {
-    @Autowired
-    private GateRepository gateRepository;
+    private final GateRepository gateRepository;
+
+    private final PersonelRepository personelRepository;
 
     @Autowired
-    private PersonelRepository personelRepository;
+    public GateServiceImpl (GateRepository gateRepository, PersonelRepository personelRepository){
+        this.gateRepository = gateRepository;
+        this.personelRepository = personelRepository;
+    }
 
     @Override
-    public List<Gate> getAllGates(){
+    public List<DtoGate> getAllGates(){
+        List<DtoGate> dtoGateList = new ArrayList<>();
 
-        return gateRepository.findAll();
+        List<Gate> gateList =  gateRepository.findAll();
+        for (Gate gate : gateList) {
+            DtoGate dto = new DtoGate();
+            BeanUtils.copyProperties(gate, dto);
+            dtoGateList.add(dto);
+        }
+        return dtoGateList;
     }
 
 
     @Override
-    public Gate getOneGate(Long gateId){
-        return gateRepository.findById(gateId).orElse(null);
+    public DtoGate getOneGate(Long gateId){
+        DtoGate dto = new DtoGate();
+        Optional<Gate> optional =  gateRepository.findById(gateId);
+        if(optional.isPresent()){
+            Gate dbGate = optional.get();
+
+            BeanUtils.copyProperties(dbGate, dto);
+        }
+        return dto;
     }
 
     @Override
-    public Gate saveOneGate(Gate gate) {
+    public DtoGate saveOneGate(DtoGateIU gate) {
         if(gate.getGateName() != null){
-            return gateRepository.save(gate);
+            DtoGate dto = new DtoGate();
+            Gate pGate = new Gate();
+            BeanUtils.copyProperties(gate, pGate);
+
+            Gate dbGate = gateRepository.save(pGate);
+            BeanUtils.copyProperties(dbGate, dto);
+
+            return dto;
         }else{
             return null;
         }
     }
 
     @Override
-    public Gate updateOneGate(Long id, Gate yeniGate) {
+    public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
+        DtoGate dto = new DtoGate();
+
         Optional<Gate> gate = gateRepository.findById(id);
 
         if(gate.isPresent()){
             Gate foundGate = gate.get();
-            foundGate.setGateName(yeniGate.getGateName());
-            return gateRepository.save(foundGate);
+            foundGate.setGateName(newGate.getGateName());
+
+            Gate updatedGate = gateRepository.save(foundGate);
+
+            BeanUtils.copyProperties(updatedGate, dto);
+
+            return dto;
         }else{
             return null;
         }

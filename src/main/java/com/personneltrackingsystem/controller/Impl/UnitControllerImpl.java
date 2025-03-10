@@ -1,10 +1,10 @@
 package com.personneltrackingsystem.controller.Impl;
 
+import com.personneltrackingsystem.dto.DtoUnit;
+import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.controller.IUnitController;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.service.IUnitService;
-import com.personneltrackingsystem.service.Impl.UnitServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +14,18 @@ import java.util.List;
 @RequestMapping("/api/unit")
 public class UnitControllerImpl implements IUnitController {
 
+    // solid example : article 3 (Liskov Substitution Principle)
+
+    private final IUnitService unitServiceImpl;
+
     @Autowired
-    private IUnitService unitServiceImpl;
+    public UnitControllerImpl(IUnitService unitServiceImpl){
+        this.unitServiceImpl = unitServiceImpl;
+    }
 
     @GetMapping
     @Override
-    public List<Unit> getAllUnits() {
+    public List<DtoUnit> getAllUnits() {
         return unitServiceImpl.getAllUnits();
     }
 
@@ -32,19 +38,19 @@ public class UnitControllerImpl implements IUnitController {
 
     @GetMapping("/{unitId}")
     @Override
-    public Unit getOneUnit(@PathVariable Long unitId) {
+    public DtoUnit getOneUnit(@PathVariable Long unitId) {
         return unitServiceImpl.getOneUnit(unitId);
 }
 
     @PostMapping
     @Override
-    public Unit createUnit(@RequestBody Unit newUnit) {
+    public DtoUnit createUnit(@RequestBody DtoUnitIU newUnit) {
         return unitServiceImpl.saveOneUnit(newUnit);
     }
 
     @PutMapping("/{unitId}")
     @Override
-    public Unit updateUnit(@PathVariable Long unitId, @RequestBody Unit newUnit) {
+    public DtoUnit updateUnit(@PathVariable Long unitId, @RequestBody DtoUnitIU newUnit) {
         return unitServiceImpl.updateOneUnit(unitId, newUnit);
     }
     @DeleteMapping("/{unitId}")

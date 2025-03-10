@@ -1,6 +1,7 @@
 package com.personneltrackingsystem.service;
 
-import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.dto.DtoGate;
+import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
 
@@ -8,13 +9,15 @@ import java.util.List;
 
 public interface IGateService {
 
-    public List<Gate> getAllGates();
+    // solid example : article 4 (Interface Substitution Principle)
 
-    public Gate getOneGate(Long gateId);
+    public List<DtoGate> getAllGates();
 
-    public Gate saveOneGate(Gate gate);
+    public DtoGate getOneGate(Long gateId);
 
-    public Gate updateOneGate(Long id, Gate yeniGate);
+    public DtoGate saveOneGate(DtoGateIU gate);
+
+    public DtoGate updateOneGate(Long id, DtoGateIU newGate);
 
     public void deleteOneGate(Long gateId);
 

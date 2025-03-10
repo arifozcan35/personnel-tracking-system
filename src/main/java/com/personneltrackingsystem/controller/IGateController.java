@@ -1,22 +1,23 @@
 package com.personneltrackingsystem.controller;
 
-import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.dto.DtoGate;
+import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
 public interface IGateController {
 
-    public List<Gate> getAllGates();
+    // solid example : article 4 (Interface Substitution Principle)
 
-    public Gate getOneGate(Long gateId);
+    public List<DtoGate> getAllGates();
 
-    public Gate createGate(Gate newGate);
+    public DtoGate getOneGate(Long gateId);
 
-    public Gate updateGate(Long gateId, Gate newGate);
+    public DtoGate createGate(DtoGateIU newGate);
+
+    public DtoGate updateGate(Long gateId, DtoGateIU newGate);
 
     public void deleteGate(Long gateId);
 

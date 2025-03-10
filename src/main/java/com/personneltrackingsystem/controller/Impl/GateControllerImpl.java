@@ -1,10 +1,10 @@
 package com.personneltrackingsystem.controller.Impl;
 
+import com.personneltrackingsystem.dto.DtoGate;
+import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.controller.IGateController;
-import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.IGateService;
-import com.personneltrackingsystem.service.Impl.GateServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,30 +15,34 @@ import java.util.List;
 @RequestMapping("/api/gate")
 public class GateControllerImpl implements IGateController {
 
+    private final IGateService gateService;
+
     @Autowired
-    private IGateService gateService;
+    public GateControllerImpl(IGateService gateService){
+        this.gateService = gateService;
+    }
 
 
     @GetMapping
     @Override
-    public List<Gate> getAllGates() {
+    public List<DtoGate> getAllGates() {
         return gateService.getAllGates();
     }
     @GetMapping("/{gateId}")
     @Override
-    public Gate getOneGate(@PathVariable Long gateId) {
+    public DtoGate getOneGate(@PathVariable Long gateId) {
         return gateService.getOneGate(gateId);
     }
 
     @PostMapping
     @Override
-    public Gate createGate(@RequestBody Gate newGate) {
+    public DtoGate createGate(@RequestBody DtoGateIU newGate) {
         return gateService.saveOneGate(newGate);
     }
 
     @PutMapping("/{gateId}")
     @Override
-    public Gate updateGate(@PathVariable Long gateId, @RequestBody Gate newGate) {
+    public DtoGate updateGate(@PathVariable Long gateId, @RequestBody DtoGateIU newGate) {
         return gateService.updateOneGate(gateId, newGate);
     }
 

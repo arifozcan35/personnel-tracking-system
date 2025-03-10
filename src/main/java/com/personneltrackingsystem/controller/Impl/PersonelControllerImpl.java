@@ -1,6 +1,8 @@
 package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.IPersonelController;
+import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.IPersonelService;
 import com.personneltrackingsystem.service.Impl.WorkServiceImpl;
@@ -15,15 +17,17 @@ import java.util.List;
 @RequestMapping("/api/personel")
 public class PersonelControllerImpl implements IPersonelController {
 
-    @Autowired
-    private IPersonelService personelServiceImpl;
+    private final IPersonelService personelServiceImpl;
 
     @Autowired
-    private WorkServiceImpl workServiceImpl;
+    public PersonelControllerImpl(IPersonelService personelServiceImpl){
+        this.personelServiceImpl = personelServiceImpl;
+
+    }
 
     @GetMapping
     @Override
-    public List<Personel> getAllPersonels() {
+    public List<DtoPersonel> getAllPersonels() {
         return personelServiceImpl.getAllPersonels();
     }
 
@@ -37,7 +41,7 @@ public class PersonelControllerImpl implements IPersonelController {
     // the same usage above function
     @GetMapping("/{personelId}")
     @Override
-    public Personel getOnePersonel(@PathVariable Long personelId){
+    public DtoPersonel getOnePersonel(@PathVariable Long personelId){
         return personelServiceImpl.getAOnePersonel(personelId);
     }
 

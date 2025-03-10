@@ -1,19 +1,22 @@
 package com.personneltrackingsystem.service;
 
+import com.personneltrackingsystem.dto.DtoUnit;
+import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
 
 import java.util.List;
 
 public interface IUnitService {
 
-    public List<Unit> getAllUnits();
+    // solid example : article 4 (Interface Substitution Principle)
 
-    public Unit getOneUnit(Long unitId);
+    public List<DtoUnit> getAllUnits();
 
-    public Unit saveOneUnit(Unit unit);
+    public DtoUnit getOneUnit(Long unitId);
 
-    public Unit updateOneUnit(Long id, Unit newUnit);
+    public DtoUnit saveOneUnit(DtoUnitIU unit);
+
+    public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit);
 
     public void deleteOneUnit(Long unitId);
 

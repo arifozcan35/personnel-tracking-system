@@ -1,10 +1,11 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -12,15 +13,20 @@ import java.time.LocalTime;
 
 @Service
 public class WorkServiceImpl {
-    @Autowired
-    private WorkRepository workRepository;
-    @Autowired
-    private PersonelRepository personelRepository;
+
+    private final WorkRepository workRepository;
+
+    private final PersonelRepository personelRepository;
 
     private static final LocalTime WORK_START = LocalTime.of(9, 0);
     private static final LocalTime WORK_FINISH = LocalTime.of(18, 0);
     private static final Duration MAX_WORK_MISSING = Duration.ofMinutes(15);
     private static final double PENALTY_AMOUNT = 200.0;
+
+    public WorkServiceImpl(WorkRepository workRepository, PersonelRepository personelRepository) {
+        this.workRepository = workRepository;
+        this.personelRepository = personelRepository;
+    }
 
     public Work getOneWorkofPersonel(Long personelId){
         Personel personel = new Personel();
@@ -82,7 +88,17 @@ public class WorkServiceImpl {
             }
         }
 
-        personelRepository.save(newPersonel);
+
+        Personel prsnl = new Personel();
+        DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
+
+        BeanUtils.copyProperties(newPersonel, prsnl);
+
+
+
+        Personel dbPersonel = personelRepository.save(prsnl);
+        BeanUtils.copyProperties(dbPersonel, dtoPrsnl);
+
         // return personelRepository.save(personel);
     }
 

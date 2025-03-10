@@ -1,21 +1,22 @@
 package com.personneltrackingsystem.controller;
 
+import com.personneltrackingsystem.dto.DtoUnit;
+import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
 public interface IUnitController {
 
-    public List<Unit> getAllUnits();
+    // solid example : article 4 (Interface Substitution Principle)
 
-    public Unit getOneUnit(Long unitId);
+    public List<DtoUnit> getAllUnits();
 
-    public Unit createUnit(Unit newUnit);
+    public DtoUnit getOneUnit(Long unitId);
 
-    public Unit updateUnit(Long unitId, Unit newUnit);
+    public DtoUnit createUnit(DtoUnitIU newUnit);
+
+    public DtoUnit updateUnit(Long unitId, DtoUnitIU newUnit);
 
     public void deleteUnit(Long unitId);
 

@@ -1,5 +1,7 @@
 package com.personneltrackingsystem.service;
 
+import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
 
@@ -7,9 +9,11 @@ import java.util.List;
 
 public interface IPersonelService {
 
-    public List<Personel> getAllPersonels();
+    // solid example : article 4 (Interface Substitution Principle)
 
-    public Personel getAOnePersonel(Long personelId);
+    public List<DtoPersonel> getAllPersonels();
+
+    public DtoPersonel getAOnePersonel(Long personelId);
 
     public ResponseEntity<String> saveOnePersonel(Personel newPersonel);
 

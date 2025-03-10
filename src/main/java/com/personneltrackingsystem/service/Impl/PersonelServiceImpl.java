@@ -1,5 +1,6 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.dto.*;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Work;
@@ -9,55 +10,178 @@ import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.IPersonelService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PersonelServiceImpl implements IPersonelService {
-    @Autowired
-    private PersonelRepository personelRepository;
+
+    private final PersonelRepository personelRepository;
+
+
+    private final WorkRepository workRepository;
+
+
+    private final WorkServiceImpl workServiceImpl;
+
+
+    private final UnitRepository unitRepository;
+
+
+    private final GateRepository gateRepository;
 
     @Autowired
-    private WorkRepository workRepository;
-
-    @Autowired
-    private WorkServiceImpl workServiceImpl;
-
-    @Autowired
-    private UnitRepository unitRepository;
-
-    @Autowired
-    private GateRepository gateRepository;
-
-    @Override
-    public List<Personel> getAllPersonels() {
-        return personelRepository.findAll();
+    public PersonelServiceImpl(PersonelRepository personelRepository, WorkRepository workRepository,
+                               WorkServiceImpl workServiceImpl, UnitRepository unitRepository, GateRepository gateRepository) {
+        this.personelRepository = personelRepository;
+        this.workRepository = workRepository;
+        this.workServiceImpl = workServiceImpl;
+        this.unitRepository = unitRepository;
+        this.gateRepository = gateRepository;
     }
 
+
     @Override
-    public Personel getAOnePersonel(Long personelId) {
-        return personelRepository.findById(personelId).orElse(null);
-    }
+    public List<DtoPersonel> getAllPersonels() {
+        List<DtoPersonel> dtoPersonelList = new ArrayList<>();
 
-/*
-
-    public ResponseEntity<String> saveOnePersonel(Personel newPersonel) {
-        if (newPersonel.getUnit() == null) {
-            // Create a ResponseEntity containing the error message and HTTP status code
-            return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
-        } else {
-
-            Personel savingPersonel = personelRepository.save(newPersonel);
-            return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
+        List<Personel> personelList =  personelRepository.findAll();
+        for (Personel personel : personelList) {
+            DtoPersonel dto = new DtoPersonel();
+            BeanUtils.copyProperties(personel, dto);
+            dtoPersonelList.add(dto);
         }
+        return dtoPersonelList;
     }
-*/
+
+    @Override
+    public DtoPersonel getAOnePersonel(Long personelId) {
+        DtoPersonel dto = new DtoPersonel();
+        Optional<Personel> optional =  personelRepository.findById(personelId);
+        if(optional.isPresent()){
+            Personel dbPersonel = optional.get();
+
+            BeanUtils.copyProperties(dbPersonel, dto);
+        }
+        return dto;
+    }
+
+
+
+    // codes following are about to pass the dto version - trial
+    /*
+    @Override
+    public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
+
+        // Unit control (a mandatory field)
+        if (newPersonel.getUnit() != null && newPersonel.getUnit().getUnitId() != null) {
+            Optional<Unit> existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId());
+
+            if(existingUnit.isPresent()){
+                DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
+                BeanUtils.copyProperties(existingUnit, dtoPrsnl.getUnit());
+
+                if (dtoPrsnl.getUnit() == null) {
+                    return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
+                }
+
+                newPersonel.setUnit(dtoPrsnl.getUnit());
+            }
+
+
+
+
+        } else {
+            return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
+        }
+
+
+        // Gate control (a mandatory field)
+        if (newPersonel.getGate() != null && newPersonel.getGate().getGateId() != null) {
+            Optional<Gate> existingGate = gateRepository.findById(newPersonel.getGate().getGateId());
+            if(existingGate.isPresent()){
+                DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
+                BeanUtils.copyProperties(existingGate, dtoPrsnl.getGate());
+
+                if (dtoPrsnl.getGate() == null) {
+                    return new ResponseEntity<>("The specified unit could not be found!", HttpStatus.BAD_REQUEST);
+                }
+
+                newPersonel.setGate(dtoPrsnl.getGate());
+            }
+
+        }else {
+            return new ResponseEntity<>("Personnel registration failed! Please enter the staff ticket office.", HttpStatus.BAD_REQUEST);
+        }
+
+
+        // Assign salary value
+        if(newPersonel.getAdministrator() == null && newPersonel.getSalary() == null){
+            return new ResponseEntity<>("Could not save personnel! At least one of thepersonnel's manager or salary values must be selected.", HttpStatus.BAD_REQUEST);
+        }else {
+            if(newPersonel.getAdministrator() != null){
+                DtoPersonelIU pAdmin = new DtoPersonelIU(newPersonel.getAdministrator());
+                newPersonel.setSalary(pAdmin.getSalary());
+            }else if (newPersonel.getAdministrator() == null){
+                DtoPersonelIU pSalary = new DtoPersonelIU(newPersonel.getSalary());
+                newPersonel.setAdministrator(pSalary.getAdministrator());
+                newPersonel.setSalary(pSalary.getSalary());
+            }
+        }
+
+
+        Personel prsnl = new Personel();
+        DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
+
+        BeanUtils.copyProperties(newPersonel, prsnl);
+
+        Personel dbPersonel = personelRepository.save(prsnl);
+        BeanUtils.copyProperties(dbPersonel, dtoPrsnl);
+
+        // Personel savingPersonel = personelRepository.save(newPersonel);
+
+
+        // Working hours record
+        if (newPersonel.getWork() != null) {
+            LocalTime checkIn = newPersonel.getWork().getCheckInTime();
+            LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
+
+
+            // boolean isWorkValid = workService.isWorkValid(checkIn, checkIn);
+
+            // newPersonel.getWork().setIsWorkValid(isWorkValid);
+
+
+
+            // Work work = newPersonel.getWork();
+            // work.setIsWorkValid(isWorkValid);
+
+
+
+            if (checkIn == null && checkOut == null && checkOut.isBefore(checkIn)) {
+                return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
+            } else {
+                workServiceImpl.workHoursCalculate2(newPersonel);
+
+                Work savedWork = workRepository.save(newPersonel.getWork());
+                newPersonel.setWork(savedWork);
+            }
+        }
+
+        return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
+
+    }
+
+    */
+
 
     @Override
     public ResponseEntity<String> saveOnePersonel(Personel newPersonel) {
@@ -137,7 +261,6 @@ public class PersonelServiceImpl implements IPersonelService {
         return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
 
     }
-
 
     @Override
     public ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel) {

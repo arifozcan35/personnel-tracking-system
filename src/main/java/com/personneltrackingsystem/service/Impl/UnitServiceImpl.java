@@ -1,11 +1,14 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.dto.DtoUnit;
+import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.IUnitService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +20,17 @@ import java.util.Optional;
 
 @Service
 public class UnitServiceImpl implements IUnitService {
-    @Autowired
-    private UnitRepository unitRepository;
+
+    private final UnitRepository unitRepository;
+
+
+    private final PersonelRepository personelRepository;
 
     @Autowired
-    private PersonelRepository personelRepository;
+    public UnitServiceImpl(UnitRepository unitRepository, PersonelRepository personelRepository) {
+        this.unitRepository = unitRepository;
+        this.personelRepository = personelRepository;
+    }
 
 
     /*
@@ -35,35 +44,65 @@ public class UnitServiceImpl implements IUnitService {
     }
     */
 
+    // Solid example : article 1 (Single Responsibility Principle)
     @Override
-    public List<Unit> getAllUnits(){
-        return unitRepository.findAll();
+    public List<DtoUnit> getAllUnits(){
+        List<DtoUnit> dtoUnitList = new ArrayList<>();
+
+        List<Unit> unitList =  unitRepository.findAll();
+        for (Unit unit : unitList) {
+            DtoUnit dto = new DtoUnit();
+            BeanUtils.copyProperties(unit, dto);
+            dtoUnitList.add(dto);
+        }
+        return dtoUnitList;
     }
 
 
     @Override
-    public Unit getOneUnit(Long unitId){
-        return unitRepository.findById(unitId).orElse(null);
+    public DtoUnit getOneUnit(Long unitId){
+        DtoUnit dto = new DtoUnit();
+        Optional<Unit> optional =  unitRepository.findById(unitId);
+        if(optional.isPresent()){
+            Unit dbUnit = optional.get();
+
+            BeanUtils.copyProperties(dbUnit, dto);
+        }
+        return dto;
     }
 
 
     @Override
-    public Unit saveOneUnit(Unit unit) {
+    public DtoUnit saveOneUnit(DtoUnitIU unit) {
         if(unit.getUnitName() != null){
-            return unitRepository.save(unit);
+            DtoUnit dto = new DtoUnit();
+            Unit pUnit = new Unit();
+            BeanUtils.copyProperties(unit, pUnit);
+
+            Unit dbUnit = unitRepository.save(pUnit);
+            BeanUtils.copyProperties(dbUnit, dto);
+
+            return dto;
         }else{
             return null;
         }
     }
 
     @Override
-    public Unit updateOneUnit(Long id, Unit newUnit) {
-        Optional<Unit> unit = unitRepository.findById(id);
+    public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit) {
+        DtoUnit dto = new DtoUnit();
 
-        if(unit.isPresent()){
-            Unit foundUnit = unit.get();
+        Optional<Unit> gate = unitRepository.findById(id);
+
+        if(gate.isPresent()){
+            Unit foundUnit = gate.get();
             foundUnit.setUnitName(newUnit.getUnitName());
-            return unitRepository.save(foundUnit);
+
+            Unit updatedUnit = unitRepository.save(foundUnit);
+
+            BeanUtils.copyProperties(updatedUnit, dto);
+
+            return dto;
         }else{
             return null;
         }
