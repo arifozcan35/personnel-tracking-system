@@ -2,9 +2,9 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
-import com.personneltrackingsystem.controller.IUnitController;
+import com.personneltrackingsystem.controller.UnitController;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.service.IUnitService;
+import com.personneltrackingsystem.service.UnitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,14 +12,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/unit")
-public class UnitControllerImpl implements IUnitController {
+public class UnitControllerImpl implements UnitController {
 
     // solid example : article 3 (Liskov Substitution Principle)
 
-    private final IUnitService unitServiceImpl;
+    private final UnitService unitServiceImpl;
 
     @Autowired
-    public UnitControllerImpl(IUnitService unitServiceImpl){
+    public UnitControllerImpl(UnitService unitServiceImpl){
         this.unitServiceImpl = unitServiceImpl;
     }
 

@@ -1,15 +1,19 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface IPersonelService {
+public interface PersonelService {
 
     // solid example : article 4 (Interface Substitution Principle)
+
+    /**
+     *
+     * @return
+     */
 
     public List<DtoPersonel> getAllPersonels();
 

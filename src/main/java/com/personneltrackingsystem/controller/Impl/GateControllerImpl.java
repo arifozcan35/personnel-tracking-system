@@ -2,9 +2,9 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
-import com.personneltrackingsystem.controller.IGateController;
+import com.personneltrackingsystem.controller.GateController;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.service.IGateService;
+import com.personneltrackingsystem.service.GateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +13,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/gate")
-public class GateControllerImpl implements IGateController {
+public class GateControllerImpl implements GateController {
 
-    private final IGateService gateService;
+    private final GateService gateService;
 
     @Autowired
-    public GateControllerImpl(IGateService gateService){
+    public GateControllerImpl(GateService gateService){
         this.gateService = gateService;
     }
 

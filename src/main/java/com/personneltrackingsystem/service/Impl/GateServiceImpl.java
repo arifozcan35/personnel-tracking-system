@@ -4,9 +4,12 @@ import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.exception.BaseException;
+import com.personneltrackingsystem.exception.ErrorMessage;
+import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.IGateService;
+import com.personneltrackingsystem.service.GateService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class GateServiceImpl implements IGateService {
+public class GateServiceImpl implements GateService {
     private final GateRepository gateRepository;
 
     private final PersonelRepository personelRepository;
@@ -48,12 +51,14 @@ public class GateServiceImpl implements IGateService {
     public DtoGate getOneGate(Long gateId){
         DtoGate dto = new DtoGate();
         Optional<Gate> optional =  gateRepository.findById(gateId);
-        if(optional.isPresent()){
+        if(optional.isEmpty()){
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, gateId.toString()));
+        }else{
             Gate dbGate = optional.get();
 
             BeanUtils.copyProperties(dbGate, dto);
+            return dto;
         }
-        return dto;
     }
 
     @Override
@@ -68,7 +73,7 @@ public class GateServiceImpl implements IGateService {
 
             return dto;
         }else{
-            return null;
+            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
         }
     }
 
@@ -88,25 +93,33 @@ public class GateServiceImpl implements IGateService {
 
             return dto;
         }else{
-            return null;
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
 
     }
 
     @Override
     public void deleteOneGate(Long gateId) {
-        Gate gate = gateRepository.findById(gateId)
-                .orElseThrow(() -> new EntityNotFoundException("No gate found!"));
+        Optional<Gate> gate = gateRepository.findById(gateId);
 
-        // Make the associated personnel's teller field null.
-        List<Personel> personels = personelRepository.findByGate(gate);
-        for (Personel personel : personels) {
-            personel.setGate(null);
+        if(gate.isPresent()){
+            // Make the associated personnel's gate field null.
+            List<Personel> personels = personelRepository.findByGate(gate.get());
+            for (Personel personel : personels) {
+                personel.setGate(null);
+            }
+
+            personelRepository.saveAll(personels);
+
+            gateRepository.delete(gate.get());
+        }
+        else{
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, gateId.toString()));
         }
 
-        personelRepository.saveAll(personels);
 
-        gateRepository.delete(gate);
+
+
     }
 
     @Override

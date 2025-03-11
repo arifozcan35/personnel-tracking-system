@@ -1,15 +1,12 @@
 package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-public interface IPersonelController {
+public interface PersonelController {
 
     // solid example : article 4 (Interface Substitution Principle)
 

@@ -68,6 +68,4 @@ public class Personel {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "fk_work_id")
     private Work work;
-
-
 }

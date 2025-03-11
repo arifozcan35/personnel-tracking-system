@@ -6,9 +6,7 @@ import com.personneltrackingsystem.entity.Personel;
 
 import java.util.List;
 
-public interface IUnitController {
-
-    // solid example : article 4 (Interface Substitution Principle)
+public interface UnitController {
 
     public List<DtoUnit> getAllUnits();
 

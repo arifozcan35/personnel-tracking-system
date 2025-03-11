@@ -4,9 +4,12 @@ import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.exception.BaseException;
+import com.personneltrackingsystem.exception.ErrorMessage;
+import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.IUnitService;
+import com.personneltrackingsystem.service.UnitService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UnitServiceImpl implements IUnitService {
+public class UnitServiceImpl implements UnitService {
 
     private final UnitRepository unitRepository;
 
@@ -32,17 +35,6 @@ public class UnitServiceImpl implements IUnitService {
         this.personelRepository = personelRepository;
     }
 
-
-    /*
-    public List<Unit> getAllUnits(Optional<Integer> unitId) {
-        if(unitId.isPresent()){
-            return unitRepository.findByUnitId(unitId.get());
-        }
-        else{
-            return unitRepository.findAll();
-        }
-    }
-    */
 
     // Solid example : article 1 (Single Responsibility Principle)
     @Override
@@ -67,8 +59,13 @@ public class UnitServiceImpl implements IUnitService {
             Unit dbUnit = optional.get();
 
             BeanUtils.copyProperties(dbUnit, dto);
+
+            return dto;
         }
-        return dto;
+        else{
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
+        }
+
     }
 
 
@@ -84,7 +81,7 @@ public class UnitServiceImpl implements IUnitService {
 
             return dto;
         }else{
-            return null;
+            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
         }
     }
 
@@ -104,24 +101,31 @@ public class UnitServiceImpl implements IUnitService {
 
             return dto;
         }else{
-            return null;
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
 
     }
 
     @Override
     public void deleteOneUnit(Long unitId) {
-        Unit unit = unitRepository.findById(unitId)
-                .orElseThrow(() -> new EntityNotFoundException("Unit not found!"));
+        Optional<Unit> unit = unitRepository.findById(unitId);
 
-        // Set the unit field of the associated personnel to null (if necessary)
-        List<Personel> personels = personelRepository.findByUnit(unit);
-        for (Personel personel : personels) {
-            personel.setUnit(null);
+        if(unit.isPresent()){
+            // Set the unit field of the associated personnel to null (if necessary)
+            List<Personel> personels = personelRepository.findByUnit(unit.get());
+            for (Personel personel : personels) {
+                personel.setUnit(null);
+            }
+            personelRepository.saveAll(personels); // Save changes
+
+            unitRepository.delete(unit.get());
         }
-        personelRepository.saveAll(personels); // Save changes
+        else{
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
+        }
 
-        unitRepository.delete(unit);
+
+
     }
 
     @Override
@@ -137,7 +141,7 @@ public class UnitServiceImpl implements IUnitService {
             }
         }
         else {
-            new ResponseEntity<>("The unidId you entered could not be found!" , HttpStatus.BAD_REQUEST);
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
 
         return personels;

@@ -5,11 +5,14 @@ import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.exception.BaseException;
+import com.personneltrackingsystem.exception.ErrorMessage;
+import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.IPersonelService;
+import com.personneltrackingsystem.service.PersonelService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PersonelServiceImpl implements IPersonelService {
+public class PersonelServiceImpl implements PersonelService {
 
     private final PersonelRepository personelRepository;
 
@@ -66,12 +69,16 @@ public class PersonelServiceImpl implements IPersonelService {
     public DtoPersonel getAOnePersonel(Long personelId) {
         DtoPersonel dto = new DtoPersonel();
         Optional<Personel> optional =  personelRepository.findById(personelId);
-        if(optional.isPresent()){
+
+        if(optional.isEmpty()){
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
+        }else{
             Personel dbPersonel = optional.get();
 
             BeanUtils.copyProperties(dbPersonel, dto);
+
+            return dto;
         }
-        return dto;
     }
 
 
@@ -188,12 +195,13 @@ public class PersonelServiceImpl implements IPersonelService {
 
         // Unit control (a mandatory field)
         if (newPersonel.getUnit() != null && newPersonel.getUnit().getUnitId() != null) {
-            Unit existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId())
-                    .orElse(null);
-            if (existingUnit == null) {
+            Optional<Unit> existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId());
+            if(existingUnit.isEmpty()){
                 return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
+            }else{
+                newPersonel.setUnit(existingUnit.get());
             }
-            newPersonel.setUnit(existingUnit);
+
         } else {
             return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
         }
@@ -201,12 +209,14 @@ public class PersonelServiceImpl implements IPersonelService {
 
         // Gate control (a mandatory field)
         if (newPersonel.getGate() != null && newPersonel.getGate().getGateId() != null) {
-            Gate existingGate = gateRepository.findById(newPersonel.getGate().getGateId())
-                    .orElse(null);
-            if (existingGate == null) {
-                return new ResponseEntity<>("The specified unit could not be found!", HttpStatus.BAD_REQUEST);
+            Optional<Gate> existingGate = gateRepository.findById(newPersonel.getGate().getGateId());
+
+            if (existingGate.isEmpty()) {
+                return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.BAD_REQUEST);
+            }else{
+                newPersonel.setGate(existingGate.get());
             }
-            newPersonel.setGate(existingGate);
+
         }else {
             return new ResponseEntity<>("Personnel registration failed! Please enter the staff ticket office.", HttpStatus.BAD_REQUEST);
         }
@@ -291,23 +301,22 @@ public class PersonelServiceImpl implements IPersonelService {
 
             // Unit control
             if (newPersonel.getUnit() != null) {
-                Unit existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId())
-                        .orElse(null);
-                if (existingUnit == null) {
+                Optional<Unit> existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId());
+                if (existingUnit.isEmpty()) {
                     return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
                 }
-                foundPersonel.setUnit(existingUnit);
+                foundPersonel.setUnit(existingUnit.get());
             }
 
 
             // Gate control
             if (newPersonel.getGate() != null) {
-                Gate existingGate = gateRepository.findById(newPersonel.getGate().getGateId())
-                        .orElse(null);
-                if (existingGate == null) {
+                Optional<Gate> existingGate = gateRepository.findById(newPersonel.getGate().getGateId());
+
+                if (existingGate.isEmpty()) {
                     return new ResponseEntity<>("The specified unit could not be found!", HttpStatus.BAD_REQUEST);
                 }
-                foundPersonel.setGate(existingGate);
+                foundPersonel.setGate(existingGate.get());
             }
 
             // Working hours record
@@ -348,9 +357,10 @@ public class PersonelServiceImpl implements IPersonelService {
             }
             // Then delete the personnel record
             personelRepository.deleteById(id);
+
             System.out.println("The personnel was deleted successfully.");
         } else {
-            System.out.println("No personnel found.");
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
     }
 

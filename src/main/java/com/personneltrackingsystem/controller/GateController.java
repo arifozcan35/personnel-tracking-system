@@ -7,9 +7,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface IGateController {
-
-    // solid example : article 4 (Interface Substitution Principle)
+public interface GateController {
 
     public List<DtoGate> getAllGates();
 

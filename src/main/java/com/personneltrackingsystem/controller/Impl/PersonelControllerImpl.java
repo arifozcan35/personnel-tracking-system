@@ -1,12 +1,9 @@
 package com.personneltrackingsystem.controller.Impl;
 
-import com.personneltrackingsystem.controller.IPersonelController;
+import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.service.IPersonelService;
-import com.personneltrackingsystem.service.Impl.WorkServiceImpl;
-import com.personneltrackingsystem.service.Impl.PersonelServiceImpl;
+import com.personneltrackingsystem.service.PersonelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +12,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/personel")
-public class PersonelControllerImpl implements IPersonelController {
+public class PersonelControllerImpl implements PersonelController {
 
-    private final IPersonelService personelServiceImpl;
+    private final PersonelService personelServiceImpl;
 
     @Autowired
-    public PersonelControllerImpl(IPersonelService personelServiceImpl){
+    public PersonelControllerImpl(PersonelService personelServiceImpl){
         this.personelServiceImpl = personelServiceImpl;
 
     }

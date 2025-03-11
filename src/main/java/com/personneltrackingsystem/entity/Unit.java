@@ -24,6 +24,4 @@ public class Unit {
     @OneToMany(mappedBy = "unit")
     @JsonIgnore
     private List<Personel> personels;
-
-
 }
