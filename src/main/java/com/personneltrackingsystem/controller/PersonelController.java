@@ -2,10 +2,12 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Work;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PersonelController {
 
@@ -21,5 +23,9 @@ public interface PersonelController {
 
     public void deletePersonel(Long personelId);
 
-    public void seeSalary(Long personelId);
+    public DtoPersonel seeSalary(Long personelId);
+
+    public Work seeWork(Long personelId);
+
+    public Map<String, Double> getAllSalaries();
 }

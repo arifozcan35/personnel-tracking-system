@@ -9,19 +9,12 @@ import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.UnitService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +26,7 @@ public class UnitServiceImpl implements UnitService {
 
 
     // Solid example : article 1 (Single Responsibility Principle)
+
     @Override
     public List<DtoUnit> getAllUnits(){
         List<DtoUnit> dtoUnitList = new ArrayList<>();
@@ -81,6 +75,7 @@ public class UnitServiceImpl implements UnitService {
         }
     }
 
+
     @Override
     public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit) {
         DtoUnit dto = new DtoUnit();
@@ -102,6 +97,7 @@ public class UnitServiceImpl implements UnitService {
 
     }
 
+
     @Override
     public void deleteOneUnit(Long unitId) {
         Optional<Unit> unit = unitRepository.findById(unitId);
@@ -120,23 +116,18 @@ public class UnitServiceImpl implements UnitService {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
 
-
-
     }
 
+
     @Override
-    public List<Personel> getPersonelsByUnitId(Long unitId){
+    public Set<Personel> getPersonelsByUnitId(Long unitId) {
+        Set<Personel> personels = new HashSet<>();
 
-        List<Personel> personels = new ArrayList<>();
+        Optional<Unit> unit = unitRepository.findById(unitId);
 
-        Optional<Unit> unit= unitRepository.findById(unitId);
-
-        if(unit.isPresent()){
-            for (Personel personel : unit.get().getPersonels()) {
-                personels.add(personel);
-            }
-        }
-        else {
+        if (unit.isPresent()) {
+            personels.addAll(unit.get().getPersonels());
+        } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
 

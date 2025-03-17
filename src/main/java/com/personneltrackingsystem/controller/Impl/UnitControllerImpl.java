@@ -6,10 +6,10 @@ import com.personneltrackingsystem.controller.UnitController;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.UnitService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,13 +26,6 @@ public class UnitControllerImpl implements UnitController {
     public List<DtoUnit> getAllUnits() {
         return unitServiceImpl.getAllUnits();
     }
-
-/*
-    @GetMapping("/{unitId}")
-    public ResponseEntity<JSONObject> getUnitAndUnitPersonel(@PathVariable Long unitId) throws JSONException {
-        return ResponseEntity.ok(unitService.getOneUnit(unitId));
-    }
-*/
 
     @GetMapping("/{unitId}")
     @Override
@@ -57,9 +50,10 @@ public class UnitControllerImpl implements UnitController {
         unitServiceImpl.deleteOneUnit(unitId);
     }
 
+
     @GetMapping("/personel/{unitId}")
     @Override
-    public List<Personel> getPersonels(@PathVariable Long unitId) {
+    public Set<Personel> getPersonels(@PathVariable Long unitId) {
         return unitServiceImpl.getPersonelsByUnitId(unitId);
     }
 }

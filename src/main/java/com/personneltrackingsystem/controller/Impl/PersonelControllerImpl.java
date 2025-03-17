@@ -3,13 +3,16 @@ package com.personneltrackingsystem.controller.Impl;
 import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.service.Impl.WorkServiceImpl;
 import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.WorkService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +20,8 @@ import java.util.List;
 public class PersonelControllerImpl implements PersonelController {
 
     private final PersonelService personelServiceImpl;
+
+    private final WorkService workServiceImpl;
 
     @GetMapping
     @Override
@@ -56,10 +61,25 @@ public class PersonelControllerImpl implements PersonelController {
         personelServiceImpl.deleteOnePersonel(personelId);
     }
 
+
+
     @GetMapping("/salary/{personelId}")
     @Override
-    public void seeSalary(@PathVariable Long personelId) {
-        personelServiceImpl.workHoursCalculate(personelId);
+    public DtoPersonel seeSalary(@PathVariable Long personelId) {
+        return personelServiceImpl.calculateSalaryByPersonelId(personelId);
+    }
+
+    @GetMapping("/work/{personelId}")
+    @Override
+    public Work seeWork(@PathVariable Long personelId) {
+        return workServiceImpl.getOneWorkofPersonel(personelId);
+    }
+
+    @GetMapping("/salaries")
+    @Override
+    public Map<String, Double> getAllSalaries() {
+        Map<String, Double> salaries = personelServiceImpl.listSalaries();
+        return salaries;
     }
 
 }

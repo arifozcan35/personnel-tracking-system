@@ -5,6 +5,7 @@ import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PersonelService {
 
@@ -25,5 +26,7 @@ public interface PersonelService {
 
     public void deleteOnePersonel(Long id);
 
-    public void workHoursCalculate(Long personelId);
+    public DtoPersonel calculateSalaryByPersonelId(Long personelId);
+
+    public Map<String, Double> listSalaries();
 }

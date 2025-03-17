@@ -15,7 +15,6 @@ import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.PersonelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -53,6 +54,7 @@ public class PersonelServiceImpl implements PersonelService {
         return dtoPersonelList;
     }
 
+
     @Override
     public DtoPersonel getAOnePersonel(Long personelId) {
         DtoPersonel dto = new DtoPersonel();
@@ -68,7 +70,6 @@ public class PersonelServiceImpl implements PersonelService {
             return dto;
         }
     }
-
 
 
     // codes following are about to pass the dto version - trial
@@ -91,13 +92,9 @@ public class PersonelServiceImpl implements PersonelService {
                 newPersonel.setUnit(dtoPrsnl.getUnit());
             }
 
-
-
-
         } else {
             return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
         }
-
 
         // Gate control (a mandatory field)
         if (newPersonel.getGate() != null && newPersonel.getGate().getGateId() != null) {
@@ -117,7 +114,6 @@ public class PersonelServiceImpl implements PersonelService {
             return new ResponseEntity<>("Personnel registration failed! Please enter the staff ticket office.", HttpStatus.BAD_REQUEST);
         }
 
-
         // Assign salary value
         if(newPersonel.getAdministrator() == null && newPersonel.getSalary() == null){
             return new ResponseEntity<>("Could not save personnel! At least one of thepersonnel's manager or salary values must be selected.", HttpStatus.BAD_REQUEST);
@@ -131,7 +127,6 @@ public class PersonelServiceImpl implements PersonelService {
                 newPersonel.setSalary(pSalary.getSalary());
             }
         }
-
 
         Personel prsnl = new Personel();
         DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
@@ -155,10 +150,8 @@ public class PersonelServiceImpl implements PersonelService {
             // newPersonel.getWork().setIsWorkValid(isWorkValid);
 
 
-
             // Work work = newPersonel.getWork();
             // work.setIsWorkValid(isWorkValid);
-
 
 
             if (checkIn == null && checkOut == null && checkOut.isBefore(checkIn)) {
@@ -170,11 +163,8 @@ public class PersonelServiceImpl implements PersonelService {
                 newPersonel.setWork(savedWork);
             }
         }
-
         return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
-
     }
-
     */
 
 
@@ -234,11 +224,9 @@ public class PersonelServiceImpl implements PersonelService {
             LocalTime checkIn = newPersonel.getWork().getCheckInTime();
             LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
 
-
             // boolean isWorkValid = workService.isWorkValid(checkIn, checkIn);
 
             // newPersonel.getWork().setIsWorkValid(isWorkValid);
-
 
             /*
             Work work = newPersonel.getWork();
@@ -259,6 +247,7 @@ public class PersonelServiceImpl implements PersonelService {
         return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
 
     }
+
 
     @Override
     public ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel) {
@@ -354,10 +343,24 @@ public class PersonelServiceImpl implements PersonelService {
 
 
     @Override
-    public void workHoursCalculate(Long personelId) {
-        workServiceImpl.workHoursCalculate(personelId);
+    public DtoPersonel calculateSalaryByPersonelId(Long personelId) {
+        return workServiceImpl.workHoursCalculate(personelId);
     }
 
 
+    @Override
+    public Map<String, Double> listSalaries(){
+
+        // filling names to list with stream api
+
+        Map<String, Double> salaries = personelRepository.findAll().stream()
+                .collect(Collectors.toMap(
+                        person -> person.getName(),
+                        person -> person.getSalary()
+                ));
+
+        return salaries;
+
+    }
 
 }

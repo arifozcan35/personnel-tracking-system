@@ -5,6 +5,7 @@ import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UnitService {
 
@@ -18,5 +19,5 @@ public interface UnitService {
 
     public void deleteOneUnit(Long unitId);
 
-    public List<Personel> getPersonelsByUnitId(Long unitId);
+    public Set<Personel> getPersonelsByUnitId(Long unitId);
 }

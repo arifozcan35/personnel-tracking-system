@@ -2,11 +2,8 @@ package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
-import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
@@ -14,21 +11,18 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
 public class GateServiceImpl implements GateService {
+
     private final GateRepository gateRepository;
 
     private final PersonelRepository personelRepository;
@@ -64,6 +58,7 @@ public class GateServiceImpl implements GateService {
         }
     }
 
+
     @Override
     public DtoGate saveOneGate(DtoGateIU gate) {
         if(gate.getGateName() != null){
@@ -80,6 +75,7 @@ public class GateServiceImpl implements GateService {
             throw new BaseException(errorMessage);
         }
     }
+
 
     @Override
     public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
@@ -102,6 +98,7 @@ public class GateServiceImpl implements GateService {
         }
 
     }
+
 
     @Override
     public void deleteOneGate(Long gateId) {
@@ -127,18 +124,14 @@ public class GateServiceImpl implements GateService {
 
 
     @Override
-    public List<Personel> getPersonelsByGateId(Long gateId){
+    public Set<Personel> getPersonelsByGateId(Long gateId) {
+        Set<Personel> personels = new HashSet<>();
 
-        List<Personel> personels = new ArrayList<>();
+        Optional<Gate> gate = gateRepository.findById(gateId);
 
-        Optional<Gate> gate= gateRepository.findById(gateId);
-
-        if(gate.isPresent()){
-            for (Personel personel : gate.get().getPersonels()) {
-                personels.add(personel);
-            }
-        }
-        else {
+        if (gate.isPresent()) {
+            personels.addAll(gate.get().getPersonels());
+        } else {
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
         }
