@@ -13,6 +13,7 @@ import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.PersonelService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,32 +25,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class PersonelServiceImpl implements PersonelService {
 
     private final PersonelRepository personelRepository;
 
-
     private final WorkRepository workRepository;
-
 
     private final WorkServiceImpl workServiceImpl;
 
-
     private final UnitRepository unitRepository;
 
-
     private final GateRepository gateRepository;
-
-    @Autowired
-    public PersonelServiceImpl(PersonelRepository personelRepository, WorkRepository workRepository,
-                               WorkServiceImpl workServiceImpl, UnitRepository unitRepository, GateRepository gateRepository) {
-        this.personelRepository = personelRepository;
-        this.workRepository = workRepository;
-        this.workServiceImpl = workServiceImpl;
-        this.unitRepository = unitRepository;
-        this.gateRepository = gateRepository;
-    }
 
 
     @Override

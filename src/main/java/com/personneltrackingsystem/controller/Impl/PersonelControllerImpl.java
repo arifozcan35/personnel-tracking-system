@@ -4,6 +4,7 @@ import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.PersonelService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/personel")
 public class PersonelControllerImpl implements PersonelController {
 
     private final PersonelService personelServiceImpl;
-
-    @Autowired
-    public PersonelControllerImpl(PersonelService personelServiceImpl){
-        this.personelServiceImpl = personelServiceImpl;
-
-    }
 
     @GetMapping
     @Override

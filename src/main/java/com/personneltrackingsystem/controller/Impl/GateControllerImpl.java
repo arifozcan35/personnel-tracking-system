@@ -3,8 +3,11 @@ package com.personneltrackingsystem.controller.Impl;
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.controller.GateController;
+import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.GateService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,16 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/gate")
 public class GateControllerImpl implements GateController {
 
     private final GateService gateService;
-
-    @Autowired
-    public GateControllerImpl(GateService gateService){
-        this.gateService = gateService;
-    }
-
 
     @GetMapping
     @Override
@@ -52,9 +50,14 @@ public class GateControllerImpl implements GateController {
         gateService.deleteOneGate(gateId);
     }
 
-    @PostMapping("/{wantedToEnterGate}")
+    @GetMapping("/personel/{gateId}")
     @Override
-    public ResponseEntity<String> passGise(@PathVariable Long wantedToEnterGate, @RequestBody Personel personel){
-        return gateService.passGise(wantedToEnterGate, personel);
+    public List<Personel> getPersonels(@PathVariable Long gateId) {
+        return gateService.getPersonelsByGateId(gateId);
+    }
+    @PostMapping("personelpass/{wantedToEnterGate}")
+    @Override
+    public ResponseEntity<String> passGate(@PathVariable Long wantedToEnterGate, @RequestBody Personel personel){
+        return gateService.passGate(wantedToEnterGate, personel);
     }
 }

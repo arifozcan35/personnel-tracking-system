@@ -9,8 +9,10 @@ import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
+import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.UnitService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,19 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class UnitServiceImpl implements UnitService {
 
     private final UnitRepository unitRepository;
 
-
     private final PersonelRepository personelRepository;
-
-    @Autowired
-    public UnitServiceImpl(UnitRepository unitRepository, PersonelRepository personelRepository) {
-        this.unitRepository = unitRepository;
-        this.personelRepository = personelRepository;
-    }
 
 
     // Solid example : article 1 (Single Responsibility Principle)

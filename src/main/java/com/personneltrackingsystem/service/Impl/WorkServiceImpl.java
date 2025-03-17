@@ -5,12 +5,14 @@ import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalTime;
 
+@RequiredArgsConstructor
 @Service
 public class WorkServiceImpl {
 
@@ -23,10 +25,6 @@ public class WorkServiceImpl {
     private static final Duration MAX_WORK_MISSING = Duration.ofMinutes(15);
     private static final double PENALTY_AMOUNT = 200.0;
 
-    public WorkServiceImpl(WorkRepository workRepository, PersonelRepository personelRepository) {
-        this.workRepository = workRepository;
-        this.personelRepository = personelRepository;
-    }
 
     public Work getOneWorkofPersonel(Long personelId){
         Personel personel = new Personel();

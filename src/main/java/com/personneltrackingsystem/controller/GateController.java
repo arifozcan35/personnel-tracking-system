@@ -2,6 +2,8 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
+import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import org.springframework.http.ResponseEntity;
 
@@ -19,5 +21,7 @@ public interface GateController {
 
     public void deleteGate(Long gateId);
 
-    public ResponseEntity<String> passGise(Long wantedToEnterGate, Personel personel);
+    public List<Personel> getPersonels(Long unitId);
+
+    public ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
 }

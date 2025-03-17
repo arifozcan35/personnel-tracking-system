@@ -2,15 +2,20 @@ package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
+import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
+import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,17 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class GateServiceImpl implements GateService {
     private final GateRepository gateRepository;
 
     private final PersonelRepository personelRepository;
 
-    @Autowired
-    public GateServiceImpl (GateRepository gateRepository, PersonelRepository personelRepository){
-        this.gateRepository = gateRepository;
-        this.personelRepository = personelRepository;
-    }
+    private final MessageResolver messageResolver;
 
     @Override
     public List<DtoGate> getAllGates(){
@@ -52,7 +54,8 @@ public class GateServiceImpl implements GateService {
         DtoGate dto = new DtoGate();
         Optional<Gate> optional =  gateRepository.findById(gateId);
         if(optional.isEmpty()){
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, gateId.toString()));
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
+            throw new BaseException(errorMessage);
         }else{
             Gate dbGate = optional.get();
 
@@ -73,7 +76,8 @@ public class GateServiceImpl implements GateService {
 
             return dto;
         }else{
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, messageResolver.toString());
+            throw new BaseException(errorMessage);
         }
     }
 
@@ -93,7 +97,8 @@ public class GateServiceImpl implements GateService {
 
             return dto;
         }else{
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
+            throw new BaseException(errorMessage);
         }
 
     }
@@ -114,16 +119,36 @@ public class GateServiceImpl implements GateService {
             gateRepository.delete(gate.get());
         }
         else{
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, gateId.toString()));
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
+            throw new BaseException(errorMessage);
         }
-
-
-
 
     }
 
+
     @Override
-    public ResponseEntity<String> passGise(Long wantedToEnterGate, Personel personel) {
+    public List<Personel> getPersonelsByGateId(Long gateId){
+
+        List<Personel> personels = new ArrayList<>();
+
+        Optional<Gate> gate= gateRepository.findById(gateId);
+
+        if(gate.isPresent()){
+            for (Personel personel : gate.get().getPersonels()) {
+                personels.add(personel);
+            }
+        }
+        else {
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
+            throw new BaseException(errorMessage);
+        }
+
+        return personels;
+    }
+
+
+    @Override
+    public ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel) {
         Long gatePersonelBelongs = personel.getGate().getGateId();
 
         Optional<Personel> isThisPersonelExists = personelRepository.findById(personel.getPersonelId());

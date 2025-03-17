@@ -5,12 +5,14 @@ import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.controller.UnitController;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.UnitService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/unit")
 public class UnitControllerImpl implements UnitController {
 
@@ -18,10 +20,6 @@ public class UnitControllerImpl implements UnitController {
 
     private final UnitService unitServiceImpl;
 
-    @Autowired
-    public UnitControllerImpl(UnitService unitServiceImpl){
-        this.unitServiceImpl = unitServiceImpl;
-    }
 
     @GetMapping
     @Override
