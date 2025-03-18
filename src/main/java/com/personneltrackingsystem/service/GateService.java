@@ -2,27 +2,32 @@ package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
+import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface GateService {
 
-    public List<DtoGate> getAllGates();
+    Optional<Gate> findById(Long gateId);
 
-    public DtoGate getOneGate(Long gateId);
+    List<DtoGate> getAllGates();
 
-    public DtoGate saveOneGate(DtoGateIU gate);
+    DtoGate getOneGate(Long gateId);
 
-    public DtoGate updateOneGate(Long id, DtoGateIU newGate);
+    DtoGate saveOneGate(DtoGateIU gate);
 
-    public void deleteOneGate(Long gateId);
+    DtoGate updateOneGate(Long id, DtoGateIU newGate);
 
-    public Set<Personel> getPersonelsByGateId(Long gateId);
+    void deleteOneGate(Long gateId);
 
-    public ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
+    Set<Personel> getPersonelsByGateId(Long gateId);
+
+    ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
 
 
 }

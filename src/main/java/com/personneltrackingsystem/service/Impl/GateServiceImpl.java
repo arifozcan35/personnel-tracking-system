@@ -9,13 +9,13 @@ import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.GateRepository;
-import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -25,9 +25,13 @@ public class GateServiceImpl implements GateService {
 
     private final GateRepository gateRepository;
 
-    private final PersonelRepository personelRepository;
-
     private final MessageResolver messageResolver;
+
+
+    @Override
+    public Optional<Gate> findById(Long gateId) {
+        return gateRepository.findById(gateId);
+    }
 
     @Override
     public List<DtoGate> getAllGates(){
@@ -101,25 +105,21 @@ public class GateServiceImpl implements GateService {
 
 
     @Override
+    @Transactional
     public void deleteOneGate(Long gateId) {
         Optional<Gate> gate = gateRepository.findById(gateId);
 
         if(gate.isPresent()){
-            // Make the associated personnel's gate field null.
-            List<Personel> personels = personelRepository.findByGate(gate.get());
-            for (Personel personel : personels) {
-                personel.setGate(null);
-            }
+            // update associated personnel records
+            gateRepository.updatePersonelGateReferences(gateId);
 
-            personelRepository.saveAll(personels);
-
+            // delete gate
             gateRepository.delete(gate.get());
         }
         else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
         }
-
     }
 
 
@@ -144,7 +144,7 @@ public class GateServiceImpl implements GateService {
     public ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel) {
         Long gatePersonelBelongs = personel.getGate().getGateId();
 
-        Optional<Personel> isThisPersonelExists = personelRepository.findById(personel.getPersonelId());
+        Optional<Personel> isThisPersonelExists = gateRepository.findPrsnlById(personel.getPersonelId());
 
         Optional<Gate> isThisValueExists = gateRepository.findById(wantedToEnterGate);
 

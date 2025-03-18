@@ -24,11 +24,13 @@ public class GateControllerImpl implements GateController {
     public List<DtoGate> getAllGates() {
         return gateServiceImpl.getAllGates();
     }
+
     @GetMapping("/{gateId}")
     @Override
     public DtoGate getOneGate(@PathVariable Long gateId) {
         return gateServiceImpl.getOneGate(gateId);
     }
+
 
     @PostMapping
     @Override
@@ -36,11 +38,13 @@ public class GateControllerImpl implements GateController {
         return gateServiceImpl.saveOneGate(newGate);
     }
 
+
     @PutMapping("/{gateId}")
     @Override
     public DtoGate updateGate(@PathVariable Long gateId, @RequestBody DtoGateIU newGate) {
         return gateServiceImpl.updateOneGate(gateId, newGate);
     }
+
 
     @DeleteMapping("/{gateId}")
     @Override
@@ -54,6 +58,7 @@ public class GateControllerImpl implements GateController {
     public Set<Personel> getPersonels(@PathVariable Long gateId) {
         return gateServiceImpl.getPersonelsByGateId(gateId);
     }
+
 
     @PostMapping("personelpass/{wantedToEnterGate}")
     @Override

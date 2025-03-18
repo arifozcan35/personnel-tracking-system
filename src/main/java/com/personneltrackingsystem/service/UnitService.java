@@ -3,21 +3,25 @@ package com.personneltrackingsystem.service;
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface UnitService {
 
-    public List<DtoUnit> getAllUnits();
+    Optional<Unit> findById(Long unitId);
 
-    public DtoUnit getOneUnit(Long unitId);
+    List<DtoUnit> getAllUnits();
 
-    public DtoUnit saveOneUnit(DtoUnitIU unit);
+    DtoUnit getOneUnit(Long unitId);
 
-    public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit);
+    DtoUnit saveOneUnit(DtoUnitIU unit);
 
-    public void deleteOneUnit(Long unitId);
+    DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit);
 
-    public Set<Personel> getPersonelsByUnitId(Long unitId);
+    void deleteOneUnit(Long unitId);
+
+    Set<Personel> getPersonelsByUnitId(Long unitId);
 }

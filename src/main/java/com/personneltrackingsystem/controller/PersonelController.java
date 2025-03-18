@@ -13,19 +13,19 @@ public interface PersonelController {
 
     // solid example : article 4 (Interface Substitution Principle)
 
-    public List<DtoPersonel> getAllPersonels();
+    List<DtoPersonel> getAllPersonels();
 
-    public DtoPersonel getOnePersonel(Long personelId);
+    DtoPersonel getOnePersonel(Long personelId);
 
-    public ResponseEntity<String> createPersonel(Personel newPersonel);
+    ResponseEntity<String> createPersonel(Personel newPersonel);
 
-    public ResponseEntity<String> updatePersonel(Long personelId, Personel newPersonel);
+    ResponseEntity<String> updatePersonel(Long personelId, Personel newPersonel);
 
-    public void deletePersonel(Long personelId);
+    void deletePersonel(Long personelId);
 
-    public DtoPersonel seeSalary(Long personelId);
+    DtoPersonel seeSalary(Long personelId);
 
-    public Work seeWork(Long personelId);
+    Work seeWork(Long personelId);
 
-    public Map<String, Double> getAllSalaries();
+    Map<String, Double> getAllSalaries();
 }

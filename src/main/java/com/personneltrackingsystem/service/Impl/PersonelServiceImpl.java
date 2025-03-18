@@ -7,18 +7,21 @@ import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
+import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
-import com.personneltrackingsystem.repository.UnitRepository;
-import com.personneltrackingsystem.repository.GateRepository;
-import com.personneltrackingsystem.repository.WorkRepository;
 import com.personneltrackingsystem.repository.PersonelRepository;
+import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.UnitService;
+import com.personneltrackingsystem.service.WorkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +29,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.personneltrackingsystem.service.Impl.WorkServiceImpl.*;
+
 @RequiredArgsConstructor
 @Service
-public class PersonelServiceImpl implements PersonelService {
+public class PersonelServiceImpl implements PersonelService  {
 
     private final PersonelRepository personelRepository;
 
-    private final WorkRepository workRepository;
+    private final WorkService workServiceImpl;
 
-    private final WorkServiceImpl workServiceImpl;
+    private final UnitService unitServiceImpl;
 
-    private final UnitRepository unitRepository;
+    private final GateService gateServiceImpl;
 
-    private final GateRepository gateRepository;
+    private final MessageResolver messageResolver;
 
 
     @Override
@@ -72,108 +77,12 @@ public class PersonelServiceImpl implements PersonelService {
     }
 
 
-    // codes following are about to pass the dto version - trial
-    /*
-    @Override
-    public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
-
-        // Unit control (a mandatory field)
-        if (newPersonel.getUnit() != null && newPersonel.getUnit().getUnitId() != null) {
-            Optional<Unit> existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId());
-
-            if(existingUnit.isPresent()){
-                DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
-                BeanUtils.copyProperties(existingUnit, dtoPrsnl.getUnit());
-
-                if (dtoPrsnl.getUnit() == null) {
-                    return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
-                }
-
-                newPersonel.setUnit(dtoPrsnl.getUnit());
-            }
-
-        } else {
-            return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
-        }
-
-        // Gate control (a mandatory field)
-        if (newPersonel.getGate() != null && newPersonel.getGate().getGateId() != null) {
-            Optional<Gate> existingGate = gateRepository.findById(newPersonel.getGate().getGateId());
-            if(existingGate.isPresent()){
-                DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
-                BeanUtils.copyProperties(existingGate, dtoPrsnl.getGate());
-
-                if (dtoPrsnl.getGate() == null) {
-                    return new ResponseEntity<>("The specified unit could not be found!", HttpStatus.BAD_REQUEST);
-                }
-
-                newPersonel.setGate(dtoPrsnl.getGate());
-            }
-
-        }else {
-            return new ResponseEntity<>("Personnel registration failed! Please enter the staff ticket office.", HttpStatus.BAD_REQUEST);
-        }
-
-        // Assign salary value
-        if(newPersonel.getAdministrator() == null && newPersonel.getSalary() == null){
-            return new ResponseEntity<>("Could not save personnel! At least one of thepersonnel's manager or salary values must be selected.", HttpStatus.BAD_REQUEST);
-        }else {
-            if(newPersonel.getAdministrator() != null){
-                DtoPersonelIU pAdmin = new DtoPersonelIU(newPersonel.getAdministrator());
-                newPersonel.setSalary(pAdmin.getSalary());
-            }else if (newPersonel.getAdministrator() == null){
-                DtoPersonelIU pSalary = new DtoPersonelIU(newPersonel.getSalary());
-                newPersonel.setAdministrator(pSalary.getAdministrator());
-                newPersonel.setSalary(pSalary.getSalary());
-            }
-        }
-
-        Personel prsnl = new Personel();
-        DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
-
-        BeanUtils.copyProperties(newPersonel, prsnl);
-
-        Personel dbPersonel = personelRepository.save(prsnl);
-        BeanUtils.copyProperties(dbPersonel, dtoPrsnl);
-
-        // Personel savingPersonel = personelRepository.save(newPersonel);
-
-
-        // Working hours record
-        if (newPersonel.getWork() != null) {
-            LocalTime checkIn = newPersonel.getWork().getCheckInTime();
-            LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
-
-
-            // boolean isWorkValid = workService.isWorkValid(checkIn, checkIn);
-
-            // newPersonel.getWork().setIsWorkValid(isWorkValid);
-
-
-            // Work work = newPersonel.getWork();
-            // work.setIsWorkValid(isWorkValid);
-
-
-            if (checkIn == null && checkOut == null && checkOut.isBefore(checkIn)) {
-                return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
-            } else {
-                workServiceImpl.workHoursCalculate2(newPersonel);
-
-                Work savedWork = workRepository.save(newPersonel.getWork());
-                newPersonel.setWork(savedWork);
-            }
-        }
-        return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
-    }
-    */
-
-
     @Override
     public ResponseEntity<String> saveOnePersonel(Personel newPersonel) {
 
         // Unit control (a mandatory field)
         if (newPersonel.getUnit() != null && newPersonel.getUnit().getUnitId() != null) {
-            Optional<Unit> existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId());
+            Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
             if(existingUnit.isEmpty()){
                 return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
             }else{
@@ -187,7 +96,7 @@ public class PersonelServiceImpl implements PersonelService {
 
         // Gate control (a mandatory field)
         if (newPersonel.getGate() != null && newPersonel.getGate().getGateId() != null) {
-            Optional<Gate> existingGate = gateRepository.findById(newPersonel.getGate().getGateId());
+            Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
 
             if (existingGate.isEmpty()) {
                 return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.BAD_REQUEST);
@@ -223,6 +132,7 @@ public class PersonelServiceImpl implements PersonelService {
         if (newPersonel.getWork() != null) {
             LocalTime checkIn = newPersonel.getWork().getCheckInTime();
             LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
+            // newPersonel.setEmail("sadfsadff");
 
             // boolean isWorkValid = workService.isWorkValid(checkIn, checkIn);
 
@@ -237,9 +147,9 @@ public class PersonelServiceImpl implements PersonelService {
             if (checkIn == null && checkOut == null && checkOut.isBefore(checkIn)) {
                 return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
             } else {
-                workServiceImpl.workHoursCalculate2(newPersonel);
+                workHoursCalculate2(newPersonel);
 
-                Work savedWork = workRepository.save(newPersonel.getWork());
+                Work savedWork = workServiceImpl.save(newPersonel.getWork());
                 newPersonel.setWork(savedWork);
             }
         }
@@ -278,7 +188,7 @@ public class PersonelServiceImpl implements PersonelService {
 
             // Unit control
             if (newPersonel.getUnit() != null) {
-                Optional<Unit> existingUnit = unitRepository.findById(newPersonel.getUnit().getUnitId());
+                Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
                 if (existingUnit.isEmpty()) {
                     return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
                 }
@@ -288,7 +198,7 @@ public class PersonelServiceImpl implements PersonelService {
 
             // Gate control
             if (newPersonel.getGate() != null) {
-                Optional<Gate> existingGate = gateRepository.findById(newPersonel.getGate().getGateId());
+                Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
 
                 if (existingGate.isEmpty()) {
                     return new ResponseEntity<>("The specified unit could not be found!", HttpStatus.BAD_REQUEST);
@@ -306,11 +216,11 @@ public class PersonelServiceImpl implements PersonelService {
                 if (giris != null && cikis != null && cikis.isAfter(giris)) {
 
                     // adding new shift record
-                    Work kaydedilenWork = workRepository.save(newPersonel.getWork());
+                    Work kaydedilenWork = workServiceImpl.save(newPersonel.getWork());
                     foundPersonel.setWork(kaydedilenWork);
 
                     // delete previous shift record
-                    workRepository.deleteById(oncekiKayit);
+                    workServiceImpl.deleteById(oncekiKayit);
                 }
             }
 
@@ -325,12 +235,13 @@ public class PersonelServiceImpl implements PersonelService {
 
 
     @Override
+    @Transactional
     public void deleteOnePersonel(Long id) {
         Optional<Personel> personel = personelRepository.findById(id);
         if (personel.isPresent()) {
             // Delete the shift record first
             if (personel.get().getWork() != null) {
-                workRepository.deleteById(personel.get().getWork().getWorkId());
+                workServiceImpl.deleteById(personel.get().getWork().getWorkId());
             }
             // Then delete the personnel record
             personelRepository.deleteById(id);
@@ -344,7 +255,104 @@ public class PersonelServiceImpl implements PersonelService {
 
     @Override
     public DtoPersonel calculateSalaryByPersonelId(Long personelId) {
-        return workServiceImpl.workHoursCalculate(personelId);
+        return workHoursCalculate(personelId);
+    }
+
+
+    @Override
+    public DtoPersonel workHoursCalculate(Long personelId) {
+        Personel personel = personelRepository.findById(personelId).orElse(null);
+
+        if (personel == null) {
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
+            throw new BaseException(errorMessage);
+        }
+
+        Work work = personel.getWork();
+        Double salary = personel.getSalary();
+
+        LocalTime checkInHour = work.getCheckInTime();
+        LocalTime checkOutHour = work.getCheckOutTime();
+
+        Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
+
+        boolean valid = isWorkValid(checkInHour, checkOutHour);
+        personel.getWork().setIsWorkValid(valid);
+
+        if (Boolean.TRUE.equals(personel.getAdministrator())) {
+            personel.setSalary(salary);
+        } else {
+            if (!valid) {
+                double penalty = calculatePenalty(workTime);
+                personel.setSalary(personel.getSalary() - penalty);
+            }
+        }
+
+        personelRepository.save(personel);
+
+        return new DtoPersonel(personel.getName(), personel.getEmail(), personel.getSalary());
+    }
+
+
+    @Override
+    public void workHoursCalculate2(Personel newPersonel) {
+
+        Work work = newPersonel.getWork();
+
+        Double salary = newPersonel.getSalary();
+
+        LocalTime checkInHour = work.getCheckInTime();
+        LocalTime checkOutHour = work.getCheckOutTime();
+
+        Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
+
+        boolean valid = isWorkValid(checkInHour, checkOutHour);
+        newPersonel.getWork().setIsWorkValid(valid);
+
+        // if employee is an admin then ignore the pay cut :)
+        if (newPersonel.getAdministrator() != null && newPersonel.getAdministrator() == true) {
+            newPersonel.setSalary(salary);
+        } else {
+            // if employee is not an admin then
+            if (!valid) {
+                double penalty = calculatePenalty(workTime);
+                newPersonel.setSalary(((newPersonel.getSalary()) - (penalty)));
+            }
+        }
+
+
+        Personel prsnl = new Personel();
+        DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
+
+        BeanUtils.copyProperties(newPersonel, prsnl);
+
+
+
+        Personel dbPersonel = personelRepository.save(prsnl);
+        BeanUtils.copyProperties(dbPersonel, dtoPrsnl);
+
+        // return personelRepository.save(personel);
+    }
+
+
+    @Override
+    public Work getOneWorkofPersonel(Long personelId) {
+        Optional<Personel> personel = personelRepository.findById(personelId);
+
+        if (personel.isPresent()) {
+            Long workId = personel.get().getWork().getWorkId();
+            Optional<Work> dbWorkOpt = workServiceImpl.findById(workId);
+
+            if (dbWorkOpt.isPresent()) {
+                Work work = new Work();
+                BeanUtils.copyProperties(dbWorkOpt.get(), work); // dbWorkOpt.get() (source), work (aim)
+                return work;
+            } else {
+                throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, "Work with ID: " + workId));
+            }
+        } else {
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
+        }
     }
 
 
@@ -361,6 +369,26 @@ public class PersonelServiceImpl implements PersonelService {
 
         return salaries;
 
+    }
+
+
+    protected Duration calculateWorkTime(LocalTime checkInHour, LocalTime checkOutHour) {
+        return Duration.between(checkInHour, checkOutHour);
+    }
+
+
+    protected boolean isWorkValid(LocalTime checkInHour, LocalTime checkOutHour) {
+        Duration workDuration = calculateWorkTime(checkInHour, checkOutHour);
+        Duration workLimit = Duration.between(WORK_START, WORK_FINISH).minus(MAX_WORK_MISSING);
+        return workDuration.compareTo(workLimit) >= 0;
+    }
+
+
+    private double calculatePenalty(Duration workPeriod) {
+        if (workPeriod.compareTo(Duration.between(WORK_START, WORK_FINISH)) < 0) {
+            return PENALTY_AMOUNT;
+        }
+        return 0.0;
     }
 
 }

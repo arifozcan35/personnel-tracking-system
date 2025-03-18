@@ -1,11 +1,15 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
+import com.personneltrackingsystem.entity.Work;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface PersonelService {
 
@@ -16,17 +20,24 @@ public interface PersonelService {
      * @return
      */
 
-    public List<DtoPersonel> getAllPersonels();
 
-    public DtoPersonel getAOnePersonel(Long personelId);
+    List<DtoPersonel> getAllPersonels();
 
-    public ResponseEntity<String> saveOnePersonel(Personel newPersonel);
+    DtoPersonel getAOnePersonel(Long personelId);
 
-    public ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel);
+    ResponseEntity<String> saveOnePersonel(Personel newPersonel);
 
-    public void deleteOnePersonel(Long id);
+    ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel);
 
-    public DtoPersonel calculateSalaryByPersonelId(Long personelId);
+    void deleteOnePersonel(Long id);
 
-    public Map<String, Double> listSalaries();
+    DtoPersonel calculateSalaryByPersonelId(Long personelId);
+
+    DtoPersonel workHoursCalculate(Long personelId);
+
+    void workHoursCalculate2(Personel newPersonel);
+
+    Work getOneWorkofPersonel(Long personelId);
+
+    Map<String, Double> listSalaries();
 }

@@ -27,7 +27,7 @@ public class Personel {
     private Double salary;
 
     public Personel(Boolean administrator){
-        if(administrator == true){
+        if(administrator){
             this.salary = 40000.0;
         }
         else{

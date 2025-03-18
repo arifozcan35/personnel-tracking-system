@@ -8,8 +8,8 @@ import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.repository.UnitRepository;
-import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.UnitService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -22,10 +22,13 @@ public class UnitServiceImpl implements UnitService {
 
     private final UnitRepository unitRepository;
 
-    private final PersonelRepository personelRepository;
-
 
     // Solid example : article 1 (Single Responsibility Principle)
+
+    @Override
+    public Optional<Unit> findById(Long unitId) {
+        return unitRepository.findById(unitId);
+    }
 
     @Override
     public List<DtoUnit> getAllUnits(){
@@ -99,23 +102,19 @@ public class UnitServiceImpl implements UnitService {
 
 
     @Override
+    @Transactional
     public void deleteOneUnit(Long unitId) {
         Optional<Unit> unit = unitRepository.findById(unitId);
 
-        if(unit.isPresent()){
-            // Set the unit field of the associated personnel to null (if necessary)
-            List<Personel> personels = personelRepository.findByUnit(unit.get());
-            for (Personel personel : personels) {
-                personel.setUnit(null);
-            }
-            personelRepository.saveAll(personels); // Save changes
+        if (unit.isPresent()) {
+            // make personnel connected to Unit null
+            unitRepository.detachPersonelFromUnit(unit.get());
 
+            // delete unit
             unitRepository.delete(unit.get());
-        }
-        else{
+        } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
-
     }
 
 

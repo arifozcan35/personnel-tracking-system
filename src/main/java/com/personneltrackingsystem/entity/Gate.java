@@ -21,8 +21,6 @@ public class Gate {
 
     private String gateName;
 
-    //private Boolean allowToPass;
-
 
     @OneToMany(mappedBy = "gate")
     @JsonIgnore

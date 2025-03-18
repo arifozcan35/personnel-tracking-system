@@ -10,17 +10,17 @@ import java.util.Set;
 
 public interface GateController {
 
-    public List<DtoGate> getAllGates();
+    List<DtoGate> getAllGates();
 
-    public DtoGate getOneGate(Long gateId);
+    DtoGate getOneGate(Long gateId);
 
-    public DtoGate createGate(DtoGateIU newGate);
+    DtoGate createGate(DtoGateIU newGate);
 
-    public DtoGate updateGate(Long gateId, DtoGateIU newGate);
+    DtoGate updateGate(Long gateId, DtoGateIU newGate);
 
-    public void deleteGate(Long gateId);
+    void deleteGate(Long gateId);
 
-    public Set<Personel> getPersonels(Long unitId);
+    Set<Personel> getPersonels(Long unitId);
 
-    public ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
+    ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
 }

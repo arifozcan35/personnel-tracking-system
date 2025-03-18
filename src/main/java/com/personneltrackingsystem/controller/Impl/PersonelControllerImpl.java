@@ -4,9 +4,7 @@ import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Work;
-import com.personneltrackingsystem.service.Impl.WorkServiceImpl;
 import com.personneltrackingsystem.service.PersonelService;
-import com.personneltrackingsystem.service.WorkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +18,6 @@ import java.util.Map;
 public class PersonelControllerImpl implements PersonelController {
 
     private final PersonelService personelServiceImpl;
-
-    private final WorkService workServiceImpl;
 
     @GetMapping
     @Override
@@ -72,7 +68,7 @@ public class PersonelControllerImpl implements PersonelController {
     @GetMapping("/work/{personelId}")
     @Override
     public Work seeWork(@PathVariable Long personelId) {
-        return workServiceImpl.getOneWorkofPersonel(personelId);
+        return personelServiceImpl.getOneWorkofPersonel(personelId);
     }
 
     @GetMapping("/salaries")

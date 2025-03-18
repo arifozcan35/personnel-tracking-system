@@ -17,9 +17,4 @@ public interface PersonelRepository extends JpaRepository<Personel, Long> {
     List<Personel> findByUnit(Unit unit);
     List<Personel> findByGate(Gate gate);
 
-    /*
-    @Query(value = "SELECT * FROM dbpersonel WHERE ID = ?1", nativeQuery = true)
-    User getUserByUserID(String userId);
-     */
-
 }
