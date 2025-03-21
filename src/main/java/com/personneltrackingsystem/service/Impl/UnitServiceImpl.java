@@ -129,7 +129,6 @@ public class UnitServiceImpl implements UnitService {
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
-
         return personels;
     }
 

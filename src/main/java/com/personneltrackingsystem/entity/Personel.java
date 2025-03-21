@@ -1,5 +1,6 @@
 package com.personneltrackingsystem.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 @Data
 @AllArgsConstructor
 public class Personel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "personel_id")
@@ -67,5 +69,6 @@ public class Personel {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "fk_work_id")
+    @Nullable
     private Work work;
 }

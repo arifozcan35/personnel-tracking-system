@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DtoGate {
+
     private Long gateId;
 
     private String gateName;

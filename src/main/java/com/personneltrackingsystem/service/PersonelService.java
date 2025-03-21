@@ -20,7 +20,6 @@ public interface PersonelService {
      * @return
      */
 
-
     List<DtoPersonel> getAllPersonels();
 
     DtoPersonel getAOnePersonel(Long personelId);

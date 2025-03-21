@@ -81,31 +81,28 @@ public class PersonelServiceImpl implements PersonelService  {
     public ResponseEntity<String> saveOnePersonel(Personel newPersonel) {
 
         // Unit control (a mandatory field)
-        if (newPersonel.getUnit() != null && newPersonel.getUnit().getUnitId() != null) {
+        if (newPersonel.getUnit() == null || newPersonel.getUnit().getUnitId() == null) {
+            return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
+        } else {
             Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
-            if(existingUnit.isEmpty()){
+            if (existingUnit.isEmpty()) {
                 return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
-            }else{
+            } else {
                 newPersonel.setUnit(existingUnit.get());
             }
-
-        } else {
-            return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
         }
 
 
         // Gate control (a mandatory field)
-        if (newPersonel.getGate() != null && newPersonel.getGate().getGateId() != null) {
+        if (newPersonel.getGate() == null || newPersonel.getGate().getGateId() == null) {
+            return new ResponseEntity<>("Personnel registration failed! Please enter the gate.", HttpStatus.BAD_REQUEST);
+        }else{
             Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
-
             if (existingGate.isEmpty()) {
                 return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.BAD_REQUEST);
             }else{
                 newPersonel.setGate(existingGate.get());
             }
-
-        }else {
-            return new ResponseEntity<>("Personnel registration failed! Please enter the staff ticket office.", HttpStatus.BAD_REQUEST);
         }
 
 
@@ -123,39 +120,24 @@ public class PersonelServiceImpl implements PersonelService  {
             }
         }
 
-
+        // saving first
         personelRepository.save(newPersonel);
-        // Personel savingPersonel = personelRepository.save(newPersonel);
-
 
         // Working hours record
         if (newPersonel.getWork() != null) {
             LocalTime checkIn = newPersonel.getWork().getCheckInTime();
             LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
-            // newPersonel.setEmail("sadfsadff");
 
-            // boolean isWorkValid = workService.isWorkValid(checkIn, checkIn);
-
-            // newPersonel.getWork().setIsWorkValid(isWorkValid);
-
-            /*
-            Work work = newPersonel.getWork();
-            work.setIsWorkValid(isWorkValid);
-            */
-
-
-            if (checkIn == null && checkOut == null && checkOut.isBefore(checkIn)) {
+            if (checkIn == null || checkOut == null || checkOut.isBefore(checkIn)) {
                 return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
-            } else {
-                workHoursCalculate2(newPersonel);
-
-                Work savedWork = workServiceImpl.save(newPersonel.getWork());
-                newPersonel.setWork(savedWork);
             }
+
+            workHoursCalculate2(newPersonel);
+            Work savedWork = workServiceImpl.save(newPersonel.getWork());
+            newPersonel.setWork(savedWork);
         }
 
         return new ResponseEntity<>("Personnel registered successfully!", HttpStatus.CREATED);
-
     }
 
 
@@ -169,13 +151,13 @@ public class PersonelServiceImpl implements PersonelService  {
             if (newPersonel.getName() != null) {
                 foundPersonel.setName(newPersonel.getName());
             }
+
             if (newPersonel.getEmail() != null) {
                 foundPersonel.setEmail(newPersonel.getEmail());
             }
 
-
             if(newPersonel.getAdministrator() != null){
-                    foundPersonel.setAdministrator(newPersonel.getAdministrator());
+                foundPersonel.setAdministrator(newPersonel.getAdministrator());
 
                 Personel pAdmin = new Personel(newPersonel.getAdministrator());
                 foundPersonel.setSalary(pAdmin.getSalary());
@@ -186,15 +168,17 @@ public class PersonelServiceImpl implements PersonelService  {
                 foundPersonel.setSalary(pSalary.getSalary());
             }
 
+
             // Unit control
             if (newPersonel.getUnit() != null) {
                 Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
                 if (existingUnit.isEmpty()) {
                     return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
+                }else{
+                    foundPersonel.setUnit(existingUnit.get());
                 }
-                foundPersonel.setUnit(existingUnit.get());
-            }
 
+            }
 
             // Gate control
             if (newPersonel.getGate() != null) {
@@ -202,25 +186,27 @@ public class PersonelServiceImpl implements PersonelService  {
 
                 if (existingGate.isEmpty()) {
                     return new ResponseEntity<>("The specified unit could not be found!", HttpStatus.BAD_REQUEST);
+                }else{
+                    foundPersonel.setGate(existingGate.get());
                 }
-                foundPersonel.setGate(existingGate.get());
+
             }
 
             // Working hours record
             if (newPersonel.getWork() != null) {
-                LocalTime giris = newPersonel.getWork().getCheckInTime();
-                LocalTime cikis = newPersonel.getWork().getCheckOutTime();
+                LocalTime entry = newPersonel.getWork().getCheckInTime();
+                LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
 
-                Long oncekiKayit = foundPersonel.getWork().getWorkId();
+                Long previousRecord = foundPersonel.getWork().getWorkId();
 
-                if (giris != null && cikis != null && cikis.isAfter(giris)) {
+                if (entry != null && checkOut != null && checkOut.isAfter(entry)) {
 
                     // adding new shift record
-                    Work kaydedilenWork = workServiceImpl.save(newPersonel.getWork());
-                    foundPersonel.setWork(kaydedilenWork);
+                    Work savedWork = workServiceImpl.save(newPersonel.getWork());
+                    foundPersonel.setWork(savedWork);
 
                     // delete previous shift record
-                    workServiceImpl.deleteById(oncekiKayit);
+                    workServiceImpl.deleteById(previousRecord);
                 }
             }
 
@@ -320,18 +306,15 @@ public class PersonelServiceImpl implements PersonelService  {
             }
         }
 
-
         Personel prsnl = new Personel();
         DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
 
         BeanUtils.copyProperties(newPersonel, prsnl);
 
 
-
         Personel dbPersonel = personelRepository.save(prsnl);
         BeanUtils.copyProperties(dbPersonel, dtoPrsnl);
 
-        // return personelRepository.save(personel);
     }
 
 
@@ -358,17 +341,13 @@ public class PersonelServiceImpl implements PersonelService  {
 
     @Override
     public Map<String, Double> listSalaries(){
-
         // filling names to list with stream api
-
         Map<String, Double> salaries = personelRepository.findAll().stream()
                 .collect(Collectors.toMap(
                         person -> person.getName(),
                         person -> person.getSalary()
                 ));
-
         return salaries;
-
     }
 
 

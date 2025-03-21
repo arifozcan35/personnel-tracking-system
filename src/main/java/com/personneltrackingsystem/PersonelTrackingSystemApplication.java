@@ -10,4 +10,18 @@ public class PersonelTrackingSystemApplication {
 		SpringApplication.run(PersonelTrackingSystemApplication.class, args);
 	}
 
+	/*
+	@Bean
+	public OpenAPI customOpenAPI(@Value("${application-description}") String description,
+								 @Value("${application-version}") String version){
+		return new OpenAPI()
+				.info(new Info()
+						.title("PTS API")
+				.version(version)
+				.description(description)
+				.license(new License().name("PTS API License")));
+	}
+
+	 */
+
 }

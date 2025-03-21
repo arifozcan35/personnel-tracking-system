@@ -27,7 +27,6 @@ public class Work {
 
     private Boolean isWorkValid;
 
-
     /*
     @OneToOne(mappedBy = "work")
     @JsonIgnore
