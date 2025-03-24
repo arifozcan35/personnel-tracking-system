@@ -6,7 +6,7 @@ public enum MessageType2 {
     GENERAL_EXCEPTION("9999", "general.exception");
 
     private String code;
-    private String messageKey; // Artık doğrudan mesaj yerine message key tutuyoruz
+    private String messageKey;
 
     MessageType2(String code, String messageKey) {
         this.code = code;

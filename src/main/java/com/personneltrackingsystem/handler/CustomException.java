@@ -8,7 +8,7 @@ public class CustomException<E> {
     private Date createTime;
     private E message;
 
-    // Getter ve setter metodları
+
     public String getHostName() {
         return hostName;
     }

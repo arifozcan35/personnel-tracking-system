@@ -4,10 +4,12 @@ import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ public class GateServiceImpl implements GateService {
 
     private final MessageResolver messageResolver;
 
+    private final GateMapper gateMapper;
+
 
     @Override
     public Optional<Gate> findById(Long gateId) {
@@ -35,45 +39,33 @@ public class GateServiceImpl implements GateService {
 
     @Override
     public List<DtoGate> getAllGates(){
-        List<DtoGate> dtoGateList = new ArrayList<>();
 
         List<Gate> gateList =  gateRepository.findAll();
-        for (Gate gate : gateList) {
-            DtoGate dto = new DtoGate();
-            BeanUtils.copyProperties(gate, dto);
-            dtoGateList.add(dto);
-        }
-        return dtoGateList;
+
+        return gateMapper.gatesToDtoGates(gateList);
     }
 
 
     @Override
     public DtoGate getOneGate(Long gateId){
-        DtoGate dto = new DtoGate();
-        Optional<Gate> optional =  gateRepository.findById(gateId);
-        if(optional.isEmpty()){
+        Optional<Gate> optGate =  gateRepository.findById(gateId);
+        if(optGate.isEmpty()){
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
         }else{
-            Gate dbGate = optional.get();
-
-            BeanUtils.copyProperties(dbGate, dto);
-            return dto;
+            return gateMapper.gateToDtoGate(optGate.get());
         }
     }
 
 
     @Override
-    public DtoGate saveOneGate(DtoGateIU gate) {
-        if(gate.getGateName() != null){
-            DtoGate dto = new DtoGate();
-            Gate pGate = new Gate();
-            BeanUtils.copyProperties(gate, pGate);
+    public DtoGate saveOneGate(DtoGateIU gateIU) {
+        if(gateIU.getGateName() != null){
+            Gate pGate = gateMapper.dtoGateIUToGate(gateIU);
 
             Gate dbGate = gateRepository.save(pGate);
-            BeanUtils.copyProperties(dbGate, dto);
 
-            return dto;
+            return gateMapper.gateToDtoGate(dbGate);
         }else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, messageResolver.toString());
             throw new BaseException(errorMessage);
@@ -83,19 +75,16 @@ public class GateServiceImpl implements GateService {
 
     @Override
     public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
-        DtoGate dto = new DtoGate();
 
-        Optional<Gate> gate = gateRepository.findById(id);
+        Optional<Gate> optGate = gateRepository.findById(id);
 
-        if(gate.isPresent()){
-            Gate foundGate = gate.get();
+        if(optGate.isPresent()){
+            Gate foundGate = optGate.get();
             foundGate.setGateName(newGate.getGateName());
 
             Gate updatedGate = gateRepository.save(foundGate);
 
-            BeanUtils.copyProperties(updatedGate, dto);
-
-            return dto;
+            return gateMapper.gateToDtoGate(updatedGate);
         }else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
@@ -107,14 +96,14 @@ public class GateServiceImpl implements GateService {
     @Override
     @Transactional
     public void deleteOneGate(Long gateId) {
-        Optional<Gate> gate = gateRepository.findById(gateId);
+        Optional<Gate> optGate = gateRepository.findById(gateId);
 
-        if(gate.isPresent()){
+        if(optGate.isPresent()){
             // update associated personnel records
             gateRepository.updatePersonelGateReferences(gateId);
 
             // delete gate
-            gateRepository.delete(gate.get());
+            gateRepository.delete(optGate.get());
         }
         else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
@@ -127,10 +116,10 @@ public class GateServiceImpl implements GateService {
     public Set<Personel> getPersonelsByGateId(Long gateId) {
         Set<Personel> personels = new HashSet<>();
 
-        Optional<Gate> gate = gateRepository.findById(gateId);
+        Optional<Gate> optGate = gateRepository.findById(gateId);
 
-        if (gate.isPresent()) {
-            personels.addAll(gate.get().getPersonels());
+        if (optGate.isPresent()) {
+            personels.addAll(optGate.get().getPersonels());
         } else {
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
@@ -141,16 +130,15 @@ public class GateServiceImpl implements GateService {
 
 
     @Override
-    public ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel) {
-        Long gatePersonelBelongs = personel.getGate().getGateId();
+    public ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId) {
 
-        Optional<Personel> isThisPersonelExists = gateRepository.findPrsnlById(personel.getPersonelId());
+        Optional<Personel> isThisPersonelExists = gateRepository.findPrsnlById(personelId);
 
         Optional<Gate> isThisValueExists = gateRepository.findById(wantedToEnterGate);
 
         if(isThisPersonelExists.isPresent()){
             if(isThisValueExists.isPresent()){
-                if(gatePersonelBelongs.equals(wantedToEnterGate)){
+                if(personelId.equals(wantedToEnterGate)){
                     return new ResponseEntity<>("Personnel entered the gate!", HttpStatus.CREATED);
                 }else{
                     return new ResponseEntity<>("Personnel is not authorized to enter this gate!", HttpStatus.BAD_REQUEST);

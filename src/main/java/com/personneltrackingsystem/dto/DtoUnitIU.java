@@ -1,6 +1,7 @@
 package com.personneltrackingsystem.dto;
 
 import com.personneltrackingsystem.entity.Personel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +17,10 @@ public class DtoUnitIU {
 
     // solid example : article 2 (Open Closed Principle)
 
+    @Schema(description = "Unique identity of unit", example = "3")
     private Long unitId;
 
+    @Schema(description = "The name of unit", example = "Information Technologies")
     private String unitName;
 
     private List<DtoPersonel> personels;

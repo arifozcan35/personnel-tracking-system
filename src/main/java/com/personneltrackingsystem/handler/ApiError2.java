@@ -2,7 +2,7 @@ package com.personneltrackingsystem.handler;
 
 public class ApiError2<E> {
     private Integer status;
-    private String code; // Hata kodu eklendi
+    private String code;
     private CustomException<E> exception;
 
     public Integer getStatus() {

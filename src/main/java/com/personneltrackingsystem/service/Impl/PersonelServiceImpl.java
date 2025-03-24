@@ -9,6 +9,7 @@ import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.PersonelService;
@@ -45,34 +46,26 @@ public class PersonelServiceImpl implements PersonelService  {
 
     private final MessageResolver messageResolver;
 
+    private final PersonelMapper personelMapper;
+
 
     @Override
     public List<DtoPersonel> getAllPersonels() {
-        List<DtoPersonel> dtoPersonelList = new ArrayList<>();
 
         List<Personel> personelList =  personelRepository.findAll();
-        for (Personel personel : personelList) {
-            DtoPersonel dto = new DtoPersonel();
-            BeanUtils.copyProperties(personel, dto);
-            dtoPersonelList.add(dto);
-        }
-        return dtoPersonelList;
+
+        return personelMapper.personelsToDtoPersonels(personelList);
     }
 
 
     @Override
     public DtoPersonel getAOnePersonel(Long personelId) {
-        DtoPersonel dto = new DtoPersonel();
-        Optional<Personel> optional =  personelRepository.findById(personelId);
+        Optional<Personel> optPersonel =  personelRepository.findById(personelId);
 
-        if(optional.isEmpty()){
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
+        if(optPersonel.isPresent()){
+            return personelMapper.personelToDtoPersonel(optPersonel.get());
         }else{
-            Personel dbPersonel = optional.get();
-
-            BeanUtils.copyProperties(dbPersonel, dto);
-
-            return dto;
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
         }
     }
 
@@ -143,10 +136,10 @@ public class PersonelServiceImpl implements PersonelService  {
 
     @Override
     public ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel) {
-        Optional<Personel> personel = personelRepository.findById(id);
+        Optional<Personel> optPersonel = personelRepository.findById(id);
 
-        if (personel.isPresent()) {
-            Personel foundPersonel = personel.get();
+        if (optPersonel.isPresent()) {
+            Personel foundPersonel = optPersonel.get();
 
             if (newPersonel.getName() != null) {
                 foundPersonel.setName(newPersonel.getName());
@@ -195,11 +188,11 @@ public class PersonelServiceImpl implements PersonelService  {
             // Working hours record
             if (newPersonel.getWork() != null) {
                 LocalTime entry = newPersonel.getWork().getCheckInTime();
-                LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
+                LocalTime exit = newPersonel.getWork().getCheckOutTime();
 
                 Long previousRecord = foundPersonel.getWork().getWorkId();
 
-                if (entry != null && checkOut != null && checkOut.isAfter(entry)) {
+                if (entry != null && exit != null && exit.isAfter(entry)) {
 
                     // adding new shift record
                     Work savedWork = workServiceImpl.save(newPersonel.getWork());
@@ -223,11 +216,11 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     @Transactional
     public void deleteOnePersonel(Long id) {
-        Optional<Personel> personel = personelRepository.findById(id);
-        if (personel.isPresent()) {
+        Optional<Personel> optPersonel = personelRepository.findById(id);
+        if (optPersonel.isPresent()) {
             // Delete the shift record first
-            if (personel.get().getWork() != null) {
-                workServiceImpl.deleteById(personel.get().getWork().getWorkId());
+            if (optPersonel.get().getWork() != null) {
+                workServiceImpl.deleteById(optPersonel.get().getWork().getWorkId());
             }
             // Then delete the personnel record
             personelRepository.deleteById(id);
@@ -247,36 +240,37 @@ public class PersonelServiceImpl implements PersonelService  {
 
     @Override
     public DtoPersonel workHoursCalculate(Long personelId) {
-        Personel personel = personelRepository.findById(personelId).orElse(null);
+        Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
-        if (personel == null) {
+        if(optPersonel.isPresent() && optPersonel.get().getWork() != null){
+            Work work = optPersonel.get().getWork();
+            Double salary = optPersonel.get().getSalary();
+
+            LocalTime checkInHour = work.getCheckInTime();
+            LocalTime checkOutHour = work.getCheckOutTime();
+
+            Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
+
+            boolean valid = isWorkValid(checkInHour, checkOutHour);
+            optPersonel.get().getWork().setIsWorkValid(valid);
+
+            if (Boolean.TRUE.equals(optPersonel.get().getPersonelId())) {
+                optPersonel.get().setSalary(salary);
+            } else {
+                if (!valid) {
+                    double penalty = calculatePenalty(workTime);
+                    optPersonel.get().setSalary(optPersonel.get().getSalary() - penalty);
+                }
+            }
+
+            personelRepository.save(optPersonel.get());
+
+            return new DtoPersonel(optPersonel.get().getName(), optPersonel.get().getEmail(), optPersonel.get().getSalary());
+
+        }else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
         }
-
-        Work work = personel.getWork();
-        Double salary = personel.getSalary();
-
-        LocalTime checkInHour = work.getCheckInTime();
-        LocalTime checkOutHour = work.getCheckOutTime();
-
-        Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
-
-        boolean valid = isWorkValid(checkInHour, checkOutHour);
-        personel.getWork().setIsWorkValid(valid);
-
-        if (Boolean.TRUE.equals(personel.getAdministrator())) {
-            personel.setSalary(salary);
-        } else {
-            if (!valid) {
-                double penalty = calculatePenalty(workTime);
-                personel.setSalary(personel.getSalary() - penalty);
-            }
-        }
-
-        personelRepository.save(personel);
-
-        return new DtoPersonel(personel.getName(), personel.getEmail(), personel.getSalary());
     }
 
 
@@ -306,24 +300,19 @@ public class PersonelServiceImpl implements PersonelService  {
             }
         }
 
-        Personel prsnl = new Personel();
-        DtoPersonelIU dtoPrsnl = new DtoPersonelIU();
+        Personel dbPersonel = personelRepository.save(newPersonel);
 
-        BeanUtils.copyProperties(newPersonel, prsnl);
-
-
-        Personel dbPersonel = personelRepository.save(prsnl);
-        BeanUtils.copyProperties(dbPersonel, dtoPrsnl);
+        personelMapper.personelToDtoPersonelIU(dbPersonel);
 
     }
 
 
     @Override
     public Work getOneWorkofPersonel(Long personelId) {
-        Optional<Personel> personel = personelRepository.findById(personelId);
+        Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
-        if (personel.isPresent()) {
-            Long workId = personel.get().getWork().getWorkId();
+        if (optPersonel.isPresent()) {
+            Long workId = optPersonel.get().getWork().getWorkId();
             Optional<Work> dbWorkOpt = workServiceImpl.findById(workId);
 
             if (dbWorkOpt.isPresent()) {

@@ -22,5 +22,5 @@ public interface GateController {
 
     Set<Personel> getPersonels(Long unitId);
 
-    ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
+    ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId);
 }

@@ -27,7 +27,7 @@ public interface GateService {
 
     Set<Personel> getPersonelsByGateId(Long gateId);
 
-    ResponseEntity<String> passGate(Long wantedToEnterGate, Personel personel);
+    ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId);
 
 
 }

@@ -7,6 +7,7 @@ import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.service.UnitService;
 import jakarta.transaction.Transactional;
@@ -22,6 +23,8 @@ public class UnitServiceImpl implements UnitService {
 
     private final UnitRepository unitRepository;
 
+    private final UnitMapper unitMapper;
+
 
     // Solid example : article 1 (Single Responsibility Principle)
 
@@ -32,28 +35,18 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<DtoUnit> getAllUnits(){
-        List<DtoUnit> dtoUnitList = new ArrayList<>();
+        List<Unit> unitList = unitRepository.findAll();
 
-        List<Unit> unitList =  unitRepository.findAll();
-        for (Unit unit : unitList) {
-            DtoUnit dto = new DtoUnit();
-            BeanUtils.copyProperties(unit, dto);
-            dtoUnitList.add(dto);
-        }
-        return dtoUnitList;
+        return unitMapper.unitsToDtoUnits(unitList);
     }
 
 
     @Override
     public DtoUnit getOneUnit(Long unitId){
-        DtoUnit dto = new DtoUnit();
-        Optional<Unit> optional =  unitRepository.findById(unitId);
-        if(optional.isPresent()){
-            Unit dbUnit = optional.get();
 
-            BeanUtils.copyProperties(dbUnit, dto);
-
-            return dto;
+        Optional<Unit> optUnit =  unitRepository.findById(unitId);
+        if(optUnit.isPresent()){
+            return unitMapper.unitToDtoUnit(optUnit.get());
         }
         else{
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
@@ -63,16 +56,14 @@ public class UnitServiceImpl implements UnitService {
 
 
     @Override
-    public DtoUnit saveOneUnit(DtoUnitIU unit) {
-        if(unit.getUnitName() != null){
-            DtoUnit dto = new DtoUnit();
-            Unit pUnit = new Unit();
-            BeanUtils.copyProperties(unit, pUnit);
+    public DtoUnit saveOneUnit(DtoUnitIU unitIU) {
+        if(unitIU.getUnitName() != null){
+
+            Unit pUnit = unitMapper.dtoUnitIUToUnit(unitIU);
 
             Unit dbUnit = unitRepository.save(pUnit);
-            BeanUtils.copyProperties(dbUnit, dto);
 
-            return dto;
+            return unitMapper.unitToDtoUnit(dbUnit);
         }else{
             throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
         }
@@ -81,37 +72,32 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit) {
-        DtoUnit dto = new DtoUnit();
+        Optional<Unit> optUnit = unitRepository.findById(id);
 
-        Optional<Unit> gate = unitRepository.findById(id);
-
-        if(gate.isPresent()){
-            Unit foundUnit = gate.get();
+        if(optUnit.isPresent()){
+            Unit foundUnit = optUnit.get();
             foundUnit.setUnitName(newUnit.getUnitName());
 
             Unit updatedUnit = unitRepository.save(foundUnit);
 
-            BeanUtils.copyProperties(updatedUnit, dto);
-
-            return dto;
-        }else{
+            return unitMapper.unitToDtoUnit(updatedUnit);
+        } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
-
     }
 
 
     @Override
     @Transactional
     public void deleteOneUnit(Long unitId) {
-        Optional<Unit> unit = unitRepository.findById(unitId);
+        Optional<Unit> optUnit = unitRepository.findById(unitId);
 
-        if (unit.isPresent()) {
+        if (optUnit.isPresent()) {
             // make personnel connected to Unit null
-            unitRepository.detachPersonelFromUnit(unit.get());
+            unitRepository.detachPersonelFromUnit(optUnit.get());
 
             // delete unit
-            unitRepository.delete(unit.get());
+            unitRepository.delete(optUnit.get());
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
@@ -122,10 +108,10 @@ public class UnitServiceImpl implements UnitService {
     public Set<Personel> getPersonelsByUnitId(Long unitId) {
         Set<Personel> personels = new HashSet<>();
 
-        Optional<Unit> unit = unitRepository.findById(unitId);
+        Optional<Unit> optUnit = unitRepository.findById(unitId);
 
-        if (unit.isPresent()) {
-            personels.addAll(unit.get().getPersonels());
+        if (optUnit.isPresent()) {
+            personels.addAll(optUnit.get().getPersonels());
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
