@@ -10,10 +10,10 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.service.UnitService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -56,8 +56,11 @@ public class UnitServiceImpl implements UnitService {
 
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public DtoUnit saveOneUnit(DtoUnitIU unitIU) {
-        if(unitIU.getUnitName() != null){
+
+        unitMapper.dtoUnitIUToUnit(unitIU);
+        if(unitIU.getBirimIsim() != null){
 
             Unit pUnit = unitMapper.dtoUnitIUToUnit(unitIU);
 
@@ -71,12 +74,13 @@ public class UnitServiceImpl implements UnitService {
 
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit) {
         Optional<Unit> optUnit = unitRepository.findById(id);
 
         if(optUnit.isPresent()){
             Unit foundUnit = optUnit.get();
-            foundUnit.setUnitName(newUnit.getUnitName());
+            foundUnit.setUnitName(newUnit.getBirimIsim());
 
             Unit updatedUnit = unitRepository.save(foundUnit);
 

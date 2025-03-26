@@ -2,6 +2,7 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.service.PersonelService;
@@ -48,14 +49,14 @@ public class PersonelControllerImpl implements PersonelController {
 
     @PostMapping
     @Override
-    public ResponseEntity<String> createPersonel(@RequestBody Personel newPersonel) {
+    public ResponseEntity<String> createPersonel(@RequestBody DtoPersonelIU newPersonel) {
         return personelServiceImpl.saveOnePersonel(newPersonel);
     }
 
 
     @PutMapping("/{personelId}")
     @Override
-    public ResponseEntity<String> updatePersonel(@PathVariable Long personelId, @RequestBody Personel newPersonel) {
+    public ResponseEntity<String> updatePersonel(@PathVariable Long personelId, @RequestBody DtoPersonelIU newPersonel) {
         return personelServiceImpl.updateOnePersonel(personelId, newPersonel);
     }
 

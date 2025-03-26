@@ -16,5 +16,5 @@ public class DtoUnit {
     private Long unitId;
 
     @Schema(description = "The name of unit", example = "Information Technologies")
-    private String unitName;
+    private String birimIsim;
 }

@@ -4,7 +4,6 @@ import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

@@ -22,5 +22,7 @@ public interface PersonelMapper {
 
     DtoPersonelIU personelToDtoPersonelIU(Personel personel);
 
+    Personel dtoPersonelIUToPersonel(DtoPersonelIU personelIU);
+
 
 }

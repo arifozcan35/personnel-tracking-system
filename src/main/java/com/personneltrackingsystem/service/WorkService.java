@@ -1,7 +1,5 @@
 package com.personneltrackingsystem.service;
 
-import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Work;
 
 import java.util.Optional;

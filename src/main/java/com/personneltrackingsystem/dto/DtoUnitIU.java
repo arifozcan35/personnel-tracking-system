@@ -1,6 +1,5 @@
 package com.personneltrackingsystem.dto;
 
-import com.personneltrackingsystem.entity.Personel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class DtoUnitIU {
     private Long unitId;
 
     @Schema(description = "The name of unit", example = "Information Technologies")
-    private String unitName;
+    private String birimIsim;
 
     private List<DtoPersonel> personels;
 }

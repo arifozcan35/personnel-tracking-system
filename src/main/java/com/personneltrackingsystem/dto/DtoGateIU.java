@@ -1,6 +1,5 @@
 package com.personneltrackingsystem.dto;
 
-import com.personneltrackingsystem.entity.Personel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

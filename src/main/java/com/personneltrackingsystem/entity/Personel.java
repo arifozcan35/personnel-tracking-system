@@ -28,36 +28,6 @@ public class Personel {
 
     private Double salary;
 
-    public Personel(Boolean administrator){
-        if(administrator){
-            this.salary = 40000.0;
-        }
-        else{
-            this.salary = 30000.0;
-        }
-    }
-
-    public Personel(Double salary){
-        if(salary.equals(30000.0) || salary.equals(40000.0)){
-            if(salary.equals(40000.0)){
-                this.administrator = true;
-                this.salary = 40000.0;
-            }else{
-                this.administrator = false;
-                this.salary = 30000.0;
-            }
-        }else{
-            if (Math.abs(salary - 30000.0) < Math.abs(salary - 40000.0)) {
-                this.administrator = false;
-                this.salary = 30000.0;
-            } else {
-                this.administrator = true;
-                this.salary = 40000.0;
-            }
-            new ResponseEntity<>("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
-                    "to the value that is closer to these two values (" + this.salary + ")!" , HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "fk_unit_id")

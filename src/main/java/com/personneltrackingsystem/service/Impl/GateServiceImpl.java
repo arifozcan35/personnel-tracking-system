@@ -59,6 +59,7 @@ public class GateServiceImpl implements GateService {
 
 
     @Override
+    @Transactional
     public DtoGate saveOneGate(DtoGateIU gateIU) {
         if(gateIU.getGateName() != null){
             Gate pGate = gateMapper.dtoGateIUToGate(gateIU);
@@ -74,6 +75,7 @@ public class GateServiceImpl implements GateService {
 
 
     @Override
+    @Transactional
     public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
 
         Optional<Gate> optGate = gateRepository.findById(id);

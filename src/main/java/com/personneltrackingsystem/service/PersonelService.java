@@ -1,15 +1,13 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Work;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface PersonelService {
 
@@ -24,9 +22,9 @@ public interface PersonelService {
 
     DtoPersonel getAOnePersonel(Long personelId);
 
-    ResponseEntity<String> saveOnePersonel(Personel newPersonel);
+    ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel);
 
-    ResponseEntity<String> updateOnePersonel(Long id, Personel newPersonel);
+    ResponseEntity<String> updateOnePersonel(Long id, DtoPersonelIU newPersonel);
 
     void deleteOnePersonel(Long id);
 
