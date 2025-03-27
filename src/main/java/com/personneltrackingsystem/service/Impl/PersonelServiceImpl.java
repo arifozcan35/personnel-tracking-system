@@ -321,30 +321,32 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Double salary = newPersonel.getSalary();
 
-        LocalTime checkInHour = work.getCheckInTime();
-        LocalTime checkOutHour = work.getCheckOutTime();
+        if(work != null){
+            LocalTime checkInHour = work.getCheckInTime();
+            LocalTime checkOutHour = work.getCheckOutTime();
 
-        Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
+            Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
 
-        boolean valid = isWorkValid(checkInHour, checkOutHour);
-        newPersonel.getWork().setIsWorkValid(valid);
+            boolean valid = isWorkValid(checkInHour, checkOutHour);
+            newPersonel.getWork().setIsWorkValid(valid);
 
-        // if employee is an admin then ignore the pay cut :)
-        if (newPersonel.getAdministrator() != null && newPersonel.getAdministrator() == true) {
-            newPersonel.setSalary(salary);
-        } else {
-            // if employee is not an admin then
-            if (!valid) {
-                double penalty = calculatePenalty(workTime);
-                newPersonel.setSalary(((newPersonel.getSalary()) - (penalty)));
+            // if employee is an admin then ignore the pay cut :)
+            if (newPersonel.getAdministrator() != null && newPersonel.getAdministrator() == true) {
+                newPersonel.setSalary(salary);
+            } else {
+                // if employee is not an admin then
+                if (!valid) {
+                    double penalty = calculatePenalty(workTime);
+                    newPersonel.setSalary(((newPersonel.getSalary()) - (penalty)));
+                }
             }
+
+            // Personel realPersonel = personelMapper.dtoPersonelIUToPersonel(newPersonel);
+
+            Personel dbPersonel = personelRepository.save(newPersonel);
+
+            personelMapper.personelToDtoPersonelIU(dbPersonel);
         }
-
-        // Personel realPersonel = personelMapper.dtoPersonelIUToPersonel(newPersonel);
-
-        Personel dbPersonel = personelRepository.save(newPersonel);
-
-        personelMapper.personelToDtoPersonelIU(dbPersonel);
 
     }
 
@@ -390,18 +392,19 @@ public class PersonelServiceImpl implements PersonelService  {
     protected boolean isWorkValid(LocalTime checkInHour, LocalTime checkOutHour) {
         Duration workDuration = calculateWorkTime(checkInHour, checkOutHour);
         Duration workLimit = Duration.between(WORK_START, WORK_FINISH).minus(MAX_WORK_MISSING);
+
         return workDuration.compareTo(workLimit) >= 0;
     }
 
 
-    private double calculatePenalty(Duration workPeriod) {
+    protected double calculatePenalty(Duration workPeriod) {
         if (workPeriod.compareTo(Duration.between(WORK_START, WORK_FINISH)) < 0) {
             return PENALTY_AMOUNT;
         }
         return 0.0;
     }
 
-    public Boolean selectionPosition(DtoPersonelIU pAdmin, Boolean administrator){
+    protected Boolean selectionPosition(DtoPersonelIU pAdmin, Boolean administrator){
 
         if(administrator){
             pAdmin.setSalary(40000.0);
@@ -412,7 +415,7 @@ public class PersonelServiceImpl implements PersonelService  {
         return false;
     }
 
-    public void salaryAssignment(DtoPersonelIU pSalary, Double salary){
+    protected void salaryAssignment(DtoPersonelIU pSalary, Double salary){
 
         if(salary.equals(30000.0) || salary.equals(40000.0)){
             if(salary.equals(40000.0)){
