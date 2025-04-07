@@ -5,14 +5,11 @@ import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Unit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UnitMapper {
-
-    UnitMapper INSTANCE = Mappers.getMapper(UnitMapper.class);
 
     @Mapping(source = "unitName", target = "birimIsim")
     DtoUnit unitToDtoUnit(Unit unit);

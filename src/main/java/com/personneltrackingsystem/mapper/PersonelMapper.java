@@ -12,8 +12,6 @@ import java.util.Optional;
 @Mapper(componentModel = "spring")
 public interface PersonelMapper {
 
-    PersonelMapper INSTANCE = Mappers.getMapper(PersonelMapper.class);
-
     List<DtoPersonel> personelsToDtoPersonels(List<Personel> personelList);
 
 

@@ -19,6 +19,7 @@ import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.UnitService;
 import com.personneltrackingsystem.service.WorkService;
+import com.personneltrackingsystem.validator.PersonelValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,6 +66,9 @@ public class PersonelServiceImplTest {
 
     @Mock
     private GateMapper gateMapper;
+
+    @Mock
+    private PersonelValidator personelValidator;
 
     @InjectMocks
     private PersonelServiceImpl personelService;
@@ -255,7 +259,7 @@ public class PersonelServiceImplTest {
     void testSelectionPosition() {
         DtoPersonelIU pAdmin = new DtoPersonelIU();
 
-        Boolean result = personelService.selectionPosition(pAdmin, true);
+        Boolean result = personelValidator.selectionPosition(pAdmin, true);
 
         assertEquals(40000.0, pAdmin.getSalary());
         assertFalse(result);
@@ -265,7 +269,7 @@ public class PersonelServiceImplTest {
     void testSalaryAssignment_MidValue() {
         DtoPersonelIU pSalary = new DtoPersonelIU();
 
-        personelService.salaryAssignment(pSalary, 34999.0);
+        personelValidator.salaryAssignment(pSalary, 34999.0);
 
         assertEquals(30000.0, pSalary.getSalary());
         assertFalse(pSalary.getAdministrator());
@@ -275,7 +279,7 @@ public class PersonelServiceImplTest {
     void testSalaryAssignment_LessThan30000() {
         DtoPersonelIU pSalary = new DtoPersonelIU();
 
-        personelService.salaryAssignment(pSalary, 25000.0);
+        personelValidator.salaryAssignment(pSalary, 25000.0);
 
         assertEquals(30000.0, pSalary.getSalary());
         assertFalse(pSalary.getAdministrator());
@@ -285,7 +289,7 @@ public class PersonelServiceImplTest {
     void testSalaryAssignment_GreaterThan40000() {
         DtoPersonelIU pSalary = new DtoPersonelIU();
 
-        personelService.salaryAssignment(pSalary, 45000.0);
+        personelValidator.salaryAssignment(pSalary, 45000.0);
 
         assertEquals(40000.0, pSalary.getSalary());
         assertTrue(pSalary.getAdministrator());
@@ -295,7 +299,7 @@ public class PersonelServiceImplTest {
     void testSalaryAssignment_Exact30000() {
         DtoPersonelIU pSalary = new DtoPersonelIU();
 
-        personelService.salaryAssignment(pSalary, 30000.0);
+        personelValidator.salaryAssignment(pSalary, 30000.0);
 
         assertEquals(30000.0, pSalary.getSalary());
         assertFalse(pSalary.getAdministrator());
@@ -305,7 +309,7 @@ public class PersonelServiceImplTest {
     void testSalaryAssignment_Exact40000() {
         DtoPersonelIU pSalary = new DtoPersonelIU();
 
-        personelService.salaryAssignment(pSalary, 40000.0);
+        personelValidator.salaryAssignment(pSalary, 40000.0);
 
         assertEquals(40000.0, pSalary.getSalary());
         assertTrue(pSalary.getAdministrator());

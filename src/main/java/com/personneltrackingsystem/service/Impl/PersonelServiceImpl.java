@@ -5,10 +5,7 @@ import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.exception.BaseException;
-import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
-import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.mapper.UnitMapper;
@@ -17,6 +14,7 @@ import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.UnitService;
 import com.personneltrackingsystem.service.WorkService;
+import com.personneltrackingsystem.validator.PersonelValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -54,6 +52,8 @@ public class PersonelServiceImpl implements PersonelService  {
 
     private final GateMapper gateMapper;
 
+    private final PersonelValidator personelValidator;
+
 
     @Override
     public List<DtoPersonel> getAllPersonels() {
@@ -81,62 +81,23 @@ public class PersonelServiceImpl implements PersonelService  {
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
 
         // Validate unit (mandatory field)
-        if (newPersonel.getUnit() == null || newPersonel.getUnit().getUnitId() == null) {
-            return new ResponseEntity<>("Could not save personnel! Please enter personnel unit.", HttpStatus.BAD_REQUEST);
-        } else {
-            Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
-            if (existingUnit.isEmpty()) {
-                return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
-            } else {
-                newPersonel.setUnit(unitMapper.unitToDtoUnit(existingUnit.get()));
-            }
-        }
+        personelValidator.savePersonelCheckUnit(newPersonel);
 
         // Validate gate (mandatory field)
-        if (newPersonel.getGate() == null || newPersonel.getGate().getGateId() == null) {
-            return new ResponseEntity<>("Personnel registration failed! Please enter the gate.", HttpStatus.BAD_REQUEST);
-        } else {
-            Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
-            if (existingGate.isEmpty()) {
-                return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.BAD_REQUEST);
-            } else {
-                newPersonel.setGate(gateMapper.gateToDtoGate(existingGate.get()));
-            }
-        }
+        personelValidator.savePersonelCheckGate(newPersonel);
 
         // Validate salary and administrator
-        if (newPersonel.getAdministrator() == null && newPersonel.getSalary() == null) {
-            return new ResponseEntity<>("Could not save personnel! At least one of the personnel's manager or salary values must be selected.", HttpStatus.BAD_REQUEST);
-        } else {
-            if(newPersonel.getAdministrator() != null){
-                DtoPersonelIU pAdmin = new DtoPersonelIU();
-                pAdmin.setAdministrator(selectionPosition(pAdmin, newPersonel.getAdministrator()));
-                newPersonel.setSalary(pAdmin.getSalary());
-            }else if (newPersonel.getAdministrator() == null){
-                DtoPersonelIU pSalary = new DtoPersonelIU();
-                salaryAssignment(pSalary, newPersonel.getSalary());
-                newPersonel.setAdministrator(pSalary.getAdministrator());
-                newPersonel.setSalary(pSalary.getSalary());
-            }
-        }
+        personelValidator.savePersonelCheckAdminAndSalary(newPersonel);
 
         // Check for existing personnel with the same email
-        Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
-        if (existingPersonnel.isPresent()) {
-            return new ResponseEntity<>("Personnel with this email already exists!", HttpStatus.BAD_REQUEST);
-        }
+        personelValidator.savePersonelCheckEmail(newPersonel);
 
         // Convert DTO to Entity
         Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
 
         // Handle work hours if provided
         if (newPersonel.getWork() != null) {
-            LocalTime checkIn = newPersonel.getWork().getCheckInTime();
-            LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
-
-            if (checkIn == null || checkOut == null || checkOut.isBefore(checkIn)) {
-                return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
-            }
+            personelValidator.savePersonelCheckWorkingHours(newPersonel);
 
             // Calculate and set work hours
             workHoursCalculate2(personelToSave);
@@ -174,10 +135,8 @@ public class PersonelServiceImpl implements PersonelService  {
         // Update email with uniqueness check
         if (newPersonel.getEmail() != null) {
             // Check if email is already in use by another personnel
-            Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
-            if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
-                return new ResponseEntity<>("Email is already in use by another personnel!", HttpStatus.BAD_REQUEST);
-            }
+            personelValidator.updatePersonelCheckUniqueEmail(id, newPersonel);
+
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
@@ -186,12 +145,12 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setAdministrator(newPersonel.getAdministrator());
 
             DtoPersonelIU pAdmin = new DtoPersonelIU();
-            pAdmin.setAdministrator(selectionPosition(pAdmin, newPersonel.getAdministrator()));
+            pAdmin.setAdministrator(personelValidator.selectionPosition(pAdmin, newPersonel.getAdministrator()));
             foundPersonel.setSalary(pAdmin.getSalary());
         }
         else if(newPersonel.getSalary() != null){
             DtoPersonelIU pSalary = new DtoPersonelIU();
-            salaryAssignment(pSalary, newPersonel.getSalary());
+            personelValidator.salaryAssignment(pSalary, newPersonel.getSalary());
             foundPersonel.setAdministrator(pSalary.getAdministrator());
             foundPersonel.setSalary(pSalary.getSalary());
         }
@@ -199,18 +158,18 @@ public class PersonelServiceImpl implements PersonelService  {
         // Update Unit
         if (newPersonel.getUnit() != null) {
             Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
-            if (existingUnit.isEmpty()) {
-                return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.BAD_REQUEST);
-            }
+
+            personelValidator.updatePersonelCheckUnit(existingUnit);
+
             foundPersonel.setUnit(existingUnit.get());
         }
 
         // Update Gate
         if (newPersonel.getGate() != null) {
             Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
-            if (existingGate.isEmpty()) {
-                return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.BAD_REQUEST);
-            }
+
+            personelValidator.updatePersonelCheckGate(existingGate);
+
             foundPersonel.setGate(existingGate.get());
         }
 
@@ -220,9 +179,7 @@ public class PersonelServiceImpl implements PersonelService  {
             LocalTime exit = newPersonel.getWork().getCheckOutTime();
 
             // Validate check-in and check-out times
-            if (entry == null || exit == null || !exit.isAfter(entry)) {
-                return new ResponseEntity<>("Invalid check-in/check-out time!", HttpStatus.BAD_REQUEST);
-            }
+            personelValidator.updatePersonelCheckEntryAndExit(entry, exit);
 
             // If personnel already has a work record, update the existing one
             Work existingWork = foundPersonel.getWork();
@@ -404,37 +361,5 @@ public class PersonelServiceImpl implements PersonelService  {
         return 0.0;
     }
 
-    protected Boolean selectionPosition(DtoPersonelIU pAdmin, Boolean administrator){
 
-        if(administrator){
-            pAdmin.setSalary(40000.0);
-        }
-        else{
-            pAdmin.setSalary(30000.0);
-        }
-        return false;
-    }
-
-    protected void salaryAssignment(DtoPersonelIU pSalary, Double salary){
-
-        if(salary.equals(30000.0) || salary.equals(40000.0)){
-            if(salary.equals(40000.0)){
-                pSalary.setAdministrator(true);
-                pSalary.setSalary(40000.0);
-            }else{
-                pSalary.setAdministrator(false);
-                pSalary.setSalary(30000.0);
-            }
-        }else{
-            if (Math.abs(salary - 30000.0) < Math.abs(salary - 40000.0)) {
-                pSalary.setAdministrator(false);
-                pSalary.setSalary(30000.0);
-            } else {
-                pSalary.setAdministrator(true);
-                pSalary.setSalary(40000.0);
-            }
-            new ResponseEntity<>("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
-                    "to the value that is closer to these two values (" + pSalary.getSalary() + ")!" , HttpStatus.BAD_REQUEST);
-        }
-    }
 }

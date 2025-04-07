@@ -11,8 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface GateMapper {
 
-    GateMapper INSTANCE = Mappers.getMapper(GateMapper.class);
-
     DtoGate gateToDtoGate(Gate gate);
 
     List<DtoGate> gatesToDtoGates(List<Gate> gateList);

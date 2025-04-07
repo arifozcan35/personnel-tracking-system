@@ -2,6 +2,7 @@ package com.personneltrackingsystem.entity;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class Personel {
 
     private String name;
 
+    @NotBlank
     private String email;
 
     private Boolean administrator;

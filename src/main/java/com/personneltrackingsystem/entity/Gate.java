@@ -2,6 +2,7 @@ package com.personneltrackingsystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class Gate {
     @Column(name = "gate_id")
     private Long gateId;
 
+    @NotBlank
     private String gateName;
 
 

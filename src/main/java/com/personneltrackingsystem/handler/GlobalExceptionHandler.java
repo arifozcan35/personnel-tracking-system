@@ -1,6 +1,7 @@
 package com.personneltrackingsystem.handler;
 
 import com.personneltrackingsystem.exception.BaseException;
+import com.personneltrackingsystem.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,6 +11,8 @@ import org.springframework.web.context.request.WebRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -45,5 +48,15 @@ public class GlobalExceptionHandler {
         }
 
         return null;
+    }
+
+
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException ex) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("message", ex.getMessage());  // only message!
+
+        return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
 }
