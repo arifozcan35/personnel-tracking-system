@@ -30,6 +30,7 @@ public class GateServiceImpl implements GateService {
     private final GateMapper gateMapper;
 
 
+    // hata fıtlatmalar burada yapılsın dto kullanalaım
     @Override
     public Optional<Gate> findById(Long gateId) {
         return gateRepository.findById(gateId);
@@ -56,21 +57,18 @@ public class GateServiceImpl implements GateService {
     }
 
 
+
     @Override
     @Transactional
     public DtoGate saveOneGate(DtoGateIU gateIU) {
-        if(gateIU.getGateName() != null){
-            Gate pGate = gateMapper.dtoGateIUToGate(gateIU);
 
-            Gate dbGate = gateRepository.save(pGate);
+        Gate pGate = gateMapper.dtoGateIUToGate(gateIU);
 
-            return gateMapper.gateToDtoGate(dbGate);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, messageResolver.toString());
-            throw new BaseException(errorMessage);
-        }
+        Gate dbGate = gateRepository.save(pGate);
+
+        return gateMapper.gateToDtoGate(dbGate);
+
     }
-
 
     @Override
     @Transactional
@@ -129,6 +127,8 @@ public class GateServiceImpl implements GateService {
     }
 
 
+
+    //buradaki kod güncellenecek, 2 elseThrow ve findById yerine başka bir sorgu ile if else lerin hepsi gidecek
     @Override
     public ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId) {
 

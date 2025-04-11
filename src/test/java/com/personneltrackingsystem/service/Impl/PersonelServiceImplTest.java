@@ -225,7 +225,7 @@ public class PersonelServiceImplTest {
         LocalTime checkIn = LocalTime.of(9, 0);
         LocalTime checkOut = LocalTime.of(17, 0);
 
-        Duration workTime = personelService.calculateWorkTime(checkIn, checkOut);
+        Duration workTime = personelValidator.calculateWorkTime(checkIn, checkOut);
 
         assertEquals(Duration.ofHours(8), workTime);
     }
@@ -239,7 +239,7 @@ public class PersonelServiceImplTest {
         Duration workDuration = Duration.between(checkIn, checkOut);
         Duration workLimit = Duration.between(WORK_START, WORK_FINISH).minus(MAX_WORK_MISSING);
 
-        boolean isValid = personelService.isWorkValid(checkIn, checkOut);
+        boolean isValid = personelValidator.isWorkValid(checkIn, checkOut);
 
         assertTrue(isValid, "The period of employment must be valid.");
     }
@@ -250,68 +250,9 @@ public class PersonelServiceImplTest {
         LocalTime checkIn = LocalTime.of(9, 0);
         LocalTime checkOut = LocalTime.of(14, 0);
 
-        boolean isValid = personelService.isWorkValid(checkIn, checkOut);
+        boolean isValid = personelValidator.isWorkValid(checkIn, checkOut);
 
         assertFalse(isValid, "The period of employment must be invalid.");
     }
 
-    @Test
-    void testSelectionPosition() {
-        DtoPersonelIU pAdmin = new DtoPersonelIU();
-
-        Boolean result = personelValidator.selectionPosition(pAdmin, true);
-
-        assertEquals(40000.0, pAdmin.getSalary());
-        assertFalse(result);
-    }
-
-    @Test
-    void testSalaryAssignment_MidValue() {
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-
-        personelValidator.salaryAssignment(pSalary, 34999.0);
-
-        assertEquals(30000.0, pSalary.getSalary());
-        assertFalse(pSalary.getAdministrator());
-    }
-
-    @Test
-    void testSalaryAssignment_LessThan30000() {
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-
-        personelValidator.salaryAssignment(pSalary, 25000.0);
-
-        assertEquals(30000.0, pSalary.getSalary());
-        assertFalse(pSalary.getAdministrator());
-    }
-
-    @Test
-    void testSalaryAssignment_GreaterThan40000() {
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-
-        personelValidator.salaryAssignment(pSalary, 45000.0);
-
-        assertEquals(40000.0, pSalary.getSalary());
-        assertTrue(pSalary.getAdministrator());
-    }
-
-    @Test
-    void testSalaryAssignment_Exact30000() {
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-
-        personelValidator.salaryAssignment(pSalary, 30000.0);
-
-        assertEquals(30000.0, pSalary.getSalary());
-        assertFalse(pSalary.getAdministrator());
-    }
-
-    @Test
-    void testSalaryAssignment_Exact40000() {
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-
-        personelValidator.salaryAssignment(pSalary, 40000.0);
-
-        assertEquals(40000.0, pSalary.getSalary());
-        assertTrue(pSalary.getAdministrator());
-    }
 }

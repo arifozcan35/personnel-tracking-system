@@ -4,12 +4,15 @@ import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Validated
 public interface GateService {
 
     Optional<Gate> findById(Long gateId);
@@ -18,7 +21,7 @@ public interface GateService {
 
     DtoGate getOneGate(Long gateId);
 
-    DtoGate saveOneGate(DtoGateIU gate);
+    DtoGate saveOneGate(@Valid DtoGateIU gate);
 
     DtoGate updateOneGate(Long id, DtoGateIU newGate);
 

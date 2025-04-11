@@ -4,22 +4,21 @@ import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Unit;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.GateMapper;
-import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.UnitService;
-import com.personneltrackingsystem.service.WorkService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Optional;
+
+import static com.personneltrackingsystem.service.Impl.WorkServiceImpl.*;
+import static com.personneltrackingsystem.service.Impl.WorkServiceImpl.PENALTY_AMOUNT;
 
 @Component
 @RequiredArgsConstructor
@@ -27,15 +26,9 @@ public class PersonelValidator {
 
     private final PersonelRepository personelRepository;
 
-    private final WorkService workServiceImpl;
-
     private final UnitService unitServiceImpl;
 
     private final GateService gateServiceImpl;
-
-    private final MessageResolver messageResolver;
-
-    private final PersonelMapper personelMapper;
 
     private final UnitMapper unitMapper;
 
@@ -167,8 +160,32 @@ public class PersonelValidator {
                 pSalary.setAdministrator(true);
                 pSalary.setSalary(40000.0);
             }
+
+            ///düzeltilecek
             throw new ValidationException("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
                     "to the value that is closer to these two values (" + pSalary.getSalary() + ")!");
         }
+    }
+
+
+
+    public Duration calculateWorkTime(LocalTime checkInHour, LocalTime checkOutHour) {
+        return Duration.between(checkInHour, checkOutHour);
+    }
+
+
+    public boolean isWorkValid(LocalTime checkInHour, LocalTime checkOutHour) {
+        Duration workDuration = calculateWorkTime(checkInHour, checkOutHour);
+        Duration workLimit = Duration.between(WORK_START, WORK_FINISH).minus(MAX_WORK_MISSING);
+
+        return workDuration.compareTo(workLimit) >= 0;
+    }
+
+
+    public double calculatePenalty(Duration workPeriod) {
+        if (workPeriod.compareTo(Duration.between(WORK_START, WORK_FINISH)) < 0) {
+            return PENALTY_AMOUNT;
+        }
+        return 0.0;
     }
 }

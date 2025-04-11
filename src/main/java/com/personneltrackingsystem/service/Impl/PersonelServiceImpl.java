@@ -48,10 +48,6 @@ public class PersonelServiceImpl implements PersonelService  {
 
     private final PersonelMapper personelMapper;
 
-    private final UnitMapper unitMapper;
-
-    private final GateMapper gateMapper;
-
     private final PersonelValidator personelValidator;
 
 
@@ -77,7 +73,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = NullPointerException.class, readOnly = true)
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
 
         // Validate unit (mandatory field)
@@ -229,6 +225,7 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
 
+    // silinecek
     @Override
     public DtoPersonel calculateSalaryByPersonelId(Long personelId) {
         return workHoursCalculate(personelId);
@@ -246,16 +243,16 @@ public class PersonelServiceImpl implements PersonelService  {
             LocalTime checkInHour = work.getCheckInTime();
             LocalTime checkOutHour = work.getCheckOutTime();
 
-            Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
+            Duration workTime = personelValidator.calculateWorkTime(checkInHour, checkOutHour);
 
-            boolean valid = isWorkValid(checkInHour, checkOutHour);
+            boolean valid = personelValidator.isWorkValid(checkInHour, checkOutHour);
             optPersonel.get().getWork().setIsWorkValid(valid);
 
             if (Boolean.TRUE.equals(optPersonel.get().getPersonelId())) {
                 optPersonel.get().setSalary(salary);
             } else {
                 if (!valid) {
-                    double penalty = calculatePenalty(workTime);
+                    double penalty = personelValidator.calculatePenalty(workTime);
                     optPersonel.get().setSalary(optPersonel.get().getSalary() - penalty);
                 }
             }
@@ -271,6 +268,7 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
 
+    ///method void olacak ise method güncellensin return değeri olacak ise ona göre güncellenyelim
     @Override
     public void workHoursCalculate2(Personel newPersonel) {
 
@@ -282,18 +280,18 @@ public class PersonelServiceImpl implements PersonelService  {
             LocalTime checkInHour = work.getCheckInTime();
             LocalTime checkOutHour = work.getCheckOutTime();
 
-            Duration workTime = calculateWorkTime(checkInHour, checkOutHour);
+            Duration workTime = personelValidator.calculateWorkTime(checkInHour, checkOutHour);
 
-            boolean valid = isWorkValid(checkInHour, checkOutHour);
+            boolean valid = personelValidator.isWorkValid(checkInHour, checkOutHour);
             newPersonel.getWork().setIsWorkValid(valid);
 
             // if employee is an admin then ignore the pay cut :)
-            if (newPersonel.getAdministrator() != null && newPersonel.getAdministrator() == true) {
+            if (newPersonel.getAdministrator() != null && newPersonel.getAdministrator()) {
                 newPersonel.setSalary(salary);
             } else {
                 // if employee is not an admin then
                 if (!valid) {
-                    double penalty = calculatePenalty(workTime);
+                    double penalty = personelValidator.calculatePenalty(workTime);
                     newPersonel.setSalary(((newPersonel.getSalary()) - (penalty)));
                 }
             }
@@ -308,6 +306,7 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
 
+    // beanutils yerine mapper kullan
     @Override
     public Work getOneWorkofPersonel(Long personelId) {
         Optional<Personel> optPersonel = personelRepository.findById(personelId);
@@ -316,6 +315,7 @@ public class PersonelServiceImpl implements PersonelService  {
             Long workId = optPersonel.get().getWork().getWorkId();
             Optional<Work> dbWorkOpt = workServiceImpl.findById(workId);
 
+            //mapper kullanalım
             if (dbWorkOpt.isPresent()) {
                 Work work = new Work();
                 BeanUtils.copyProperties(dbWorkOpt.get(), work); // dbWorkOpt.get() (source), work (aim)
@@ -329,6 +329,7 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
 
+    //method mapperda olsun
     @Override
     public Map<String, Double> listSalaries(){
         // filling names to list with stream api
@@ -339,27 +340,5 @@ public class PersonelServiceImpl implements PersonelService  {
                 ));
         return salaries;
     }
-
-
-    protected Duration calculateWorkTime(LocalTime checkInHour, LocalTime checkOutHour) {
-        return Duration.between(checkInHour, checkOutHour);
-    }
-
-
-    protected boolean isWorkValid(LocalTime checkInHour, LocalTime checkOutHour) {
-        Duration workDuration = calculateWorkTime(checkInHour, checkOutHour);
-        Duration workLimit = Duration.between(WORK_START, WORK_FINISH).minus(MAX_WORK_MISSING);
-
-        return workDuration.compareTo(workLimit) >= 0;
-    }
-
-
-    protected double calculatePenalty(Duration workPeriod) {
-        if (workPeriod.compareTo(Duration.between(WORK_START, WORK_FINISH)) < 0) {
-            return PENALTY_AMOUNT;
-        }
-        return 0.0;
-    }
-
 
 }

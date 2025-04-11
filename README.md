@@ -16,7 +16,10 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 - Spring Web
 - Lombok
 - MySQL
+- PostgreSQL (with docker)
+- Docker, Docker Compose
 - Postman, Swagger (for testing)
+- Maven
 
 ---
 
