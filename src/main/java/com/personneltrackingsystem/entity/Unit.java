@@ -2,7 +2,6 @@ package com.personneltrackingsystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 public class Unit {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "unit_id")
     private Long unitId;
 
-    @NotBlank
     private String unitName;
+
 
     @OneToMany(mappedBy = "unit")
     @JsonIgnore

@@ -73,35 +73,20 @@ public class PersonelServiceImpl implements PersonelService  {
 
 
     @Override
-    @Transactional(rollbackFor = NullPointerException.class, readOnly = true)
+    @Transactional
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
 
-        // Validate unit (mandatory field)
-        personelValidator.savePersonelCheckUnit(newPersonel);
+        // validate all personel
+        personelValidator.validatePersonelForSave(newPersonel);
 
-        // Validate gate (mandatory field)
-        personelValidator.savePersonelCheckGate(newPersonel);
-
-        // Validate salary and administrator
-        personelValidator.savePersonelCheckAdminAndSalary(newPersonel);
-
-        // Check for existing personnel with the same email
-        personelValidator.savePersonelCheckEmail(newPersonel);
-
-        // Convert DTO to Entity
         Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
 
-        // Handle work hours if provided
+        // calculate working hours if it exists
         if (newPersonel.getWork() != null) {
-            personelValidator.savePersonelCheckWorkingHours(newPersonel);
-
-            // Calculate and set work hours
             workHoursCalculate2(personelToSave);
-            Work savedWork = workServiceImpl.save(newPersonel.getWork());
-            personelToSave.setWork(savedWork);
         }
 
-        // Save the personnel
+        // after modify cascade type, we save the personel at once
         try {
             Personel savedPersonnel = personelRepository.save(personelToSave);
             return new ResponseEntity<>("Personnel registered successfully with ID: " + savedPersonnel.getPersonelId(), HttpStatus.CREATED);
@@ -114,7 +99,7 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     @Transactional
     public ResponseEntity<String> updateOnePersonel(Long id, DtoPersonelIU newPersonel) {
-        // Find the existing personnel
+
         Optional<Personel> optPersonel = personelRepository.findById(id);
 
         if (optPersonel.isEmpty()) {
@@ -123,20 +108,20 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Personel foundPersonel = optPersonel.get();
 
-        // Update name
+        // update name
         if (newPersonel.getName() != null) {
             foundPersonel.setName(newPersonel.getName());
         }
 
-        // Update email with uniqueness check
+        // update email with uniqueness check
         if (newPersonel.getEmail() != null) {
-            // Check if email is already in use by another personnel
+            // check if email is already in use by another personnel
             personelValidator.updatePersonelCheckUniqueEmail(id, newPersonel);
 
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
-        // Update administrator and salary
+        // update administrator posiiton and salary
         if(newPersonel.getAdministrator() != null){
             foundPersonel.setAdministrator(newPersonel.getAdministrator());
 
@@ -151,7 +136,7 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setSalary(pSalary.getSalary());
         }
 
-        // Update Unit
+        // update unit
         if (newPersonel.getUnit() != null) {
             Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
 
@@ -160,7 +145,7 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setUnit(existingUnit.get());
         }
 
-        // Update Gate
+        // update gate
         if (newPersonel.getGate() != null) {
             Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
 
@@ -169,26 +154,26 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setGate(existingGate.get());
         }
 
-        // Update Working Hours
+        // update working hours
         if (newPersonel.getWork() != null) {
             LocalTime entry = newPersonel.getWork().getCheckInTime();
             LocalTime exit = newPersonel.getWork().getCheckOutTime();
 
-            // Validate check-in and check-out times
+            // validate check-in and check-out times
             personelValidator.updatePersonelCheckEntryAndExit(entry, exit);
 
-            // If personnel already has a work record, update the existing one
+            // if personnel already has a work record, update the existing one
             Work existingWork = foundPersonel.getWork();
             if (existingWork != null) {
-                // Update existing work record
+                // update existing work record
                 existingWork.setCheckInTime(entry);
                 existingWork.setCheckOutTime(exit);
 
-                // Save the updated work record
+                // save the updated work record
                 workHoursCalculate2(foundPersonel);
                 workServiceImpl.save(existingWork);
             } else {
-                // If no existing work record, create a new one
+                // if no existing work record, create a new one
                 Work newWork = newPersonel.getWork();
                 workHoursCalculate2(foundPersonel);
                 Work savedWork = workServiceImpl.save(newWork);
@@ -197,7 +182,6 @@ public class PersonelServiceImpl implements PersonelService  {
         }
 
         try {
-            // Save the updated personnel
             Personel updatedPersonnel = personelRepository.save(foundPersonel);
             return new ResponseEntity<>("Personnel updated successfully with ID: " + updatedPersonnel.getPersonelId(), HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
@@ -211,24 +195,16 @@ public class PersonelServiceImpl implements PersonelService  {
     public void deleteOnePersonel(Long id) {
         Optional<Personel> optPersonel = personelRepository.findById(id);
         if (optPersonel.isPresent()) {
-            // Delete the shift record first
+            // delete the shift record first
             if (optPersonel.get().getWork() != null) {
                 workServiceImpl.deleteById(optPersonel.get().getWork().getWorkId());
             }
-            // Then delete the personnel record
+            // then delete the personnel record
             personelRepository.deleteById(id);
 
-            System.out.println("The personnel was deleted successfully.");
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
-    }
-
-
-    // silinecek
-    @Override
-    public DtoPersonel calculateSalaryByPersonelId(Long personelId) {
-        return workHoursCalculate(personelId);
     }
 
 
@@ -268,7 +244,6 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
 
-    ///method void olacak ise method güncellensin return değeri olacak ise ona göre güncellenyelim
     @Override
     public void workHoursCalculate2(Personel newPersonel) {
 
@@ -295,18 +270,10 @@ public class PersonelServiceImpl implements PersonelService  {
                     newPersonel.setSalary(((newPersonel.getSalary()) - (penalty)));
                 }
             }
-
-            // Personel realPersonel = personelMapper.dtoPersonelIUToPersonel(newPersonel);
-
-            Personel dbPersonel = personelRepository.save(newPersonel);
-
-            personelMapper.personelToDtoPersonelIU(dbPersonel);
         }
-
     }
 
 
-    // beanutils yerine mapper kullan
     @Override
     public Work getOneWorkofPersonel(Long personelId) {
         Optional<Personel> optPersonel = personelRepository.findById(personelId);
@@ -315,11 +282,8 @@ public class PersonelServiceImpl implements PersonelService  {
             Long workId = optPersonel.get().getWork().getWorkId();
             Optional<Work> dbWorkOpt = workServiceImpl.findById(workId);
 
-            //mapper kullanalım
             if (dbWorkOpt.isPresent()) {
-                Work work = new Work();
-                BeanUtils.copyProperties(dbWorkOpt.get(), work); // dbWorkOpt.get() (source), work (aim)
-                return work;
+                return personelMapper.DbWorktoWork(dbWorkOpt);
             } else {
                 throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, "Work with ID: " + workId));
             }
@@ -329,16 +293,9 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
 
-    //method mapperda olsun
     @Override
-    public Map<String, Double> listSalaries(){
-        // filling names to list with stream api
-        Map<String, Double> salaries = personelRepository.findAll().stream()
-                .collect(Collectors.toMap(
-                        person -> person.getEmail(),
-                        person -> person.getSalary()
-                ));
-        return salaries;
+    public Map<String, Double> listSalaries() {
+        List<Personel> allPersonels = personelRepository.findAll();
+        return personelMapper.personelsToSalaryMap(allPersonels);
     }
-
 }

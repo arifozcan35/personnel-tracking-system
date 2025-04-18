@@ -53,7 +53,7 @@ public class PersonelControllerImpl implements PersonelController {
 
     @Override
     public DtoPersonel seeSalary(Long personelId) {
-        return personelServiceImpl.calculateSalaryByPersonelId(personelId);
+        return personelServiceImpl.workHoursCalculate(personelId);
     }
 
 

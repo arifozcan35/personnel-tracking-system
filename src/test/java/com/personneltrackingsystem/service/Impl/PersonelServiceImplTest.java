@@ -204,7 +204,7 @@ public class PersonelServiceImplTest {
 
         when(personelRepository.findById(1L)).thenReturn(Optional.of(mockPersonel));
 
-        DtoPersonel result = personelService.calculateSalaryByPersonelId(1L);
+        DtoPersonel result = personelService.workHoursCalculate(1L);
 
         assertNotNull(result);
         verify(personelRepository).findById(1L);

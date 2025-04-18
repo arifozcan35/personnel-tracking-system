@@ -18,7 +18,6 @@ public class DtoGateIU {
     @Schema(description = "Unique identity of gate", example = "2")
     private Long gateId;
 
-    @NotBlank(message = "This field can not be null")
     @Schema(description = "The name of gate", example = "3. Floor")
     private String gateName;
 

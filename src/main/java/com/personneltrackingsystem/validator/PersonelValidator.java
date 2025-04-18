@@ -30,41 +30,29 @@ public class PersonelValidator {
 
     private final GateService gateServiceImpl;
 
-    private final UnitMapper unitMapper;
 
-    private final GateMapper gateMapper;
-
-
-    public void savePersonelCheckUnit(DtoPersonelIU newPersonel){
-
+    public void validatePersonelForSave(DtoPersonelIU newPersonel) {
+        // check unit
         if (newPersonel.getUnit() == null || newPersonel.getUnit().getUnitId() == null) {
             throw new ValidationException("Could not save personnel! Please enter personnel unit.");
         } else {
             Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
             if (existingUnit.isEmpty()) {
                 throw new ValidationException("You have not selected a suitable unit!");
-            } else {
-                newPersonel.setUnit(unitMapper.unitToDtoUnit(existingUnit.get()));
             }
         }
-    }
 
-
-    public void savePersonelCheckGate(DtoPersonelIU newPersonel){
+        // check gate
         if (newPersonel.getGate() == null || newPersonel.getGate().getGateId() == null) {
             throw new ValidationException("Personnel registration failed! Please enter the gate.");
         } else {
             Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
             if (existingGate.isEmpty()) {
                 throw new ValidationException("The specified gate could not be found!");
-            } else {
-                newPersonel.setGate(gateMapper.gateToDtoGate(existingGate.get()));
             }
         }
-    }
 
-
-    public void savePersonelCheckAdminAndSalary(DtoPersonelIU newPersonel){
+        // check admin position and salary
         if (newPersonel.getAdministrator() == null && newPersonel.getSalary() == null) {
             throw new ValidationException("Could not save personnel! At least one of the personnel's manager or salary values must be selected.");
         } else {
@@ -79,23 +67,21 @@ public class PersonelValidator {
                 newPersonel.setSalary(pSalary.getSalary());
             }
         }
-    }
 
-
-    public  void savePersonelCheckEmail(DtoPersonelIU newPersonel){
+        // check email
         Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
         if (existingPersonnel.isPresent()) {
             throw new ValidationException("Personnel with this email already exists!");
         }
-    }
 
+        // check working hours
+        if (newPersonel.getWork() != null) {
+            LocalTime checkIn = newPersonel.getWork().getCheckInTime();
+            LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
 
-    public void savePersonelCheckWorkingHours(DtoPersonelIU newPersonel){
-        LocalTime checkIn = newPersonel.getWork().getCheckInTime();
-        LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
-
-        if (checkIn == null || checkOut == null || checkOut.isBefore(checkIn)) {
-            throw new ValidationException("Invalid check-in/check-out time!");
+            if (checkIn == null || checkOut == null || checkOut.isBefore(checkIn)) {
+                throw new ValidationException("Invalid check-in/check-out time!");
+            }
         }
     }
 
@@ -161,10 +147,9 @@ public class PersonelValidator {
                 pSalary.setSalary(40000.0);
             }
 
-            ///düzeltilecek
-            throw new ValidationException("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
-                    "to the value that is closer to these two values (" + pSalary.getSalary() + ")!");
         }
+        throw new ValidationException("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
+                "to the value that is closer to these two values (" + pSalary.getSalary() + ")!");
     }
 
 

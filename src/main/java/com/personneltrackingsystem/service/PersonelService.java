@@ -28,7 +28,6 @@ public interface PersonelService {
 
     void deleteOnePersonel(Long id);
 
-    DtoPersonel calculateSalaryByPersonelId(Long personelId);
 
     DtoPersonel workHoursCalculate(Long personelId);
 

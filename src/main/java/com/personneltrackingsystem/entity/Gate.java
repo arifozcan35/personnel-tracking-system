@@ -2,7 +2,6 @@ package com.personneltrackingsystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,11 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 public class Gate {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "gate_id")
     private Long gateId;
 
-    @NotBlank
     private String gateName;
 
 

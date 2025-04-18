@@ -3,11 +3,14 @@ package com.personneltrackingsystem.mapper;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Work;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface PersonelMapper {
@@ -23,4 +26,19 @@ public interface PersonelMapper {
     Personel dtoPersonelIUToPersonel(DtoPersonelIU personelIU);
 
 
+    // converts personnel list to Map<String, Double>
+    default Map<String, Double> personelsToSalaryMap(List<Personel> personels) {
+        if (personels == null) {
+            return Collections.emptyMap();
+        }
+
+        return personels.stream()
+                .collect(Collectors.toMap(
+                        Personel::getEmail,
+                        Personel::getSalary
+                ));
+    }
+
+
+    Work DbWorktoWork(Optional<Work> dbWorkOpt);
 }

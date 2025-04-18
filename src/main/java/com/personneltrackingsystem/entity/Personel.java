@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 @Entity
 @Table(name = "personel", schema = "dbpersonel")
@@ -17,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 public class Personel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "personel_id")
     private Long personelId;
 
@@ -31,11 +29,11 @@ public class Personel {
     private Double salary;
 
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "fk_unit_id")
     private Unit unit;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "fk_gate_id")
     private Gate gate;
 
