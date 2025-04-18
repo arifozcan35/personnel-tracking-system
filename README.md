@@ -82,6 +82,12 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 
 ## 🛠 Setup and Installation
 
+./mvnw clean package -DskipTests
+
+docker-compose build springboot-app
+
+docker-compose up -d
+
 - *Clone the repository:*
 ```bash
 git clone https://github.com/yourusername/personnel-tracking-system.git
