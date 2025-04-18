@@ -15,7 +15,7 @@ import java.util.Set;
 @Validated
 public interface GateService {
 
-    Optional<Gate> findById(Long gateId);
+    DtoGate findById(Long gateId);
 
     List<DtoGate> getAllGates();
 

@@ -15,7 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 public class Gate {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGen2")
+    @SequenceGenerator(name = "mySeqGen2", allocationSize = 1)
     @Column(name = "gate_id")
     private Long gateId;
 

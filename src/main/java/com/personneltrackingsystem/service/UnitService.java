@@ -11,7 +11,7 @@ import java.util.Set;
 
 public interface UnitService {
 
-    Optional<Unit> findById(Long unitId);
+    DtoUnit findById(Long unitId);
 
     List<DtoUnit> getAllUnits();
 

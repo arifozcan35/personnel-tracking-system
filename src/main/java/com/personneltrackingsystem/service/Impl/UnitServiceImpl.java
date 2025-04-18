@@ -2,6 +2,7 @@ package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
+import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.BaseException;
@@ -10,6 +11,7 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.service.UnitService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +30,10 @@ public class UnitServiceImpl implements UnitService {
     // Solid example : article 1 (Single Responsibility Principle)
 
     @Override
-    public Optional<Unit> findById(Long unitId) {
-        return unitRepository.findById(unitId);
+    public DtoUnit findById(Long unitId) {
+        Unit unit = unitRepository.findById(unitId)
+                .orElseThrow(() -> new EntityNotFoundException("Unit not found with id: " + unitId));
+        return unitMapper.unitToDtoUnit(unit);
     }
 
     @Override

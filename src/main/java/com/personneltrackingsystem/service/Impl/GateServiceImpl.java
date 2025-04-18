@@ -11,6 +11,7 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +31,10 @@ public class GateServiceImpl implements GateService {
     private final GateMapper gateMapper;
 
 
-    // hata fıtlatmalar burada yapılsın dto kullanalaım
-    @Override
-    public Optional<Gate> findById(Long gateId) {
-        return gateRepository.findById(gateId);
+    public DtoGate findById(Long gateId) {
+        Gate gate = gateRepository.findById(gateId)
+                .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
+        return gateMapper.gateToDtoGate(gate);
     }
 
     @Override

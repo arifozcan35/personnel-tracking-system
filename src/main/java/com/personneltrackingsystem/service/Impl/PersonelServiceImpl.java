@@ -81,7 +81,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
 
-        // calculate working hours if it exists
+        // calculate working hours
         if (newPersonel.getWork() != null) {
             workHoursCalculate2(personelToSave);
         }
@@ -121,7 +121,7 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
-        // update administrator posiiton and salary
+        // update administrator position and salary
         if(newPersonel.getAdministrator() != null){
             foundPersonel.setAdministrator(newPersonel.getAdministrator());
 

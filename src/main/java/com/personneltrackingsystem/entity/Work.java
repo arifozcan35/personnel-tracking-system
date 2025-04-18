@@ -14,7 +14,8 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class Work {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGen4")
+    @SequenceGenerator(name = "mySeqGen4", allocationSize = 1)
     @Column(name = "work_id")
     private Long workId;
 
