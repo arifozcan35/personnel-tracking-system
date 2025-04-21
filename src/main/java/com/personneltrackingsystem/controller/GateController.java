@@ -22,7 +22,7 @@ public interface GateController {
     DtoGate getOneGate(@PathVariable Long gateId);
 
     @PostMapping
-    DtoGate createGate(@RequestBody DtoGateIU newGate);
+    DtoGate createGate(@RequestBody DtoGate newGate);
 
     @PutMapping("/{gateId}")
     DtoGate updateGate(@PathVariable Long gateId, @RequestBody DtoGateIU newGate);

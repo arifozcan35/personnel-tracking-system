@@ -15,4 +15,7 @@ public interface UnitRepository extends JpaRepository<Unit, Long> {
     @Query("UPDATE Personel p SET p.unit = NULL WHERE p.unit = :unit")
     void detachPersonelFromUnit(@Param("unit") Unit unit);
 
+    boolean existsByUnitName(String existingUnitName);
+
+    boolean existsByUnitId(Long existingUnitID);
 }

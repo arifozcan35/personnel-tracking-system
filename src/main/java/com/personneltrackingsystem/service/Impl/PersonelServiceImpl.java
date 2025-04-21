@@ -1,8 +1,6 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.*;
-import com.personneltrackingsystem.entity.Unit;
-import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.*;
@@ -16,7 +14,6 @@ import com.personneltrackingsystem.service.UnitService;
 import com.personneltrackingsystem.service.WorkService;
 import com.personneltrackingsystem.validator.PersonelValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +25,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.personneltrackingsystem.service.Impl.WorkServiceImpl.*;
 
 @RequiredArgsConstructor
 @Service
@@ -47,6 +41,10 @@ public class PersonelServiceImpl implements PersonelService  {
     private final MessageResolver messageResolver;
 
     private final PersonelMapper personelMapper;
+
+    private final UnitMapper unitMapper;
+
+    private final GateMapper gateMapper;
 
     private final PersonelValidator personelValidator;
 
@@ -138,20 +136,24 @@ public class PersonelServiceImpl implements PersonelService  {
 
         // update unit
         if (newPersonel.getUnit() != null) {
-            Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
+            Optional<DtoUnitIU> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
 
-            personelValidator.updatePersonelCheckUnit(existingUnit);
+            if (existingUnit.isEmpty()) {
+                return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.NOT_FOUND);
+            }
 
-            foundPersonel.setUnit(existingUnit.get());
+            foundPersonel.setUnit(unitMapper.dtoUnitIUToUnit(existingUnit.get()));
         }
 
         // update gate
         if (newPersonel.getGate() != null) {
-            Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
+            Optional<DtoGateIU> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
 
-            personelValidator.updatePersonelCheckGate(existingGate);
+            if (existingGate.isEmpty()) {
+                return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.NOT_FOUND);
+            }
 
-            foundPersonel.setGate(existingGate.get());
+            foundPersonel.setGate(gateMapper.dtoGateIUToGate(existingGate.get()));
         }
 
         // update working hours
@@ -214,7 +216,6 @@ public class PersonelServiceImpl implements PersonelService  {
 
         if(optPersonel.isPresent() && optPersonel.get().getWork() != null){
             Work work = optPersonel.get().getWork();
-            Double salary = optPersonel.get().getSalary();
 
             LocalTime checkInHour = work.getCheckInTime();
             LocalTime checkOutHour = work.getCheckOutTime();
@@ -224,13 +225,9 @@ public class PersonelServiceImpl implements PersonelService  {
             boolean valid = personelValidator.isWorkValid(checkInHour, checkOutHour);
             optPersonel.get().getWork().setIsWorkValid(valid);
 
-            if (Boolean.TRUE.equals(optPersonel.get().getPersonelId())) {
-                optPersonel.get().setSalary(salary);
-            } else {
-                if (!valid) {
-                    double penalty = personelValidator.calculatePenalty(workTime);
-                    optPersonel.get().setSalary(optPersonel.get().getSalary() - penalty);
-                }
+            if (!valid) {
+                double penalty = personelValidator.calculatePenalty(workTime);
+                optPersonel.get().setSalary(optPersonel.get().getSalary() - penalty);
             }
 
             personelRepository.save(optPersonel.get());

@@ -21,4 +21,9 @@ public interface GateRepository extends JpaRepository<Gate, Long> {
     @Modifying
     @Query("UPDATE Personel p SET p.gate = NULL WHERE p.gate.gateId = :gateId")
     void updatePersonelGateReferences(@Param("gateId") Long gateId);
+
+    boolean existsByGateName(String existingGateName);
+
+    boolean existsByGateId(Long existingGateID);
+
 }

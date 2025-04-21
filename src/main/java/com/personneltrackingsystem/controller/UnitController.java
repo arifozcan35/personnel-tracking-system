@@ -21,7 +21,7 @@ public interface UnitController {
     DtoUnit getOneUnit(@PathVariable Long unitId);
 
     @PostMapping
-    DtoUnit createUnit(@RequestBody DtoUnitIU newUnit);
+    DtoUnit createUnit(@RequestBody DtoUnit newUnit);
 
     @PutMapping("/{unitId}")
     DtoUnit updateUnit(@PathVariable Long unitId, @RequestBody DtoUnitIU newUnit);

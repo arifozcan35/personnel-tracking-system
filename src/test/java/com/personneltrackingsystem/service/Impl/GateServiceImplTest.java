@@ -8,6 +8,8 @@ import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
+import com.personneltrackingsystem.validator.GateValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,27 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 public class GateServiceImplTest {
 
@@ -35,210 +58,279 @@ public class GateServiceImplTest {
     @Mock
     private GateMapper gateMapper;
 
+    @Mock
+    private GateValidator gateValidator;
+
     @InjectMocks
     private GateServiceImpl gateService;
 
-    private Gate mockGate;
-    private DtoGate mockDtoGate;
-    private DtoGateIU mockDtoGateIU;
-    private Personel mockPersonel;
+    private Gate gate;
+    private DtoGate dtoGate;
+    private DtoGateIU dtoGateIU;
+    private List<Gate> gateList;
+    private Set<Personel> personelSet;
+    private Personel personel;
 
     @BeforeEach
     void setUp() {
-        mockGate = new Gate();
-        mockGate.setGateId(1L);
-        mockGate.setGateName("Main Gate");
+        // Initialize test data
+        gate = new Gate();
+        gate.setGateId(1L);
+        gate.setGateName("Test Gate");
 
-        mockDtoGate = new DtoGate();
-        mockDtoGate.setGateId(1L);
-        mockDtoGate.setGateName("Main Gate");
+        dtoGate = new DtoGate();
+        dtoGate.setGateId(1L);
+        dtoGate.setGateName("Test Gate");
 
-        mockDtoGateIU = new DtoGateIU();
-        mockDtoGateIU.setGateName("Main Gate");
+        dtoGateIU = new DtoGateIU();
+        dtoGateIU.setGateName("Updated Gate Name");
 
-        mockPersonel = new Personel();
-        mockPersonel.setPersonelId(1L);
-        mockPersonel.setName("Test Personnel");
+        gateList = new ArrayList<>();
+        gateList.add(gate);
+
+        personelSet = new HashSet<>();
+        personel = new Personel();
+        personel.getGate().setGateId(1L);
+        Gate personelGate = new Gate();
+        personelGate.setGateId(1L);
+        personel.setGate(personelGate);
+        personelSet.add(personel);
+        gate.setPersonels((List<Personel>) personelSet);
     }
 
     @Test
-    void testFindById_Exists() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(mockGate));
+    void findById_WhenGateExists_ShouldReturnDtoGateIU() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+        when(gateMapper.gateToDtoGateIU(any(Gate.class))).thenReturn(dtoGateIU);
 
-        Optional<Gate> result = gateService.findById(1L);
+        // Act
+        Optional<DtoGateIU> result = gateService.findById(1L);
 
+        // Assert
         assertTrue(result.isPresent());
-        assertEquals(mockGate, result.get());
+        assertEquals(dtoGateIU, result.get());
         verify(gateRepository).findById(1L);
+        verify(gateMapper).gateToDtoGateIU(gate);
     }
 
     @Test
-    void testGetAllGates() {
-        List<Gate> gates = Arrays.asList(mockGate);
-        List<DtoGate> dtoGates = Arrays.asList(mockDtoGate);
+    void findById_WhenGateDoesNotExist_ShouldThrowEntityNotFoundException() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        when(gateRepository.findAll()).thenReturn(gates);
-        when(gateMapper.gatesToDtoGates(gates)).thenReturn(dtoGates);
+        // Act & Assert
+        assertThrows(EntityNotFoundException.class, () -> gateService.findById(1L));
+        verify(gateRepository).findById(1L);
+        verify(gateMapper, never()).gateToDtoGateIU(any(Gate.class));
+    }
 
+    @Test
+    void getAllGates_ShouldReturnAllGates() {
+        // Arrange
+        when(gateRepository.findAll()).thenReturn(gateList);
+        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
+
+        // Act
         List<DtoGate> result = gateService.getAllGates();
 
-        assertEquals(dtoGates, result);
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(dtoGate, result.get(0));
         verify(gateRepository).findAll();
-        verify(gateMapper).gatesToDtoGates(gates);
+        verify(gateMapper).gateToDtoGate(gate);
     }
 
     @Test
-    void testGetOneGate_Exists() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(mockGate));
-        when(gateMapper.gateToDtoGate(mockGate)).thenReturn(mockDtoGate);
+    void getOneGate_WhenGateExists_ShouldReturnGate() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
 
+        // Act
         DtoGate result = gateService.getOneGate(1L);
 
-        assertEquals(mockDtoGate, result);
+        // Assert
+        assertNotNull(result);
+        assertEquals(dtoGate, result);
         verify(gateRepository).findById(1L);
-        verify(gateMapper).gateToDtoGate(mockGate);
+        verify(gateMapper).gateToDtoGate(gate);
     }
 
     @Test
-    void testGetOneGate_NotExists() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Error Message");
+    void getOneGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(messageResolver.toString()).thenReturn("Gate not found");
 
-        assertThrows(BaseException.class, () -> gateService.getOneGate(1L));
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.getOneGate(1L));
         verify(gateRepository).findById(1L);
+        verify(messageResolver).toString();
+        verify(gateMapper, never()).gateToDtoGate(any(Gate.class));
     }
 
     @Test
-    void testSaveOneGate_Success() {
-        when(gateMapper.dtoGateIUToGate(mockDtoGateIU)).thenReturn(mockGate);
-        when(gateRepository.save(mockGate)).thenReturn(mockGate);
-        when(gateMapper.gateToDtoGate(mockGate)).thenReturn(mockDtoGate);
+    void saveOneGate_ShouldSaveAndReturnGate() {
+        // Arrange
+        when(gateMapper.dtoGateToGate(any(DtoGate.class))).thenReturn(gate);
+        when(gateRepository.save(any(Gate.class))).thenReturn(gate);
+        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
+        doNothing().when(gateValidator).checkIfGateAlreadyExists(any(DtoGate.class));
 
-        DtoGate result = gateService.saveOneGate(mockDtoGateIU);
+        // Act
+        DtoGate result = gateService.saveOneGate(dtoGate);
 
-        assertEquals(mockDtoGate, result);
-        verify(gateRepository).save(mockGate);
+        // Assert
+        assertNotNull(result);
+        assertEquals(dtoGate, result);
+        verify(gateValidator).checkIfGateAlreadyExists(dtoGate);
+        verify(gateMapper).dtoGateToGate(dtoGate);
+        verify(gateRepository).save(gate);
+        verify(gateMapper).gateToDtoGate(gate);
     }
 
     @Test
-    void testSaveOneGate_MissingName() {
-        mockDtoGateIU.setGateName(null);
-        when(messageResolver.toString()).thenReturn("Error Message");
+    void updateOneGate_WhenGateExists_ShouldUpdateAndReturnGate() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+        when(gateRepository.save(any(Gate.class))).thenReturn(gate);
+        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
 
-        assertThrows(BaseException.class, () -> gateService.saveOneGate(mockDtoGateIU));
-    }
+        // Act
+        DtoGate result = gateService.updateOneGate(1L, dtoGateIU);
 
-    @Test
-    void testUpdateOneGate_Success() {
-        Gate existingGate = new Gate();
-        existingGate.setGateId(1L);
-        existingGate.setGateName("Old Gate Name");
-
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(existingGate));
-        when(gateRepository.save(existingGate)).thenReturn(existingGate);
-        when(gateMapper.gateToDtoGate(existingGate)).thenReturn(mockDtoGate);
-
-        DtoGate result = gateService.updateOneGate(1L, mockDtoGateIU);
-
-        assertEquals(mockDtoGate, result);
-        assertEquals("Main Gate", existingGate.getGateName());
+        // Assert
+        assertNotNull(result);
+        assertEquals(dtoGate, result);
         verify(gateRepository).findById(1L);
-        verify(gateRepository).save(existingGate);
+        verify(gateRepository).save(gate);
+        verify(gateMapper).gateToDtoGate(gate);
+        assertEquals(dtoGateIU.getGateName(), gate.getGateName());
     }
 
     @Test
-    void testUpdateOneGate_NotExists() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Error Message");
+    void updateOneGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(messageResolver.toString()).thenReturn("Gate not found");
 
-        assertThrows(BaseException.class, () -> gateService.updateOneGate(1L, mockDtoGateIU));
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.updateOneGate(1L, dtoGateIU));
         verify(gateRepository).findById(1L);
+        verify(messageResolver).toString();
+        verify(gateRepository, never()).save(any(Gate.class));
+        verify(gateMapper, never()).gateToDtoGate(any(Gate.class));
     }
 
     @Test
-    void testDeleteOneGate_Success() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(mockGate));
+    void deleteOneGate_WhenGateExists_ShouldDeleteGate() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+        doNothing().when(gateRepository).updatePersonelGateReferences(anyLong());
+        doNothing().when(gateRepository).delete(any(Gate.class));
 
+        // Act
         gateService.deleteOneGate(1L);
 
-        verify(gateRepository).updatePersonelGateReferences(1L);
-        verify(gateRepository).delete(mockGate);
-    }
-
-    @Test
-    void testDeleteOneGate_NotExists() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Error Message");
-
-        assertThrows(BaseException.class, () -> gateService.deleteOneGate(1L));
+        // Assert
         verify(gateRepository).findById(1L);
+        verify(gateRepository).updatePersonelGateReferences(1L);
+        verify(gateRepository).delete(gate);
     }
 
     @Test
-    void testGetPersonelsByGateId_Exists() {
-        List<Personel> mockPersonels = new ArrayList<>();
-        mockPersonels.add(mockPersonel);
+    void deleteOneGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(messageResolver.toString()).thenReturn("Gate not found");
 
-        mockGate.setPersonels(mockPersonels);
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.deleteOneGate(1L));
+        verify(gateRepository).findById(1L);
+        verify(messageResolver).toString();
+        verify(gateRepository, never()).updatePersonelGateReferences(anyLong());
+        verify(gateRepository, never()).delete(any(Gate.class));
+    }
 
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(mockGate));
+    @Test
+    void getPersonelsByGateId_WhenGateExists_ShouldReturnPersonels() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
 
+        // Act
         Set<Personel> result = gateService.getPersonelsByGateId(1L);
 
-        assertFalse(result.isEmpty());
+        // Assert
+        assertNotNull(result);
         assertEquals(1, result.size());
         verify(gateRepository).findById(1L);
     }
 
     @Test
-    void testGetPersonelsByGateId_NotExists() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Error Message");
+    void getPersonelsByGateId_WhenGateDoesNotExist_ShouldThrowBaseException() {
+        // Arrange
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(messageResolver.toString()).thenReturn("Gate not found");
 
-        assertThrows(BaseException.class, () -> gateService.getPersonelsByGateId(1L));
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.getPersonelsByGateId(1L));
+        verify(gateRepository).findById(1L);
+        verify(messageResolver).toString();
+    }
+
+    @Test
+    void passGate_WhenPersonelAndGateExistAndPersonelAuthorized_ShouldReturnSuccess() {
+        // Arrange
+        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.of(personel));
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+
+        // Act
+        ResponseEntity<String> result = gateService.passGate(1L, 1L);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertEquals("Personnel entered the gate!", result.getBody());
+        verify(gateRepository).findPrsnlById(1L);
         verify(gateRepository).findById(1L);
     }
 
     @Test
-    void testPassGate_Successful() {
-        when(gateRepository.findPrsnlById(1L)).thenReturn(Optional.of(mockPersonel));
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(mockGate));
+    void passGate_WhenPersonelDoesNotExist_ShouldThrowBaseException() {
+        // Arrange
+        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<String> result = gateService.passGate(1L, 1L);
-
-        assertEquals(HttpStatus.CREATED, result.getStatusCode());
-        assertEquals("Personnel entered the gate!", result.getBody());
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.passGate(1L, 1L));
+        verify(gateRepository).findPrsnlById(1L);
+        verify(gateRepository, never()).findById(anyLong());
     }
 
     @Test
-    void testPassGate_PersonnelNotFound() {
-        when(gateRepository.findPrsnlById(1L)).thenReturn(Optional.empty());
+    void passGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
+        // Arrange
+        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.of(personel));
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<String> result = gateService.passGate(1L, 1L);
-
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertEquals("This personnel is not available! Entry from outside the institution is prohibited!", result.getBody());
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.passGate(1L, 1L));
+        verify(gateRepository).findPrsnlById(1L);
+        verify(gateRepository).findById(1L);
     }
 
     @Test
-    void testPassGate_GateNotFound() {
-        when(gateRepository.findPrsnlById(1L)).thenReturn(Optional.of(mockPersonel));
-        when(gateRepository.findById(1L)).thenReturn(Optional.empty());
+    void passGate_WhenPersonelNotAuthorized_ShouldThrowBaseException() {
+        // Arrange
+        Gate differentGate = new Gate();
+        differentGate.setGateId(2L);
 
-        ResponseEntity<String> result = gateService.passGate(1L, 1L);
+        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.of(personel));
+        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(differentGate));
 
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertEquals("The gate you want to enter is not available!", result.getBody());
-    }
-
-    @Test
-    void testPassGate_UnauthorizedEntry() {
-        when(gateRepository.findPrsnlById(1L)).thenReturn(Optional.of(mockPersonel));
-        when(gateRepository.findById(2L)).thenReturn(Optional.of(new Gate()));
-
-        ResponseEntity<String> result = gateService.passGate(2L, 1L);
-
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertEquals("Personnel is not authorized to enter this gate!", result.getBody());
+        // Act & Assert
+        BaseException exception = assertThrows(BaseException.class, () -> gateService.passGate(2L, 1L));
+        verify(gateRepository).findPrsnlById(1L);
+        verify(gateRepository).findById(2L);
     }
 }

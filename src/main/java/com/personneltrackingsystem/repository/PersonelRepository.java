@@ -14,8 +14,6 @@ import java.util.Optional;
 
 @Repository
 public interface PersonelRepository extends JpaRepository<Personel, Long> {
-    List<Personel> findByUnit(Unit unit);
-    List<Personel> findByGate(Gate gate);
 
     Optional<Personel> findByEmail(String email);
 

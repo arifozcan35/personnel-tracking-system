@@ -1,12 +1,10 @@
 package com.personneltrackingsystem.validator;
 
+import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
-import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.ValidationException;
-import com.personneltrackingsystem.mapper.GateMapper;
-import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.UnitService;
@@ -36,7 +34,7 @@ public class PersonelValidator {
         if (newPersonel.getUnit() == null || newPersonel.getUnit().getUnitId() == null) {
             throw new ValidationException("Could not save personnel! Please enter personnel unit.");
         } else {
-            Optional<Unit> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
+            Optional<DtoUnitIU> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
             if (existingUnit.isEmpty()) {
                 throw new ValidationException("You have not selected a suitable unit!");
             }
@@ -46,7 +44,7 @@ public class PersonelValidator {
         if (newPersonel.getGate() == null || newPersonel.getGate().getGateId() == null) {
             throw new ValidationException("Personnel registration failed! Please enter the gate.");
         } else {
-            Optional<Gate> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
+            Optional<DtoGateIU> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
             if (existingGate.isEmpty()) {
                 throw new ValidationException("The specified gate could not be found!");
             }
@@ -90,20 +88,6 @@ public class PersonelValidator {
         Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
         if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
             throw new ValidationException("Email is already in use by another personnel!");
-        }
-    }
-
-
-    public  void updatePersonelCheckUnit(Optional<Unit> existingUnit){
-        if (existingUnit.isEmpty()) {
-            throw new ValidationException("You have not selected a suitable unit!");
-        }
-    }
-
-
-    public  void updatePersonelCheckGate(Optional<Gate> existingGate){
-        if (existingGate.isEmpty()) {
-            throw new ValidationException("The specified gate could not be found!");
         }
     }
 

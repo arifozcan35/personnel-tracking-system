@@ -6,7 +6,6 @@ import com.personneltrackingsystem.entity.Gate;
 import org.mapstruct.Mapper;
 
 import java.util.List;
-import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface GateMapper {
@@ -16,5 +15,9 @@ public interface GateMapper {
     List<DtoGate> gatesToDtoGates(List<Gate> gateList);
 
     Gate dtoGateIUToGate(DtoGateIU dtoGateIU);
+
+    DtoGateIU gateToDtoGateIU(Gate gate);
+
+    Gate dtoGateToGate(DtoGate dtoGate);
 
 }

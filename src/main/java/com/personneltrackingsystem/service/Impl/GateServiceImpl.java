@@ -11,6 +11,7 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
+import com.personneltrackingsystem.validator.GateValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,19 +31,25 @@ public class GateServiceImpl implements GateService {
 
     private final GateMapper gateMapper;
 
+    private final GateValidator gateValidator;
 
-    public DtoGate findById(Long gateId) {
+    @Override
+    public Optional<DtoGateIU> findById(Long gateId) {
         Gate gate = gateRepository.findById(gateId)
                 .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
-        return gateMapper.gateToDtoGate(gate);
+        return Optional.ofNullable(gateMapper.gateToDtoGateIU(gate));
     }
 
     @Override
     public List<DtoGate> getAllGates(){
-
         List<Gate> gateList =  gateRepository.findAll();
+        List<DtoGate> newGateList = new ArrayList<>();
 
-        return gateMapper.gatesToDtoGates(gateList);
+        for(Gate allGates : gateList){
+            newGateList.add(gateMapper.gateToDtoGate(allGates));
+        }
+
+        return newGateList;
     }
 
 
@@ -61,10 +68,11 @@ public class GateServiceImpl implements GateService {
 
     @Override
     @Transactional
-    public DtoGate saveOneGate(DtoGateIU gateIU) {
+    public DtoGate saveOneGate(DtoGate gate) {
 
-        Gate pGate = gateMapper.dtoGateIUToGate(gateIU);
+        gateValidator.checkIfGateAlreadyExists(gate);
 
+        Gate pGate = gateMapper.dtoGateToGate(gate);
         Gate dbGate = gateRepository.save(pGate);
 
         return gateMapper.gateToDtoGate(dbGate);
@@ -129,28 +137,26 @@ public class GateServiceImpl implements GateService {
 
 
 
-    //buradaki kod güncellenecek, 2 elseThrow ve findById yerine başka bir sorgu ile if else lerin hepsi gidecek
     @Override
     public ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId) {
 
-        Optional<Personel> isThisPersonelExists = gateRepository.findPrsnlById(personelId);
+        Personel personel = gateRepository.findPrsnlById(personelId)
+                .orElseThrow(() -> new BaseException(
+                        new ErrorMessage(MessageType.NO_RECORD_EXIST, "This personnel is not available! Entry from outside the institution is prohibited!")
+                ));
 
-        Optional<Gate> isThisValueExists = gateRepository.findById(wantedToEnterGate);
+        Gate gate = gateRepository.findById(wantedToEnterGate)
+                .orElseThrow(() -> new BaseException(
+                        new ErrorMessage(MessageType.NO_RECORD_EXIST, "The gate you want to enter is not available!")
+                ));
 
-        if(isThisPersonelExists.isPresent()){
-            if(isThisValueExists.isPresent()){
-                if(personelId.equals(wantedToEnterGate)){
-                    return new ResponseEntity<>("Personnel entered the gate!", HttpStatus.CREATED);
-                }else{
-                    return new ResponseEntity<>("Personnel is not authorized to enter this gate!", HttpStatus.BAD_REQUEST);
-                }
-            }else{
-                return new ResponseEntity<>("The gate you want to enter is not available!", HttpStatus.BAD_REQUEST);
-            }
-        }else{
-            return new ResponseEntity<>("This personnel is not available! Entry from outside the institution is prohibited!", HttpStatus.BAD_REQUEST);
+        if (!personel.getGate().getGateId().equals(gate.getGateId())) {
+            throw new BaseException(
+                    new ErrorMessage(MessageType.GENERAL_EXCEPTION, "Personnel is not authorized to enter this gate!")
+            );
         }
 
+        return new ResponseEntity<>("Personnel entered the gate!", HttpStatus.CREATED);
     }
 
 }

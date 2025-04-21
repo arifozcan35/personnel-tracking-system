@@ -1,9 +1,9 @@
 package com.personneltrackingsystem.exception;
 
 public enum MessageType2 {
-    NO_RECORD_EXIST("1001","no.record.found"),
-    REQUIRED_FIELD_AVAILABLE("5000", "name.required"),
-    GENERAL_EXCEPTION("9999", "general.exception");
+    NO_RECORD_EXIST("1001","No record found!"),
+    REQUIRED_FIELD_AVAILABLE("5000", "Name information cannot be left blank!"),
+    GENERAL_EXCEPTION("9999" , "A general error has occurred!");
 
     private String code;
     private String messageKey;
