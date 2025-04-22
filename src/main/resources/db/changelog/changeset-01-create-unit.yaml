@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: arifozcan
+      changes:
+        - createTable:
+            tableName: unit
+            schemaName: dbpersonel
+            columns:
+              - column:
+                  name: unit_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: unit_name
+                  type: VARCHAR(100)
+

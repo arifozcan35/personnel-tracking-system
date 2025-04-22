@@ -3,9 +3,7 @@ package com.personneltrackingsystem.validator;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.dto.DtoUnitIU;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.ValidationException;
-import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.UnitService;
 import lombok.RequiredArgsConstructor;
@@ -116,10 +114,9 @@ public class PersonelValidator {
                 pSalary.setAdministrator(true);
                 pSalary.setSalary(40000.0);
             }
-
+            throw new ValidationException("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
+                    "to the value that is closer to these two values (" + pSalary.getSalary() + ")!");
         }
-        throw new ValidationException("The salary can be only 30000.0 or 40000.0! The value you entered is assigned " +
-                "to the value that is closer to these two values (" + pSalary.getSalary() + ")!");
     }
 
 

@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: arifozcan
+      changes:
+        - createTable:
+            tableName: personel
+            schemaName: dbpersonel
+            columns:
+              - column:
+                  name: personel_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+              - column:
+                  name: administrator
+                  type: BOOLEAN
+              - column:
+                  name: salary
+                  type: DOUBLE PRECISION
+              - column:
+                  name: fk_unit_id
+                  type: BIGINT
+              - column:
+                  name: fk_gate_id
+                  type: BIGINT
+              - column:
+                  name: fk_work_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: dbpersonel
+            baseTableName: personel
+            baseColumnNames: fk_unit_id
+            referencedTableSchemaName: dbpersonel
+            referencedTableName: unit
+            referencedColumnNames: unit_id
+            constraintName: fk_personel_unit
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: dbpersonel
+            baseTableName: personel
+            baseColumnNames: fk_gate_id
+            referencedTableSchemaName: dbpersonel
+            referencedTableName: gate
+            referencedColumnNames: gate_id
+            constraintName: fk_personel_gate
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: dbpersonel
+            baseTableName: personel
+            baseColumnNames: fk_work_id
+            referencedTableSchemaName: dbpersonel
+            referencedTableName: work
+            referencedColumnNames: work_id
+            constraintName: fk_personel_work
+            onDelete: CASCADE

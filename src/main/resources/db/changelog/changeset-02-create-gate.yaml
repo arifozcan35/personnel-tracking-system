@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: arifozcan
+      changes:
+        - createTable:
+            tableName: gate
+            schemaName: dbpersonel
+            columns:
+              - column:
+                  name: gate_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: gate_name
+                  type: VARCHAR(100)
+
+

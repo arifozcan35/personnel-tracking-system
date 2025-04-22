@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset-00-create-schema.yaml
+  - include:
+      file: db/changelog/changeset-01-create-unit.yaml
+  - include:
+      file: db/changelog/changeset-02-create-gate.yaml
+  - include:
+      file: db/changelog/changeset-03-create-work.yaml
+  - include:
+      file: db/changelog/changeset-04-create-personel.yaml
+
