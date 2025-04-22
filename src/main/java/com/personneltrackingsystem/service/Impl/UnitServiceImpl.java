@@ -7,12 +7,13 @@ import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.service.UnitService;
-import com.personneltrackingsystem.validator.UnitValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +26,6 @@ public class UnitServiceImpl implements UnitService {
     private final UnitRepository unitRepository;
 
     private final UnitMapper unitMapper;
-
-    private final UnitValidator unitValidator;
 
     // Solid example : article 1 (Single Responsibility Principle)
 
@@ -67,7 +66,20 @@ public class UnitServiceImpl implements UnitService {
     @org.springframework.transaction.annotation.Transactional
     public DtoUnit saveOneUnit(DtoUnit unit) {
 
-        unitValidator.checkIfUnitAlreadyExists(unit);
+        if (!ObjectUtils.isEmpty(unit.getUnitId())) {
+            if (unitRepository.existsByUnitId(unit.getUnitId())) {
+                throw new ValidationException("Unit with this unit ID already exists!");
+            }
+        }
+
+        String unitName = unit.getBirimIsim();
+        if (ObjectUtils.isEmpty(unitName)) {
+            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+        }
+
+        if (unitRepository.existsByUnitName(unitName)) {
+            throw new ValidationException("Unit with this unit name already exists!");
+        }
 
         Unit pUnit = unitMapper.dtoUnitToUnit(unit);
         Unit dbUnit = unitRepository.save(pUnit);

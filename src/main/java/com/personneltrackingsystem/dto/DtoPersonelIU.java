@@ -32,5 +32,5 @@ public class DtoPersonelIU {
 
     private DtoGate gate;
 
-    private Work work;
+    private DtoWork work;
 }

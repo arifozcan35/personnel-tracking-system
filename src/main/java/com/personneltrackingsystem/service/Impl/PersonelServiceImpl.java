@@ -7,6 +7,7 @@ import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.mapper.UnitMapper;
+import com.personneltrackingsystem.mapper.WorkMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.PersonelService;
@@ -14,6 +15,7 @@ import com.personneltrackingsystem.service.UnitService;
 import com.personneltrackingsystem.service.WorkService;
 import com.personneltrackingsystem.validator.PersonelValidator;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +47,8 @@ public class PersonelServiceImpl implements PersonelService  {
     private final UnitMapper unitMapper;
 
     private final GateMapper gateMapper;
+
+    private final WorkMapper workMapper;
 
     private final PersonelValidator personelValidator;
 
@@ -79,8 +83,14 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
 
+        // check email
+        Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
+        if (existingPersonnel.isPresent()) {
+            throw new ValidationException("Personnel with this email already exists!");
+        }
+
         // calculate working hours
-        if (newPersonel.getWork() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getWork())) {
             workHoursCalculate2(personelToSave);
         }
 
@@ -107,27 +117,30 @@ public class PersonelServiceImpl implements PersonelService  {
         Personel foundPersonel = optPersonel.get();
 
         // update name
-        if (newPersonel.getName() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getName())) {
             foundPersonel.setName(newPersonel.getName());
         }
 
         // update email with uniqueness check
-        if (newPersonel.getEmail() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getEmail())) {
             // check if email is already in use by another personnel
-            personelValidator.updatePersonelCheckUniqueEmail(id, newPersonel);
+            Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
+            if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
+                throw new ValidationException("Email is already in use by another personnel!");
+            }
 
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
         // update administrator position and salary
-        if(newPersonel.getAdministrator() != null){
+        if(!ObjectUtils.isEmpty(newPersonel.getAdministrator())){
             foundPersonel.setAdministrator(newPersonel.getAdministrator());
 
             DtoPersonelIU pAdmin = new DtoPersonelIU();
             pAdmin.setAdministrator(personelValidator.selectionPosition(pAdmin, newPersonel.getAdministrator()));
             foundPersonel.setSalary(pAdmin.getSalary());
         }
-        else if(newPersonel.getSalary() != null){
+        else if(!ObjectUtils.isEmpty(newPersonel.getSalary())){
             DtoPersonelIU pSalary = new DtoPersonelIU();
             personelValidator.salaryAssignment(pSalary, newPersonel.getSalary());
             foundPersonel.setAdministrator(pSalary.getAdministrator());
@@ -135,7 +148,7 @@ public class PersonelServiceImpl implements PersonelService  {
         }
 
         // update unit
-        if (newPersonel.getUnit() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getUnit())) {
             Optional<DtoUnitIU> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
 
             if (existingUnit.isEmpty()) {
@@ -146,7 +159,7 @@ public class PersonelServiceImpl implements PersonelService  {
         }
 
         // update gate
-        if (newPersonel.getGate() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getGate())) {
             Optional<DtoGateIU> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
 
             if (existingGate.isEmpty()) {
@@ -157,7 +170,7 @@ public class PersonelServiceImpl implements PersonelService  {
         }
 
         // update working hours
-        if (newPersonel.getWork() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getWork())) {
             LocalTime entry = newPersonel.getWork().getCheckInTime();
             LocalTime exit = newPersonel.getWork().getCheckOutTime();
 
@@ -166,7 +179,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
             // if personnel already has a work record, update the existing one
             Work existingWork = foundPersonel.getWork();
-            if (existingWork != null) {
+            if (!ObjectUtils.isEmpty(existingWork)) {
                 // update existing work record
                 existingWork.setCheckInTime(entry);
                 existingWork.setCheckOutTime(exit);
@@ -176,7 +189,7 @@ public class PersonelServiceImpl implements PersonelService  {
                 workServiceImpl.save(existingWork);
             } else {
                 // if no existing work record, create a new one
-                Work newWork = newPersonel.getWork();
+                Work newWork = workMapper.dtoWorkToWork(newPersonel.getWork());
                 workHoursCalculate2(foundPersonel);
                 Work savedWork = workServiceImpl.save(newWork);
                 foundPersonel.setWork(savedWork);
@@ -198,7 +211,7 @@ public class PersonelServiceImpl implements PersonelService  {
         Optional<Personel> optPersonel = personelRepository.findById(id);
         if (optPersonel.isPresent()) {
             // delete the shift record first
-            if (optPersonel.get().getWork() != null) {
+            if (!ObjectUtils.isEmpty(optPersonel.get().getWork())) {
                 workServiceImpl.deleteById(optPersonel.get().getWork().getWorkId());
             }
             // then delete the personnel record
@@ -214,7 +227,7 @@ public class PersonelServiceImpl implements PersonelService  {
     public DtoPersonel workHoursCalculate(Long personelId) {
         Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
-        if(optPersonel.isPresent() && optPersonel.get().getWork() != null){
+        if(!ObjectUtils.isEmpty(optPersonel.isPresent()) && !ObjectUtils.isEmpty(optPersonel.get().getWork())){
             Work work = optPersonel.get().getWork();
 
             LocalTime checkInHour = work.getCheckInTime();
@@ -248,7 +261,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Double salary = newPersonel.getSalary();
 
-        if(work != null){
+        if(!ObjectUtils.isEmpty(work)){
             LocalTime checkInHour = work.getCheckInTime();
             LocalTime checkOutHour = work.getCheckOutTime();
 
@@ -258,7 +271,7 @@ public class PersonelServiceImpl implements PersonelService  {
             newPersonel.getWork().setIsWorkValid(valid);
 
             // if employee is an admin then ignore the pay cut :)
-            if (newPersonel.getAdministrator() != null && newPersonel.getAdministrator()) {
+            if (!ObjectUtils.isEmpty(newPersonel.getAdministrator()) && newPersonel.getAdministrator()) {
                 newPersonel.setSalary(salary);
             } else {
                 // if employee is not an admin then

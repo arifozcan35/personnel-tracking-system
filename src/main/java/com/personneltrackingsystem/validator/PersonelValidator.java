@@ -9,6 +9,7 @@ import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.UnitService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -22,8 +23,6 @@ import static com.personneltrackingsystem.service.Impl.WorkServiceImpl.PENALTY_A
 @RequiredArgsConstructor
 public class PersonelValidator {
 
-    private final PersonelRepository personelRepository;
-
     private final UnitService unitServiceImpl;
 
     private final GateService gateServiceImpl;
@@ -31,7 +30,7 @@ public class PersonelValidator {
 
     public void validatePersonelForSave(DtoPersonelIU newPersonel) {
         // check unit
-        if (newPersonel.getUnit() == null || newPersonel.getUnit().getUnitId() == null) {
+        if (ObjectUtils.isEmpty(newPersonel.getUnit()) || ObjectUtils.isEmpty(newPersonel.getUnit().getUnitId())) {
             throw new ValidationException("Could not save personnel! Please enter personnel unit.");
         } else {
             Optional<DtoUnitIU> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
@@ -41,7 +40,7 @@ public class PersonelValidator {
         }
 
         // check gate
-        if (newPersonel.getGate() == null || newPersonel.getGate().getGateId() == null) {
+        if (ObjectUtils.isEmpty(newPersonel.getGate()) || ObjectUtils.isEmpty(newPersonel.getGate().getGateId())) {
             throw new ValidationException("Personnel registration failed! Please enter the gate.");
         } else {
             Optional<DtoGateIU> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
@@ -51,14 +50,14 @@ public class PersonelValidator {
         }
 
         // check admin position and salary
-        if (newPersonel.getAdministrator() == null && newPersonel.getSalary() == null) {
+        if (ObjectUtils.isEmpty(newPersonel.getAdministrator()) && ObjectUtils.isEmpty(newPersonel.getSalary())) {
             throw new ValidationException("Could not save personnel! At least one of the personnel's manager or salary values must be selected.");
         } else {
-            if(newPersonel.getAdministrator() != null){
+            if(!ObjectUtils.isEmpty(newPersonel.getAdministrator())){
                 DtoPersonelIU pAdmin = new DtoPersonelIU();
                 pAdmin.setAdministrator(selectionPosition(pAdmin, newPersonel.getAdministrator()));
                 newPersonel.setSalary(pAdmin.getSalary());
-            }else if (newPersonel.getAdministrator() == null){
+            }else if (ObjectUtils.isEmpty(newPersonel.getAdministrator())){
                 DtoPersonelIU pSalary = new DtoPersonelIU();
                 salaryAssignment(pSalary, newPersonel.getSalary());
                 newPersonel.setAdministrator(pSalary.getAdministrator());
@@ -66,34 +65,21 @@ public class PersonelValidator {
             }
         }
 
-        // check email
-        Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
-        if (existingPersonnel.isPresent()) {
-            throw new ValidationException("Personnel with this email already exists!");
-        }
-
         // check working hours
-        if (newPersonel.getWork() != null) {
+        if (!ObjectUtils.isEmpty(newPersonel.getWork())) {
             LocalTime checkIn = newPersonel.getWork().getCheckInTime();
             LocalTime checkOut = newPersonel.getWork().getCheckOutTime();
 
-            if (checkIn == null || checkOut == null || checkOut.isBefore(checkIn)) {
+            if (ObjectUtils.isEmpty(checkIn) || ObjectUtils.isEmpty(checkOut) || checkOut.isBefore(checkIn)) {
                 throw new ValidationException("Invalid check-in/check-out time!");
             }
         }
     }
 
 
-    public void updatePersonelCheckUniqueEmail(Long id, DtoPersonelIU newPersonel){
-        Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
-        if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
-            throw new ValidationException("Email is already in use by another personnel!");
-        }
-    }
-
 
     public void updatePersonelCheckEntryAndExit(LocalTime entry, LocalTime exit){
-        if (entry == null || exit == null || !exit.isAfter(entry)) {
+        if (ObjectUtils.isEmpty(entry) || ObjectUtils.isEmpty(exit) || !exit.isAfter(entry)) {
             throw new ValidationException("Invalid check-in/check-out time!");
         }
     }

@@ -4,16 +4,13 @@ import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.exception.BaseException;
-import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
-import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
-import com.personneltrackingsystem.validator.GateValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,8 +27,6 @@ public class GateServiceImpl implements GateService {
     private final MessageResolver messageResolver;
 
     private final GateMapper gateMapper;
-
-    private final GateValidator gateValidator;
 
     @Override
     public Optional<DtoGateIU> findById(Long gateId) {
@@ -70,7 +65,20 @@ public class GateServiceImpl implements GateService {
     @Transactional
     public DtoGate saveOneGate(DtoGate gate) {
 
-        gateValidator.checkIfGateAlreadyExists(gate);
+        if (!ObjectUtils.isEmpty(gate.getGateId())) {
+            if (gateRepository.existsByGateId(gate.getGateId())) {
+                throw new ValidationException("Gate with this gate ID already exists!");
+            }
+        }
+
+        String gateName = gate.getGateName();
+        if (ObjectUtils.isEmpty(gateName)) {
+            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+        }
+
+        if (gateRepository.existsByGateName(gateName)) {
+            throw new ValidationException("Gate with this gate name already exists!");
+        }
 
         Gate pGate = gateMapper.dtoGateToGate(gate);
         Gate dbGate = gateRepository.save(pGate);

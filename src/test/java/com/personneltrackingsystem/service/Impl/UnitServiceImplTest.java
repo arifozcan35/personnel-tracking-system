@@ -7,8 +7,6 @@ import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.UnitRepository;
-import com.personneltrackingsystem.service.Impl.UnitServiceImpl;
-import com.personneltrackingsystem.validator.UnitValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +34,6 @@ public class UnitServiceImplTest {
 
     @Mock
     private UnitMapper unitMapper;
-
-    @Mock
-    private UnitValidator unitValidator;
 
     @InjectMocks
     private UnitServiceImpl unitService;

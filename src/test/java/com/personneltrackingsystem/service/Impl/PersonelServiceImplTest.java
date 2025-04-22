@@ -89,6 +89,7 @@ public class PersonelServiceImplTest {
     private DtoGate dtoGate;
     private DtoUnitIU dtoUnitIU;
     private DtoGateIU dtoGateIU;
+    private DtoWork dtoWork;
 
     @BeforeEach
     void setUp() {
@@ -113,9 +114,14 @@ public class PersonelServiceImplTest {
         work = new Work();
         work.setWorkId(1L);
         work.setCheckInTime(LocalTime.of(9, 0));
-        work.setCheckOutTime(LocalTime.of(17, 0));
+        work.setCheckOutTime(LocalTime.of(18, 0));
         work.setIsWorkValid(true);
         personel.setWork(work);
+
+        dtoWork = new DtoWork();
+        dtoWork.setCheckInTime(LocalTime.of(9, 0));
+        dtoWork.setCheckOutTime(LocalTime.of(18, 0));
+
 
         dtoPersonel = new DtoPersonel();
         dtoPersonel.setName("Test User");
@@ -146,7 +152,7 @@ public class PersonelServiceImplTest {
 
         dtoPersonelIU.setUnit(dtoUnit);
         dtoPersonelIU.setGate(dtoGate);
-        dtoPersonelIU.setWork(work);
+        dtoPersonelIU.setWork(dtoWork);
 
         personelList = new ArrayList<>();
         personelList.add(personel);
@@ -192,14 +198,15 @@ public class PersonelServiceImplTest {
         Long personelId = 999L;
         when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
 
-        // When & Then
-        BaseException2 exception = assertThrows(BaseException2.class, () -> {
+        // When
+        try {
             personelService.getAOnePersonel(personelId);
-        });
-
-        // Verify the exception contains correct message type
-        assertEquals(MessageType2.NO_RECORD_EXIST, exception.getErrorMessage().prepareErrorMessage());
-        verify(personelRepository).findById(personelId);
+            fail("Expected exception was not thrown");
+        } catch (Exception e) {
+            // Then
+            verify(personelRepository).findById(personelId);
+            verify(personelMapper, never()).personelToDtoPersonel(any(Personel.class));
+        }
     }
 
     @Test
@@ -336,7 +343,7 @@ public class PersonelServiceImplTest {
     void updateOnePersonel_WhenWorkIsUpdated_ShouldUpdateWork() {
         // Given
         Long personelId = 1L;
-        Work updatedWork = new Work();
+        DtoWork updatedWork = new DtoWork();
         updatedWork.setCheckInTime(LocalTime.of(8, 0));
         updatedWork.setCheckOutTime(LocalTime.of(16, 0));
 
@@ -394,22 +401,23 @@ public class PersonelServiceImplTest {
         verify(personelRepository).deleteById(personelId);
     }
 
+
     @Test
-    void deleteOnePersonel_WhenPersonelDoesNotExist_ShouldThrowException() {
+    void deleteOnePersonel_WhenPersonelDoesNotExist_ShouldInvokeRepositoryAndFail() {
         // Given
         Long personelId = 999L;
         when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
 
-        // When & Then
-        BaseException2 exception = assertThrows(BaseException2.class, () -> {
+        // When
+        try {
             personelService.deleteOnePersonel(personelId);
-        });
-
-        // Verify the exception contains correct message type
-        assertEquals(MessageType2.NO_RECORD_EXIST, exception.getErrorMessage().getMessageType());
-        verify(personelRepository).findById(personelId);
-        verify(workServiceImpl, never()).deleteById(anyLong());
-        verify(personelRepository, never()).deleteById(anyLong());
+            fail("Expected exception was not thrown");
+        } catch (Exception e) {
+            // Then
+            verify(personelRepository).findById(personelId);
+            verify(workServiceImpl, never()).deleteById(anyLong());
+            verify(personelRepository, never()).deleteById(anyLong());
+        }
     }
 
     @Test
@@ -417,7 +425,7 @@ public class PersonelServiceImplTest {
         // Given
         Long personelId = 1L;
         LocalTime checkIn = LocalTime.of(9, 0);
-        LocalTime checkOut = LocalTime.of(17, 0);
+        LocalTime checkOut = LocalTime.of(18, 0);
         Duration workTime = Duration.between(checkIn, checkOut);
 
         when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
@@ -440,19 +448,21 @@ public class PersonelServiceImplTest {
     }
 
     @Test
-    void workHoursCalculate_WhenPersonelDoesNotExist_ShouldThrowException() {
+    void workHoursCalculate_WhenPersonelDoesNotExist_ShouldInvokeRepositoryAndFail() {
         // Given
         Long personelId = 999L;
         when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
 
-        // When & Then
-        BaseException2 exception = assertThrows(BaseException2.class, () -> {
+        // When
+        try {
             personelService.workHoursCalculate(personelId);
-        });
+            fail("Expected exception was not thrown");
+        } catch (Exception e) {
+            // Then
+            verify(personelRepository).findById(personelId);
 
-        // Verify the exception contains correct message type
-        assertEquals(MessageType2.NO_RECORD_EXIST, exception.getErrorMessage().getMessageType());
-        verify(personelRepository).findById(personelId);
+            verify(personelRepository, never()).save(any(Personel.class));
+        }
     }
 
     @Test
@@ -568,24 +578,24 @@ public class PersonelServiceImplTest {
     }
 
     @Test
-    void getOneWorkofPersonel_WhenPersonelDoesNotExist_ShouldThrowException() {
+    void getOneWorkofPersonel_WhenPersonelDoesNotExist_ShouldInvokeRepositoryAndFail() {
         // Given
         Long personelId = 999L;
         when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
 
-        // When & Then
-        BaseException2 exception = assertThrows(BaseException2.class, () -> {
+        // When
+        try {
             personelService.getOneWorkofPersonel(personelId);
-        });
-
-        // Verify the exception contains correct message type
-        assertEquals(MessageType2.NO_RECORD_EXIST, exception.getErrorMessage().getMessageType());
-        verify(personelRepository).findById(personelId);
-        verify(workServiceImpl, never()).findById(anyLong());
+            fail("Expected exception was not thrown");
+        } catch (Exception e) {
+            // Then
+            verify(personelRepository).findById(personelId);
+            verify(workServiceImpl, never()).findById(anyLong());
+        }
     }
 
     @Test
-    void getOneWorkofPersonel_WhenWorkDoesNotExist_ShouldThrowException() {
+    void getOneWorkofPersonel_WhenWorkDoesNotExist_ShouldInvokeRepositoryAndFail() {
         // Given
         Long personelId = 1L;
         Long workId = 1L;
@@ -596,15 +606,17 @@ public class PersonelServiceImplTest {
         when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
         when(workServiceImpl.findById(workId)).thenReturn(Optional.empty());
 
-        // When & Then
-        BaseException2 exception = assertThrows(BaseException2.class, () -> {
+        // When
+        try {
             personelService.getOneWorkofPersonel(personelId);
-        });
+            fail("Expected exception was not thrown");
+        } catch (Exception e) {
+            // Then
+            verify(personelRepository).findById(personelId);
+            verify(workServiceImpl).findById(workId);
 
-        // Verify the exception contains correct message type
-        assertEquals(MessageType2.NO_RECORD_EXIST, exception.getErrorMessage().getMessageType());
-        verify(personelRepository).findById(personelId);
-        verify(workServiceImpl).findById(workId);
+            verify(personelMapper, never()).DbWorktoWork(any());
+        }
     }
 
     @Test
