@@ -142,9 +142,21 @@ public class UnitServiceImplTest {
     @Test
     void saveOneUnit_ShouldSaveAndReturnUnit() {
         // Arrange
-        when(unitMapper.dtoUnitToUnit(any(DtoUnit.class))).thenReturn(unit);
-        when(unitRepository.save(any(Unit.class))).thenReturn(unit);
-        when(unitMapper.unitToDtoUnit(any(Unit.class))).thenReturn(dtoUnit);
+        DtoUnit dtoUnit = new DtoUnit();
+        dtoUnit.setUnitId(1L);
+        dtoUnit.setBirimIsim("Test Unit");
+
+        Unit unit = new Unit();
+        unit.setUnitId(1L);
+        unit.setUnitName("Test Unit");
+
+        when(unitRepository.existsByUnitId(dtoUnit.getUnitId())).thenReturn(false);
+
+        when(unitRepository.existsByUnitName(dtoUnit.getBirimIsim())).thenReturn(false);
+
+        when(unitMapper.dtoUnitToUnit(dtoUnit)).thenReturn(unit);
+        when(unitRepository.save(unit)).thenReturn(unit);
+        when(unitMapper.unitToDtoUnit(unit)).thenReturn(dtoUnit);
 
         // Act
         DtoUnit result = unitService.saveOneUnit(dtoUnit);
@@ -152,7 +164,8 @@ public class UnitServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(dtoUnit, result);
-        verify(unitValidator).checkIfUnitAlreadyExists(dtoUnit);
+        verify(unitRepository).existsByUnitId(dtoUnit.getUnitId());
+        verify(unitRepository).existsByUnitName(dtoUnit.getBirimIsim());
         verify(unitMapper).dtoUnitToUnit(dtoUnit);
         verify(unitRepository).save(unit);
         verify(unitMapper).unitToDtoUnit(unit);

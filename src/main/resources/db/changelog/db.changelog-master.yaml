@@ -9,4 +9,7 @@ databaseChangeLog:
       file: db/changelog/changeset-03-create-work.yaml
   - include:
       file: db/changelog/changeset-04-create-personel.yaml
+  - include:
+      file: db/changelog/db.changelog-03-insert-units.xml
+
 

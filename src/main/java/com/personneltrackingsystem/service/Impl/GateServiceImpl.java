@@ -60,7 +60,6 @@ public class GateServiceImpl implements GateService {
     }
 
 
-
     @Override
     @Transactional
     public DtoGate saveOneGate(DtoGate gate) {
@@ -125,6 +124,7 @@ public class GateServiceImpl implements GateService {
             throw new BaseException(errorMessage);
         }
     }
+
 
 
     @Override

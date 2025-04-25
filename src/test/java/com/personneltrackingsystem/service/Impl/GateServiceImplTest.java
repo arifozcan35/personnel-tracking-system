@@ -157,10 +157,21 @@ public class GateServiceImplTest {
     @Test
     void saveOneGate_ShouldSaveAndReturnGate() {
         // Arrange
-        when(gateMapper.dtoGateToGate(any(DtoGate.class))).thenReturn(gate);
-        when(gateRepository.save(any(Gate.class))).thenReturn(gate);
-        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
-        doNothing().when(gateValidator).checkIfGateAlreadyExists(any(DtoGate.class));
+        DtoGate dtoGate = new DtoGate();
+        dtoGate.setGateId(1L);
+        dtoGate.setGateName("Test Gate");
+
+        Gate gate = new Gate();
+        gate.setGateId(1L);
+        gate.setGateName("Test Gate");
+
+        when(gateRepository.existsByGateId(dtoGate.getGateId())).thenReturn(false);
+
+        when(gateRepository.existsByGateName(dtoGate.getGateName())).thenReturn(false);
+
+        when(gateMapper.dtoGateToGate(dtoGate)).thenReturn(gate);
+        when(gateRepository.save(gate)).thenReturn(gate);
+        when(gateMapper.gateToDtoGate(gate)).thenReturn(dtoGate);
 
         // Act
         DtoGate result = gateService.saveOneGate(dtoGate);
@@ -168,7 +179,8 @@ public class GateServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(dtoGate, result);
-        verify(gateValidator).checkIfGateAlreadyExists(dtoGate);
+        verify(gateRepository).existsByGateId(dtoGate.getGateId());
+        verify(gateRepository).existsByGateName(dtoGate.getGateName());
         verify(gateMapper).dtoGateToGate(dtoGate);
         verify(gateRepository).save(gate);
         verify(gateMapper).gateToDtoGate(gate);
