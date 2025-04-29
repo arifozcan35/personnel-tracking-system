@@ -1,6 +1,8 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.*;
+import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.*;
@@ -24,9 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -79,7 +80,9 @@ public class PersonelServiceImpl implements PersonelService  {
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
 
         // validate all personel
-        personelValidator.validatePersonelForSave(newPersonel);
+        Optional<DtoUnitIU> prsnlUnitId = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
+        Optional<DtoGateIU> prsnlGateId = gateServiceImpl.findById(newPersonel.getGate().getGateId());
+        personelValidator.validatePersonelForSave(newPersonel, prsnlUnitId, prsnlGateId);
 
         Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
 
@@ -115,6 +118,7 @@ public class PersonelServiceImpl implements PersonelService  {
         }
 
         Personel foundPersonel = optPersonel.get();
+        personelMapper.personelToDtoPersonelIU(foundPersonel);
 
         // update name
         if (!ObjectUtils.isEmpty(newPersonel.getName())) {
@@ -214,6 +218,9 @@ public class PersonelServiceImpl implements PersonelService  {
             if (!ObjectUtils.isEmpty(optPersonel.get().getWork())) {
                 workServiceImpl.deleteById(optPersonel.get().getWork().getWorkId());
             }
+
+             // Search for orhanRemove, you can handle these two operations in a single code
+
             // then delete the personnel record
             personelRepository.deleteById(id);
 
@@ -221,6 +228,41 @@ public class PersonelServiceImpl implements PersonelService  {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
     }
+
+
+
+    @Override
+    public Set<DtoPersonel> getPersonelsByGateId(Long gateId) {
+        Set<DtoPersonel> personels = new HashSet<>();
+
+        Optional<DtoGateIU> optGate = gateServiceImpl.findById(gateId);
+
+        if (optGate.isPresent()) {
+            personels.addAll(optGate.get().getPersonels());
+        } else {
+            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
+            throw new BaseException(errorMessage);
+        }
+
+        return personels;
+    }
+
+
+    @Override
+    public Set<DtoPersonel> getPersonelsByUnitId(Long unitId) {
+        Set<DtoPersonel> personels = new HashSet<>();
+
+        Optional<DtoUnitIU> optUnit = unitServiceImpl.findById(unitId);
+
+        if (optUnit.isPresent()) {
+            personels.addAll(optUnit.get().getPersonels());
+        } else {
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
+        }
+        return personels;
+    }
+
+
 
 
     @Override
@@ -305,7 +347,10 @@ public class PersonelServiceImpl implements PersonelService  {
 
     @Override
     public Map<String, Double> listSalaries() {
+
         List<Personel> allPersonels = personelRepository.findAll();
+
         return personelMapper.personelsToSalaryMap(allPersonels);
     }
+
 }

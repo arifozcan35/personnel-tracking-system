@@ -31,12 +31,6 @@ public interface GateController {
     void deleteGate(@PathVariable Long gateId);
 
 
-    @Operation(
-            summary = "Personnel by gates",
-            description = "Lists all personnel with the given gate number."
-    )
-    @GetMapping("/personel/{gateId}")
-    Set<Personel> getPersonels(@PathVariable Long gateId);
 
     @Operation(
             summary = "Entry Permit Check",

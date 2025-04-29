@@ -29,10 +29,4 @@ public interface UnitController {
     @DeleteMapping("/{unitId}")
     void deleteUnit(@PathVariable Long unitId);
 
-    @Operation(
-            summary = "Personnel by units",
-            description = "Lists all personnel with the given unit number."
-    )
-    @GetMapping("/personel/{unitId}")
-    Set<Personel> getPersonels(@PathVariable Long unitId);
 }

@@ -30,6 +30,9 @@ public class GateServiceImpl implements GateService {
 
     @Override
     public Optional<DtoGateIU> findById(Long gateId) {
+
+        // Don't make the outgoing returns optional, just make them dto
+
         Gate gate = gateRepository.findById(gateId)
                 .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
         return Optional.ofNullable(gateMapper.gateToDtoGateIU(gate));
@@ -37,14 +40,10 @@ public class GateServiceImpl implements GateService {
 
     @Override
     public List<DtoGate> getAllGates(){
+
         List<Gate> gateList =  gateRepository.findAll();
-        List<DtoGate> newGateList = new ArrayList<>();
 
-        for(Gate allGates : gateList){
-            newGateList.add(gateMapper.gateToDtoGate(allGates));
-        }
-
-        return newGateList;
+        return gateMapper.gateListToDtoGateList(gateList);
     }
 
 
@@ -114,7 +113,7 @@ public class GateServiceImpl implements GateService {
 
         if(optGate.isPresent()){
             // update associated personnel records
-            gateRepository.updatePersonelGateReferences(gateId);
+            gateRepository.updatePersonelGateReferences(optGate.get());
 
             // delete gate
             gateRepository.delete(optGate.get());
@@ -128,25 +127,9 @@ public class GateServiceImpl implements GateService {
 
 
     @Override
-    public Set<Personel> getPersonelsByGateId(Long gateId) {
-        Set<Personel> personels = new HashSet<>();
-
-        Optional<Gate> optGate = gateRepository.findById(gateId);
-
-        if (optGate.isPresent()) {
-            personels.addAll(optGate.get().getPersonels());
-        } else {
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
-        }
-
-        return personels;
-    }
-
-
-
-    @Override
     public ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId) {
+
+        // You can simplify this a little bit more
 
         Personel personel = gateRepository.findPrsnlById(personelId)
                 .orElseThrow(() -> new BaseException(

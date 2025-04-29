@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="insert-units-001" author="seninAdin">
+    <changeSet id="insert-units-001" author="arifozcan">
         <insert tableName="unit" schemaName="dbpersonel">
             <column name="unit_name" value="Bilgi İşlem"/>
         </insert>

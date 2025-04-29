@@ -6,6 +6,8 @@ import com.personneltrackingsystem.entity.Unit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UnitMapper {
 
@@ -20,5 +22,8 @@ public interface UnitMapper {
 
     @Mapping(source = "birimIsim", target = "unitName")
     Unit dtoUnitToUnit(DtoUnit dtoUnit);
+
+
+    List<DtoUnit> unitListToDtoUnitList(List<Unit> unitList);
 
 }

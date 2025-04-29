@@ -20,4 +20,7 @@ public interface GateMapper {
 
     Gate dtoGateToGate(DtoGate dtoGate);
 
+
+    List<DtoGate> gateListToDtoGateList(List<Gate> gateList);
+
 }

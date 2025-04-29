@@ -25,7 +25,6 @@ public interface GateService {
 
     void deleteOneGate(Long gateId);
 
-    Set<Personel> getPersonelsByGateId(Long gateId);
 
     ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId);
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,6 +48,17 @@ public class PersonelControllerImpl implements PersonelController {
     @Override
     public void deletePersonel(Long personelId) {
         personelServiceImpl.deleteOnePersonel(personelId);
+    }
+
+
+    @Override
+    public Set<DtoPersonel> getPersonelsByGate(Long gateId) {
+        return personelServiceImpl.getPersonelsByGateId(gateId);
+    }
+
+    @Override
+    public Set<DtoPersonel> getPersonelsByUnit(Long unitId) {
+        return personelServiceImpl.getPersonelsByUnitId(unitId);
     }
 
 

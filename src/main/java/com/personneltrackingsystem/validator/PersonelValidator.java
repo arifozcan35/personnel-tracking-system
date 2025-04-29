@@ -21,17 +21,11 @@ import static com.personneltrackingsystem.service.Impl.WorkServiceImpl.PENALTY_A
 @RequiredArgsConstructor
 public class PersonelValidator {
 
-    private final UnitService unitServiceImpl;
-
-    private final GateService gateServiceImpl;
-
-
-    public void validatePersonelForSave(DtoPersonelIU newPersonel) {
+    public void validatePersonelForSave(DtoPersonelIU newPersonel, Optional<DtoUnitIU> existingUnit, Optional<DtoGateIU> existingGate) {
         // check unit
         if (ObjectUtils.isEmpty(newPersonel.getUnit()) || ObjectUtils.isEmpty(newPersonel.getUnit().getUnitId())) {
             throw new ValidationException("Could not save personnel! Please enter personnel unit.");
         } else {
-            Optional<DtoUnitIU> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
             if (existingUnit.isEmpty()) {
                 throw new ValidationException("You have not selected a suitable unit!");
             }
@@ -41,7 +35,6 @@ public class PersonelValidator {
         if (ObjectUtils.isEmpty(newPersonel.getGate()) || ObjectUtils.isEmpty(newPersonel.getGate().getGateId())) {
             throw new ValidationException("Personnel registration failed! Please enter the gate.");
         } else {
-            Optional<DtoGateIU> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
             if (existingGate.isEmpty()) {
                 throw new ValidationException("The specified gate could not be found!");
             }

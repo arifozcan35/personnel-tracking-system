@@ -49,9 +49,4 @@ public class UnitControllerImpl implements UnitController {
         unitServiceImpl.deleteOneUnit(unitId);
     }
 
-
-    @Override
-    public Set<Personel> getPersonels(Long unitId) {
-        return unitServiceImpl.getPersonelsByUnitId(unitId);
-    }
 }

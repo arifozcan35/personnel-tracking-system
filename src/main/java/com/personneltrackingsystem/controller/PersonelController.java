@@ -2,6 +2,7 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
+import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Work;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Tag(name = "Personel Controller", description = "Personnel CRUD operations, working hours validity check and salary transactions")
 @RequestMapping("/api/personel")
@@ -31,6 +33,21 @@ public interface PersonelController {
 
     @DeleteMapping("/{personelId}")
     void deletePersonel(@PathVariable Long personelId);
+
+    @Operation(
+            summary = "Personnel by gates",
+            description = "Lists all personnel with the given gate number."
+    )
+    @GetMapping("/personels/{gateId}")
+    Set<DtoPersonel> getPersonelsByGate(@PathVariable Long gateId);
+
+
+    @Operation(
+            summary = "Personnel by units",
+            description = "Lists all personnel with the given unit number."
+    )
+    @GetMapping("/personel/{unitId}")
+    Set<DtoPersonel> getPersonelsByUnit(@PathVariable Long unitId);
 
 
     @Operation(

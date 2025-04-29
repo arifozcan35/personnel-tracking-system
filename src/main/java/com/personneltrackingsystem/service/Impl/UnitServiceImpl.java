@@ -38,13 +38,10 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<DtoUnit> getAllUnits(){
-        List<Unit> unitList = unitRepository.findAll();
-        List<DtoUnit> newUnitList = new ArrayList<>();
 
-        for(Unit allUnits : unitList){
-            newUnitList.add(unitMapper.unitToDtoUnit(allUnits));
-        }
-        return newUnitList;
+        List<Unit> unitList = unitRepository.findAll();
+
+        return unitMapper.unitListToDtoUnitList(unitList);
     }
 
 
@@ -120,21 +117,6 @@ public class UnitServiceImpl implements UnitService {
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
-    }
-
-
-    @Override
-    public Set<Personel> getPersonelsByUnitId(Long unitId) {
-        Set<Personel> personels = new HashSet<>();
-
-        Optional<Unit> optUnit = unitRepository.findById(unitId);
-
-        if (optUnit.isPresent()) {
-            personels.addAll(optUnit.get().getPersonels());
-        } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
-        }
-        return personels;
     }
 
 }

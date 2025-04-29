@@ -22,5 +22,4 @@ public interface UnitService {
 
     void deleteOneUnit(Long unitId);
 
-    Set<Personel> getPersonelsByUnitId(Long unitId);
 }

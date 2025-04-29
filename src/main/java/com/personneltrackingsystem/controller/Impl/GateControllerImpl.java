@@ -3,6 +3,7 @@ package com.personneltrackingsystem.controller.Impl;
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.controller.GateController;
+import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.GateService;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +49,6 @@ public class GateControllerImpl implements GateController {
         gateServiceImpl.deleteOneGate(gateId);
     }
 
-
-
-    @Override
-    public Set<Personel> getPersonels(Long gateId) {
-        return gateServiceImpl.getPersonelsByGateId(gateId);
-    }
 
 
     @Override

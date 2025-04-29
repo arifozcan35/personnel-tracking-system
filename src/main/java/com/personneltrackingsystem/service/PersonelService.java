@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface PersonelService {
 
@@ -27,6 +28,12 @@ public interface PersonelService {
     ResponseEntity<String> updateOnePersonel(Long id, DtoPersonelIU newPersonel);
 
     void deleteOnePersonel(Long id);
+
+
+    Set<DtoPersonel> getPersonelsByGateId(Long gateId);
+
+    Set<DtoPersonel> getPersonelsByUnitId(Long unitId);
+
 
 
     DtoPersonel workHoursCalculate(Long personelId);
