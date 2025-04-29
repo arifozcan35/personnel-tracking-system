@@ -3,15 +3,12 @@ package com.personneltrackingsystem.controller.Impl;
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.controller.GateController;
-import com.personneltrackingsystem.dto.DtoPersonel;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.service.GateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor

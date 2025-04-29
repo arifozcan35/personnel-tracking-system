@@ -2,13 +2,10 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
-import com.personneltrackingsystem.entity.Personel;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Tag(name = "Unit Controller", description = "Unit CRUD operations and personnel listing by unit")
 @RequestMapping("/api/unit")

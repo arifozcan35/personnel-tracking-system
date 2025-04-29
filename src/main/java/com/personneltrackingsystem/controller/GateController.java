@@ -2,14 +2,12 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
-import com.personneltrackingsystem.entity.Personel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Tag(name = "Gate Controller", description = "Gate CRUD operations and personnel listing by gate")
 @RequestMapping("/api/gate")

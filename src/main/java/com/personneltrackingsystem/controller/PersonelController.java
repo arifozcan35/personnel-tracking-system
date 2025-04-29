@@ -2,7 +2,6 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Work;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
