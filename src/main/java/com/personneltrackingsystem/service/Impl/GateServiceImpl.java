@@ -35,6 +35,7 @@ public class GateServiceImpl implements GateService {
 
         Gate gate = gateRepository.findById(gateId)
                 .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
+
         return Optional.ofNullable(gateMapper.gateToDtoGateIU(gate));
     }
 
