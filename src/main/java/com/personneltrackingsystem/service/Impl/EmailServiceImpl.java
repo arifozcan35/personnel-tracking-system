@@ -1,5 +1,6 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.mail.SimpleMailMessage;
@@ -9,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Override
     @Async
     public void sendSimpleMail(String to, String token) {
         try {

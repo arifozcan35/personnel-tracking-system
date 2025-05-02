@@ -1,6 +1,6 @@
 package com.personneltrackingsystem.entity;
 
 public enum Role {
-    ADMIN,
-    PERSONEL,
+    ROLE_ADMIN,
+    ROLE_USER,
 }

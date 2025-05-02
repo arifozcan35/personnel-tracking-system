@@ -127,7 +127,6 @@
             <input type="password" th:field="*{password}" placeholder="Password" required>
         </p>
 
-        <input th:name="${_csrf.parameterName}" type="hidden" th:value="${_csrf.token}" />
         <button type="submit" class="primary">Sign up</button>
     </form>
 </div>

@@ -4,7 +4,10 @@ import com.personneltrackingsystem.entity.Role;
 import com.personneltrackingsystem.entity.Token;
 import com.personneltrackingsystem.entity.User;
 import com.personneltrackingsystem.repository.UserRepository;
+import com.personneltrackingsystem.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,26 +16,37 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements CustomUserDetailsService, UserDetailsService {
 
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
-    private final TokenService tokenService;
+    private final TokenServiceImpl tokenService;
 
-    private final EmailService emailService;
+    private final EmailServiceImpl emailService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
+
+        GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                List.of(authority)
+        );
     }
 
+
+    @Override
     public User registerUser(User user) {
         userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail())
                 .ifPresent(existingUser -> {
@@ -41,7 +55,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);
-        user.setRole(Role.PERSONEL);
+        user.setRole(Role.ROLE_USER);
 
         userRepository.save(user);
 
@@ -60,11 +74,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         return user;
     }
 
+    @Override
     public void enableUser(User user) {
         user.setEnabled(true);
         userRepository.save(user);
     }
 
+    @Override
     @Transactional
     public void confirmToken(String token) {
         Token confirmationToken = tokenService.findByToken(token)
