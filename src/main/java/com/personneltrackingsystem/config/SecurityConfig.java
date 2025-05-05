@@ -2,18 +2,25 @@ package com.personneltrackingsystem.config;
 
 import com.personneltrackingsystem.entity.Role;
 import com.personneltrackingsystem.entity.User;
+import com.personneltrackingsystem.filter.JwtAuthenticationFilter;
 import com.personneltrackingsystem.repository.UserRepository;
-import com.personneltrackingsystem.service.Impl.CustomUserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,26 +28,40 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final CustomUserDetailsServiceImpl userDetailsService;
+    private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private final PasswordConfig passwordEncoder;
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder.passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(req -> req
-                        .requestMatchers("/register","/register/**", "/public/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                        .anyRequest().authenticated()
+                .authorizeHttpRequests(
+                        req -> req
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
-                // .formLogin(Customizer.withDefaults())
-                .logout(Customizer.withDefaults())
-                .userDetailsService(userDetailsService);
-
+                .sessionManagement(
+                        session -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(authenticationProvider());
         return http.build();
     }
-
 
     @Bean
     public CommandLineRunner createDefaultAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -50,7 +71,7 @@ public class SecurityConfig {
             String defaultPassword = "gib6";
             String defaultEmail = "zcanarif@gmail.com";
             boolean defaultEnabled = true;
-            boolean defaultLocked = false;
+
 
             if (userRepository.findByUsername(defaultUsername).isEmpty()) {
                 User admin = new User();
@@ -59,16 +80,13 @@ public class SecurityConfig {
                 admin.setPassword(passwordEncoder.encode(defaultPassword));
                 admin.setEmail(defaultEmail);
                 admin.setEnabled(defaultEnabled);
-                admin.setLocked(defaultLocked);
                 admin.setRole(Role.ROLE_ADMIN);
 
                 userRepository.save(admin);
-                System.out.println(">> Default admin user created: username=admin, password=admin123");
+                System.out.println(">> Default admin user created: username=arifozcan, password=gib6");
             } else {
                 System.out.println(">> Default admin user already exists.");
             }
         };
     }
-
-
 }

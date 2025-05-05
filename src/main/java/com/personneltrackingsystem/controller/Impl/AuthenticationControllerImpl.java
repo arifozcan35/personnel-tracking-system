@@ -1,39 +1,39 @@
 package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.AuthenticationController;
-import com.personneltrackingsystem.entity.User;
-import com.personneltrackingsystem.service.CustomUserDetailsService;
-import com.personneltrackingsystem.service.Impl.CustomUserDetailsServiceImpl;
+import com.personneltrackingsystem.dto.LoginRequest;
+import com.personneltrackingsystem.dto.RefreshTokenRequest;
+import com.personneltrackingsystem.dto.RegisterRequest;
+import com.personneltrackingsystem.dto.TokenPair;
+import com.personneltrackingsystem.service.Impl.AuthServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class AuthenticationControllerImpl implements AuthenticationController {
 
-    private final CustomUserDetailsService userDetailsService;
+    private final AuthServiceImpl authService;
 
 
     @Override
-    public String register(Model model) {
-        User user = new User();
-        model.addAttribute("user", user);
-        return "register";
+    public ResponseEntity<?> registerUser(RegisterRequest request) {
+        // Save the new user to the database and return success response
+        authService.registerUser(request);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @Override
-    public String register(User user, Model model, RedirectAttributes redirectAttributes) {
-        userDetailsService.registerUser(user);
-        redirectAttributes.addFlashAttribute("success", "Please confirm your email address");
-        return "redirect:/register";
+    public ResponseEntity<?> login(LoginRequest loginRequest) {
+        TokenPair tokenPair = authService.login(loginRequest);
+        return ResponseEntity.ok(tokenPair);
     }
 
     @Override
-    public String confirmToken(String token, Model model) {
-        userDetailsService.confirmToken(token);
-        return "confirmToken";
+    public ResponseEntity<?> refreshToken(RefreshTokenRequest request) {
+        TokenPair tokenPair = authService.refreshToken(request);
+        return ResponseEntity.ok(tokenPair);
     }
 
 }

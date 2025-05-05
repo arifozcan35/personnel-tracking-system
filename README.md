@@ -15,12 +15,11 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 - Spring Data JPA
 - Spring Web
 - Spring Security
+- JWT Authentication
 - Java Mail Sender
 - Lombok
 - Thymeleaf
-- PostgreSQL
-- Liquibase
-- MySQL
+- PostgreSQL, MySQL, Liquibase
 - Docker, Docker Compose
 - Postman, Swagger (for testing)
 - Maven

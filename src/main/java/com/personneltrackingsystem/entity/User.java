@@ -1,6 +1,8 @@
 package com.personneltrackingsystem.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,6 +15,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @Table(
         name = "user", schema = "dbpersonel",
         uniqueConstraints = {
@@ -64,8 +68,6 @@ public class User implements UserDetails {
     )
     private boolean enabled;
 
-    @Column(name = "locked")
-    private boolean locked;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -77,21 +79,6 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return !locked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
 
     @Override
     public boolean isEnabled() {
@@ -107,14 +94,12 @@ public class User implements UserDetails {
             String password,
             String email,
             boolean enabled,
-            boolean locked,
             Role role) {
         this.name = name;
         this.username = username;
         this.password = password;
         this.email = email;
         this.enabled = enabled;
-        this.locked = locked;
         this.role = role;
     }
 
@@ -127,7 +112,6 @@ public class User implements UserDetails {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", enabled=" + enabled +
-                ", locked=" + locked +
                 ", role=" + role +
                 '}';
     }

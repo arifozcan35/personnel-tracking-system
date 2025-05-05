@@ -1,21 +1,24 @@
 package com.personneltrackingsystem.controller;
 
-import com.personneltrackingsystem.entity.User;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.personneltrackingsystem.dto.LoginRequest;
+import com.personneltrackingsystem.dto.RefreshTokenRequest;
+import com.personneltrackingsystem.dto.RegisterRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 
-@RequestMapping("/register")
+import org.springframework.web.bind.annotation.*;
+
+
+@RequestMapping("/api/auth")
 public interface AuthenticationController {
 
-    @GetMapping
-    String register(Model model);
+    @PostMapping("/register")
+    ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request);
 
+    @PostMapping("/login")
+    ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest);
 
-    @PostMapping
-    String register(@ModelAttribute("user") User user, Model model, RedirectAttributes redirectAttributes);
+    @PostMapping("/refresh-token")
+    ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request);
 
-
-    @GetMapping("/confirmToken")
-    String confirmToken(@RequestParam("token") String token, Model model);
 }

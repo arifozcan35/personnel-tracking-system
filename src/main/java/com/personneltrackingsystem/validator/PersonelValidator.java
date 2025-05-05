@@ -4,8 +4,6 @@ import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.exception.ValidationException;
-import com.personneltrackingsystem.service.GateService;
-import com.personneltrackingsystem.service.UnitService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
