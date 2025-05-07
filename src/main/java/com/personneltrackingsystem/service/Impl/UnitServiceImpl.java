@@ -3,7 +3,6 @@ package com.personneltrackingsystem.service.Impl;
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Unit;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;

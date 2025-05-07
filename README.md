@@ -63,6 +63,11 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
     - See the personnel belonging to the gate
 
 
+- *Role Mechanism:*
+    - Using ADMIN and USER roles to access different system APIs
+    - Different permissions depending on roles
+
+
 - *Access Control:*
     - Grant floor access permissions
     - Only personnel can pass through gates

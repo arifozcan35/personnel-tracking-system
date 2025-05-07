@@ -3,6 +3,7 @@ package com.personneltrackingsystem.config;
 import com.personneltrackingsystem.entity.Role;
 import com.personneltrackingsystem.entity.User;
 import com.personneltrackingsystem.filter.JwtAuthenticationFilter;
+import com.personneltrackingsystem.filter.PermissionBasedSecurityFilter;
 import com.personneltrackingsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -17,7 +18,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private final PermissionBasedSecurityFilter permissionBasedSecurityFilter;
     private final PasswordConfig passwordEncoder;
 
     @Bean
@@ -52,13 +52,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(
                         session -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(permissionBasedSecurityFilter, JwtAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider());
         return http.build();
     }
