@@ -1,13 +1,11 @@
 package com.personneltrackingsystem.dto;
 
-import com.personneltrackingsystem.entity.Work;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 
 @Getter
 @Setter

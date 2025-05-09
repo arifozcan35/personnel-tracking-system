@@ -1,8 +1,6 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.*;
-import com.personneltrackingsystem.entity.Gate;
-import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.*;
@@ -27,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service

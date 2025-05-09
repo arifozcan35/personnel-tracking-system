@@ -1,6 +1,5 @@
 package com.personneltrackingsystem.handler;
 
-import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.BaseException2;
 import com.personneltrackingsystem.exception.MessageResolver;
 import org.springframework.beans.factory.annotation.Autowired;

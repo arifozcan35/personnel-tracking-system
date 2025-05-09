@@ -8,6 +8,8 @@ import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
+import com.personneltrackingsystem.dto.GatePassageEventDto;
+import com.personneltrackingsystem.service.KafkaProducerService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -27,6 +30,8 @@ public class GateServiceImpl implements GateService {
     private final MessageResolver messageResolver;
 
     private final GateMapper gateMapper;
+
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     public Optional<DtoGateIU> findById(Long gateId) {
@@ -130,8 +135,6 @@ public class GateServiceImpl implements GateService {
     @Override
     public ResponseEntity<String> passGate(Long wantedToEnterGate, Long personelId) {
 
-        // You can simplify this a little bit more
-
         Personel personel = gateRepository.findPrsnlById(personelId)
                 .orElseThrow(() -> new BaseException(
                         new ErrorMessage(MessageType.NO_RECORD_EXIST, "This personnel is not available! Entry from outside the institution is prohibited!")
@@ -147,6 +150,25 @@ public class GateServiceImpl implements GateService {
                     new ErrorMessage(MessageType.GENERAL_EXCEPTION, "Personnel is not authorized to enter this gate!")
             );
         }
+
+        if (personel.getWork() == null) {
+            throw new BaseException(
+                    new ErrorMessage(MessageType.NO_RECORD_EXIST, "Personnel does not have work hours record!")
+            );
+        }
+
+        // Create and publish gate passage event to Kafka
+        GatePassageEventDto gatePassageEvent = new GatePassageEventDto(
+                personel.getPersonelId(),
+                personel.getName(),
+                personel.getEmail(),
+                gate.getGateId(),
+                gate.getGateName(),
+                LocalDateTime.now()
+        );
+        
+        // Send to Kafka topic
+        kafkaProducerService.sendGatePassageEvent(gatePassageEvent);
 
         return new ResponseEntity<>("Personnel entered the gate!", HttpStatus.CREATED);
     }

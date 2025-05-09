@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        // Set authentication in security context
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Generate Token Pair
