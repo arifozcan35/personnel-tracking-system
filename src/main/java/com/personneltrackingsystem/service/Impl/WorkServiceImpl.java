@@ -1,7 +1,7 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.*;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
@@ -33,12 +33,12 @@ public class WorkServiceImpl implements WorkService {
 
 
     @Override
-    public Optional<Work> findById(Long workId) {
+    public Optional<WorkingHours> findById(Long workId) {
         return workRepository.findById(workId);
     }
 
     @Override
-    public Work save(Work work) {
+    public WorkingHours save(WorkingHours work) {
         return workRepository.save(work);
     }
 
@@ -51,7 +51,7 @@ public class WorkServiceImpl implements WorkService {
     @Override
     public List<DtoWorkIU> getAllWorks(){
 
-        List<Work> unitWork = workRepository.findAll();
+        List<WorkingHours> unitWork = workRepository.findAll();
 
         return workMapper.workListToDtoWorkIUList(unitWork);
     }
@@ -60,7 +60,7 @@ public class WorkServiceImpl implements WorkService {
     @Override
     public DtoWorkIU getOneWork(Long unitId){
 
-        Optional<Work> optWork =  workRepository.findById(unitId);
+        Optional<WorkingHours> optWork =  workRepository.findById(unitId);
         if(optWork.isPresent()){
             return workMapper.workToDtoWorkIU(optWork.get());
         }
@@ -74,7 +74,7 @@ public class WorkServiceImpl implements WorkService {
     @Override
     @Transactional
     public void deleteOneWork(Long workId) {
-        Optional<Work> optWork = workRepository.findById(workId);
+        Optional<WorkingHours> optWork = workRepository.findById(workId);
 
         if (optWork.isPresent()) {
             // make personnel connected to Work null

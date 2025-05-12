@@ -3,7 +3,7 @@ package com.personneltrackingsystem.mapper;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import org.mapstruct.Mapper;
 
 import java.util.Collections;
@@ -40,5 +40,5 @@ public interface PersonelMapper {
     }
 
 
-    Work DbWorktoWork(Optional<Work> dbWorkOpt);
+    WorkingHours DbWorktoWork(Optional<WorkingHours> dbWorkOpt);
 }

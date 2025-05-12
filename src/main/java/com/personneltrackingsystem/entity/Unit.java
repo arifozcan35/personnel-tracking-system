@@ -1,10 +1,8 @@
 package com.personneltrackingsystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
 
 @Entity
 @Table(name = "unit", schema = "dbpersonel")
@@ -14,15 +12,18 @@ import java.util.List;
 @AllArgsConstructor
 public class Unit {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGen3")
-    @SequenceGenerator(name = "mySeqGen3", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "unitSeq")
+    @SequenceGenerator(name = "unitSeq", allocationSize = 1)
     @Column(name = "unit_id")
     private Long unitId;
 
     private String unitName;
 
+    @ManyToOne
+    @JoinColumn(name = "fk_floor_id")
+    private Floor floorId;
 
-    @OneToMany(mappedBy = "unit")
-    @JsonIgnore
-    private List<Personel> personels;
+    @OneToOne
+    @JoinColumn(name = "fk_administrator_personel_id")
+    private Personel administratorPersonelId;
 }

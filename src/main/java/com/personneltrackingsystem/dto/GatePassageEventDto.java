@@ -11,9 +11,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class GatePassageEventDto {
     private Long personelId;
+
     private String personelName;
+
     private String personelEmail;
+
     private Long gateId;
+
     private String gateName;
+    
     private LocalDateTime passageTime;
 } 

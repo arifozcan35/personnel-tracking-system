@@ -33,8 +33,8 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGen5")
-    @SequenceGenerator(name = "mySeqGen5", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userSeq")
+    @SequenceGenerator(name = "userSeq", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 

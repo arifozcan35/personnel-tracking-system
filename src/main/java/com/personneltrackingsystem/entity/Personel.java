@@ -1,22 +1,25 @@
 package com.personneltrackingsystem.entity;
 
-import jakarta.annotation.Nullable;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "personel", schema = "dbpersonel")
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class Personel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGen")
-    @SequenceGenerator(name = "mySeqGen", allocationSize = 1)
+    @SequenceGenerator(name = "personelSeq", allocationSize = 1)
     @Column(name = "personel_id")
     private Long personelId;
 
@@ -30,16 +33,17 @@ public class Personel {
     private Double salary;
 
 
-    @ManyToOne
-    @JoinColumn(name = "fk_unit_id")
-    private Unit unit;
+    @ManyToMany
+    @JoinTable(name = "personel_unit",
+    joinColumns = @JoinColumn(name = "personel_id"),
+    inverseJoinColumns = @JoinColumn(name = "unit_id"))
+    private List<Unit> units;
 
     @ManyToOne
-    @JoinColumn(name = "fk_gate_id")
-    private Gate gate;
+    @JoinColumn(name = "fk_personel_type_id")
+    private PersonelType personelTypeId;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "fk_work_id")
-    @Nullable
-    private Work work;
+    @OneToOne
+    @JoinColumn(name = "fk_working_hours_id")
+    private WorkingHours workingHoursId;
 }

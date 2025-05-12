@@ -2,7 +2,7 @@ package com.personneltrackingsystem.mapper;
 
 import com.personneltrackingsystem.dto.DtoWork;
 import com.personneltrackingsystem.dto.DtoWorkIU;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -10,16 +10,16 @@ import java.util.List;
 @Mapper(componentModel = "spring")
     public interface WorkMapper {
 
-    Work dtoWorkToWork(DtoWork dtoWork);
+    WorkingHours dtoWorkToWork(DtoWork dtoWork);
 
-    DtoWork workToDtoWork(Work work);
+    DtoWork workToDtoWork(WorkingHours work);
 
-    Work dtoWorkIUToWork(DtoWorkIU dtoWorkIU);
+    WorkingHours dtoWorkIUToWork(DtoWorkIU dtoWorkIU);
 
-    DtoWorkIU workToDtoWorkIU(Work work);
+    DtoWorkIU workToDtoWorkIU(WorkingHours work);
 
 
-    List<DtoWorkIU> workListToDtoWorkIUList(List<Work> workList);
+    List<DtoWorkIU> workListToDtoWorkIUList(List<WorkingHours> workList);
 
-    List<Work> DtoWorkListToWork(List<DtoWork> workList);
+    List<WorkingHours> DtoWorkListToWork(List<DtoWork> workList);
 }

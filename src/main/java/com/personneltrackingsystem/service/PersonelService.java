@@ -3,7 +3,7 @@ package com.personneltrackingsystem.service;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public interface PersonelService {
 
     void workHoursCalculate2(Personel newPersonel);
 
-    Work getOneWorkofPersonel(Long personelId);
+    WorkingHours getOneWorkofPersonel(Long personelId);
 
     Map<String, Double> listSalaries();
 }

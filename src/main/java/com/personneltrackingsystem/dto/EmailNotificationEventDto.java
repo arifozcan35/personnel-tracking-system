@@ -11,10 +11,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class EmailNotificationEventDto {
     private Long personelId;
+
     private String personelName;
+
     private String personelEmail;
+
     private String subject;
+
     private String message;
+
     private Boolean isWorkValid;
+    
     private LocalDateTime notificationTime;
 } 

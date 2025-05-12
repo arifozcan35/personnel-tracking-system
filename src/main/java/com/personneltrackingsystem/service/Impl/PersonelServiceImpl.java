@@ -1,7 +1,7 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.*;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.GateMapper;
@@ -119,7 +119,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
         // update name
         if (!ObjectUtils.isEmpty(newPersonel.getName())) {
-            foundPersonel.setName(newPersonel.getName());
+            foundPersonel.setPersonelName(newPersonel.getName());
         }
 
         // update email with uniqueness check
@@ -179,7 +179,7 @@ public class PersonelServiceImpl implements PersonelService  {
             personelValidator.updatePersonelCheckEntryAndExit(entry, exit);
 
             // if personnel already has a work record, update the existing one
-            Work existingWork = foundPersonel.getWork();
+            WorkingHours existingWork = foundPersonel.getWork();
             if (!ObjectUtils.isEmpty(existingWork)) {
                 // update existing work record
                 existingWork.setCheckInTime(entry);
@@ -190,9 +190,9 @@ public class PersonelServiceImpl implements PersonelService  {
                 workServiceImpl.save(existingWork);
             } else {
                 // if no existing work record, create a new one
-                Work newWork = workMapper.dtoWorkToWork(newPersonel.getWork());
+                WorkingHours newWork = workMapper.dtoWorkToWork(newPersonel.getWork());
                 workHoursCalculate2(foundPersonel);
-                Work savedWork = workServiceImpl.save(newWork);
+                WorkingHours savedWork = workServiceImpl.save(newWork);
                 foundPersonel.setWork(savedWork);
             }
         }
@@ -267,7 +267,7 @@ public class PersonelServiceImpl implements PersonelService  {
         Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
         if(!ObjectUtils.isEmpty(optPersonel.isPresent()) && !ObjectUtils.isEmpty(optPersonel.get().getWork())){
-            Work work = optPersonel.get().getWork();
+            WorkingHours work = optPersonel.get().getWork();
 
             LocalTime checkInHour = work.getCheckInTime();
             LocalTime checkOutHour = work.getCheckOutTime();
@@ -284,7 +284,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
             personelRepository.save(optPersonel.get());
 
-            return new DtoPersonel(optPersonel.get().getName(), optPersonel.get().getEmail(), optPersonel.get().getSalary());
+            return new DtoPersonel(optPersonel.get().getPersonelName(), optPersonel.get().getEmail(), optPersonel.get().getSalary());
 
         }else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
@@ -296,7 +296,7 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     public void workHoursCalculate2(Personel newPersonel) {
 
-        Work work = newPersonel.getWork();
+        WorkingHours work = newPersonel.getWork();
 
         Double salary = newPersonel.getSalary();
 
@@ -324,12 +324,12 @@ public class PersonelServiceImpl implements PersonelService  {
 
 
     @Override
-    public Work getOneWorkofPersonel(Long personelId) {
+    public WorkingHours getOneWorkofPersonel(Long personelId) {
         Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
         if (optPersonel.isPresent()) {
             Long workId = optPersonel.get().getWork().getWorkId();
-            Optional<Work> dbWorkOpt = workServiceImpl.findById(workId);
+            Optional<WorkingHours> dbWorkOpt = workServiceImpl.findById(workId);
 
             if (dbWorkOpt.isPresent()) {
                 return personelMapper.DbWorktoWork(dbWorkOpt);

@@ -1,16 +1,16 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoWorkIU;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface WorkService {
 
-    Optional<Work> findById(Long workId);
+    Optional<WorkingHours> findById(Long workId);
 
-    Work save(Work work);
+    WorkingHours save(WorkingHours work);
 
     void deleteById(Long workId);
 

@@ -3,7 +3,7 @@ package com.personneltrackingsystem.controller.Impl;
 import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.service.PersonelService;
 
 import lombok.RequiredArgsConstructor;
@@ -70,7 +70,7 @@ public class PersonelControllerImpl implements PersonelController {
 
 
     @Override
-    public Work seeWork(Long personelId) {
+    public WorkingHours seeWork(Long personelId) {
         return personelServiceImpl.getOneWorkofPersonel(personelId);
     }
 

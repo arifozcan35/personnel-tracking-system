@@ -4,7 +4,7 @@ import com.personneltrackingsystem.dto.EmailNotificationEventDto;
 import com.personneltrackingsystem.dto.GatePassageEventDto;
 import com.personneltrackingsystem.dto.WorkValidationEventDto;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.KafkaProducerService;
 import com.personneltrackingsystem.validator.PersonelValidator;
@@ -47,11 +47,11 @@ public class KafkaConsumerServiceImpl {
         }
         
         // Use check-in and check-out information from the work entity
-        Work work = personel.getWork();
+        WorkingHours work = personel.getWork();
         
         WorkValidationEventDto workValidationEvent = new WorkValidationEventDto();
         workValidationEvent.setPersonelId(personel.getPersonelId());
-        workValidationEvent.setPersonelName(personel.getName());
+        workValidationEvent.setPersonelName(personel.getPersonelName());
         workValidationEvent.setPersonelEmail(personel.getEmail());
         workValidationEvent.setCheckInTime(work.getCheckInTime());
         workValidationEvent.setCheckOutTime(work.getCheckOutTime());
@@ -82,7 +82,7 @@ public class KafkaConsumerServiceImpl {
             personelRepository.save(personel);
             
             log.info("Applied salary deduction of {} TL to personel {}. New salary: {} TL", 
-                     penaltyAmount, personel.getName(), newSalary);
+                     penaltyAmount, personel.getPersonelName(), newSalary);
         } else {
             workValidationEvent.setPenaltyAmount(0.0);
         }

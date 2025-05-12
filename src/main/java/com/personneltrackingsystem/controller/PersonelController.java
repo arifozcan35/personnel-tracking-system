@@ -2,7 +2,7 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
-import com.personneltrackingsystem.entity.Work;
+import com.personneltrackingsystem.entity.WorkingHours;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +61,7 @@ public interface PersonelController {
             description = "The working hours information of the personnel belonging to the given id is displayed."
     )
     @GetMapping("/work/{personelId}")
-    Work seeWork(@PathVariable Long personelId);
+    WorkingHours seeWork(@PathVariable Long personelId);
 
     @Operation(
             summary = "Salary information",
