@@ -28,10 +28,6 @@ public class Personel {
     @NotBlank
     private String email;
 
-    private Boolean administrator;
-
-    private Double salary;
-
 
     @ManyToMany
     @JoinTable(name = "personel_unit",
@@ -43,7 +39,4 @@ public class Personel {
     @JoinColumn(name = "fk_personel_type_id")
     private PersonelType personelTypeId;
 
-    @OneToOne
-    @JoinColumn(name = "fk_working_hours_id")
-    private WorkingHours workingHoursId;
 }

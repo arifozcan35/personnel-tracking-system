@@ -9,7 +9,7 @@ import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.mapper.WorkMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.GateService;
+import com.personneltrackingsystem.service.FloorService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.UnitService;
 import com.personneltrackingsystem.service.WorkService;
@@ -36,7 +36,7 @@ public class PersonelServiceImpl implements PersonelService  {
 
     private final UnitService unitServiceImpl;
 
-    private final GateService gateServiceImpl;
+    private final FloorService gateServiceImpl;
 
     private final MessageResolver messageResolver;
 
