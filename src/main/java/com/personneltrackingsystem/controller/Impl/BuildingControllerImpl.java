@@ -1,0 +1,42 @@
+package com.personneltrackingsystem.controller.Impl;
+
+import com.personneltrackingsystem.controller.BuildingController;
+import com.personneltrackingsystem.dto.DtoBuilding;
+import com.personneltrackingsystem.dto.DtoBuildingIU;
+import com.personneltrackingsystem.service.BuildingService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+public class BuildingControllerImpl implements BuildingController {
+
+    private final BuildingService buildingService;
+
+    @Override
+    public List<DtoBuilding> getAllBuildings() {
+        return buildingService.getAllBuildings();
+    }
+
+    @Override
+    public DtoBuilding getOneBuilding(Long buildingId) {
+        return buildingService.getOneBuilding(buildingId);  
+    }
+
+    @Override
+    public DtoBuilding createBuilding(DtoBuildingIU newBuilding) {
+        return buildingService.createBuilding(newBuilding);
+    }
+
+    @Override
+    public DtoBuilding updateBuilding(Long buildingId, DtoBuildingIU newBuilding) {
+        return buildingService.updateBuilding(buildingId, newBuilding);
+    }
+
+    @Override
+    public void deleteBuilding(Long buildingId) {
+        buildingService.deleteBuilding(buildingId);
+    }
+} 

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import com.personneltrackingsystem.entity.Unit;
 
 @Getter
 @Setter
@@ -20,5 +20,8 @@ public class DtoGateIU {
     @Schema(description = "The name of gate", example = "3. Floor")
     private String gateName;
 
-    private List<DtoPersonel> personels;
+    private Boolean mainEntrance;
+
+
+    private Unit unitId;
 }

@@ -2,16 +2,17 @@ package com.personneltrackingsystem.dto;
 
 import com.personneltrackingsystem.entity.Building;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter; 
+import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-public class FloorResponseDTO {
+public class DtoFloorIU {
+
+    private Long floorId;
 
     private String floorName;
 
     private Building buildingId;
+
 }

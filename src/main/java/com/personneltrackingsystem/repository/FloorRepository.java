@@ -18,8 +18,8 @@ public interface FloorRepository extends JpaRepository<Floor, Long> {
     Optional<Personel> findPrsnlById(@Param("personelId") Long personelId);
 
     @Modifying
-    @Query("UPDATE Personel p SET p.floor = NULL WHERE p.floor = :floor")
-    void updatePersonelFloorReferences(@Param("floor") Floor floor);
+    @Query("UPDATE Building b SET b.floor = NULL WHERE b.floor = :floor")
+    void updateBuildingFloorReferences(@Param("floor") Floor floor);
 
     boolean existsByFloorName(String existingFloorName);
 

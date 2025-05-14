@@ -108,6 +108,9 @@ public class UnitServiceImpl implements UnitService {
         Optional<Unit> optUnit = unitRepository.findById(unitId);
 
         if (optUnit.isPresent()) {
+            // make floor connected to Unit null
+            unitRepository.detachFloorFromUnit(optUnit.get());
+
             // make personnel connected to Unit null
             unitRepository.detachPersonelFromUnit(optUnit.get());
 

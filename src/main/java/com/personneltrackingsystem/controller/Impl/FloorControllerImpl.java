@@ -1,7 +1,7 @@
 package com.personneltrackingsystem.controller.Impl;
 
-import com.personneltrackingsystem.dto.FloorCreateUpdateRequestDTO;
-import com.personneltrackingsystem.dto.FloorResponseDTO;
+import com.personneltrackingsystem.dto.DtoFloorIU;
+import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.controller.FloorController;
 import com.personneltrackingsystem.service.FloorService;
 import lombok.RequiredArgsConstructor;
@@ -18,25 +18,25 @@ public class FloorControllerImpl implements FloorController {
 
 
     @Override
-    public List<FloorResponseDTO> getAllFloors() {
+    public List<DtoFloor> getAllFloors() {
         return gateServiceImpl.getAllFloors();
     }
 
 
     @Override
-    public FloorResponseDTO getOneFloor(Long floorId) {
+    public DtoFloor getOneFloor(Long floorId) {
         return gateServiceImpl.getOneFloor(floorId);
     }
 
 
     @Override
-    public FloorResponseDTO createFloor(FloorCreateUpdateRequestDTO newFloor) {
+    public DtoFloor createFloor(DtoFloorIU newFloor) {
         return gateServiceImpl.saveOneFloor(newFloor);
     }
 
 
     @Override
-    public FloorResponseDTO updateFloor(Long floorId, FloorCreateUpdateRequestDTO newFloor) {
+    public DtoFloor updateFloor(Long floorId, DtoFloorIU newFloor) {
         return gateServiceImpl.updateOneFloor(floorId, newFloor);
     }
 

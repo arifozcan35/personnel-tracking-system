@@ -1,9 +1,7 @@
 package com.personneltrackingsystem.controller;
 
-import com.personneltrackingsystem.dto.DtoGate;
-import com.personneltrackingsystem.dto.DtoGateIU;
-import com.personneltrackingsystem.dto.FloorCreateUpdateRequestDTO;
-import com.personneltrackingsystem.dto.FloorResponseDTO;
+import com.personneltrackingsystem.dto.DtoFloorIU;
+import com.personneltrackingsystem.dto.DtoFloor;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,19 +17,19 @@ public interface FloorController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    List<FloorResponseDTO> getAllFloors();
+    List<DtoFloor> getAllFloors();
 
     @GetMapping("/{floorId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    FloorResponseDTO getOneFloor(@PathVariable Long floorId);
+    DtoFloor getOneFloor(@PathVariable Long floorId);
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    FloorResponseDTO createFloor(@RequestBody FloorCreateUpdateRequestDTO newFloor);
+    DtoFloor createFloor(@RequestBody DtoFloorIU newFloor);
 
     @PutMapping("/{floorId}")
     @PreAuthorize("hasRole('ADMIN')")
-    FloorResponseDTO updateFloor(@PathVariable Long floorId, @RequestBody FloorCreateUpdateRequestDTO newFloor);
+    DtoFloor updateFloor(@PathVariable Long floorId, @RequestBody DtoFloorIU newFloor);
 
     @DeleteMapping("/{floorId}")
     @PreAuthorize("hasRole('ADMIN')")

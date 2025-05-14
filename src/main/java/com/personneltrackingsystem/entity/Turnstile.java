@@ -33,5 +33,5 @@ public class Turnstile {
 
     @OneToMany
     @JoinColumn(name = "fk_gate_id")
-    private Long gateId;
+    private Gate gateId;
 }

@@ -33,7 +33,7 @@ public class Personel {
     @JoinTable(name = "personel_unit",
     joinColumns = @JoinColumn(name = "personel_id"),
     inverseJoinColumns = @JoinColumn(name = "unit_id"))
-    private List<Unit> units;
+    private List<Unit> unitId;
 
     @ManyToOne
     @JoinColumn(name = "fk_personel_type_id")

@@ -1,19 +1,12 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.*;
-import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.*;
-import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.mapper.PersonelMapper;
-import com.personneltrackingsystem.mapper.UnitMapper;
-import com.personneltrackingsystem.mapper.WorkMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.FloorService;
 import com.personneltrackingsystem.service.PersonelService;
-import com.personneltrackingsystem.service.UnitService;
-import com.personneltrackingsystem.service.WorkService;
-import com.personneltrackingsystem.validator.PersonelValidator;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -32,69 +23,52 @@ public class PersonelServiceImpl implements PersonelService  {
 
     private final PersonelRepository personelRepository;
 
-    private final WorkService workServiceImpl;
-
-    private final UnitService unitServiceImpl;
-
-    private final FloorService gateServiceImpl;
-
-    private final MessageResolver messageResolver;
-
     private final PersonelMapper personelMapper;
-
-    private final UnitMapper unitMapper;
-
-    private final GateMapper gateMapper;
-
-    private final WorkMapper workMapper;
-
-    private final PersonelValidator personelValidator;
 
 
     @Override
     public List<DtoPersonel> getAllPersonels() {
-
-        List<Personel> personelList =  personelRepository.findAll();
-
+        List<Personel> personelList = personelRepository.findAll();
         return personelMapper.personelsToDtoPersonels(personelList);
     }
 
-
     @Override
     public DtoPersonel getAOnePersonel(Long personelId) {
-        Optional<Personel> optPersonel =  personelRepository.findById(personelId);
+        Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
-        if(optPersonel.isPresent()){
+        if(optPersonel.isPresent()) {
             return personelMapper.personelToDtoPersonel(optPersonel.get());
-        }else{
+        } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
         }
     }
 
-
     @Override
     @Transactional
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
-
-        // validate all personel
-        Optional<DtoUnitIU> prsnlUnitId = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
-        Optional<DtoGateIU> prsnlGateId = gateServiceImpl.findById(newPersonel.getGate().getGateId());
-        personelValidator.validatePersonelForSave(newPersonel, prsnlUnitId, prsnlGateId);
+        // Basic data validation
+        if (ObjectUtils.isEmpty(newPersonel.getName()) || ObjectUtils.isEmpty(newPersonel.getEmail())) {
+            throw new ValidationException("Personnel name and email are required!");
+        }
 
         Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
 
-        // check email
+        // Check email uniqueness
         Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
         if (existingPersonnel.isPresent()) {
             throw new ValidationException("Personnel with this email already exists!");
         }
 
-        // calculate working hours
-        if (!ObjectUtils.isEmpty(newPersonel.getWork())) {
-            workHoursCalculate2(personelToSave);
+        // Handle personnel type if provided
+        if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
+            personelToSave.setPersonelTypeId(newPersonel.getPersonelTypeId());
         }
 
-        // after modify cascade type, we save the personel at once
+        // Handle units if provided
+        if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
+            personelToSave.setUnitId(newPersonel.getUnitId());
+        }
+
         try {
             Personel savedPersonnel = personelRepository.save(personelToSave);
             return new ResponseEntity<>("Personnel registered successfully with ID: " + savedPersonnel.getPersonelId(), HttpStatus.CREATED);
@@ -103,11 +77,9 @@ public class PersonelServiceImpl implements PersonelService  {
         }
     }
 
-
     @Override
     @Transactional
     public ResponseEntity<String> updateOnePersonel(Long id, DtoPersonelIU newPersonel) {
-
         Optional<Personel> optPersonel = personelRepository.findById(id);
 
         if (optPersonel.isEmpty()) {
@@ -115,86 +87,29 @@ public class PersonelServiceImpl implements PersonelService  {
         }
 
         Personel foundPersonel = optPersonel.get();
-        personelMapper.personelToDtoPersonelIU(foundPersonel);
 
-        // update name
+        // Update name
         if (!ObjectUtils.isEmpty(newPersonel.getName())) {
-            foundPersonel.setPersonelName(newPersonel.getName());
+            foundPersonel.setName(newPersonel.getName());
         }
 
-        // update email with uniqueness check
+        // Update email with uniqueness check
         if (!ObjectUtils.isEmpty(newPersonel.getEmail())) {
-            // check if email is already in use by another personnel
             Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
             if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
                 throw new ValidationException("Email is already in use by another personnel!");
             }
-
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
-        // update administrator position and salary
-        if(!ObjectUtils.isEmpty(newPersonel.getAdministrator())){
-            foundPersonel.setAdministrator(newPersonel.getAdministrator());
-
-            DtoPersonelIU pAdmin = new DtoPersonelIU();
-            pAdmin.setAdministrator(personelValidator.selectionPosition(pAdmin, newPersonel.getAdministrator()));
-            foundPersonel.setSalary(pAdmin.getSalary());
-        }
-        else if(!ObjectUtils.isEmpty(newPersonel.getSalary())){
-            DtoPersonelIU pSalary = new DtoPersonelIU();
-            personelValidator.salaryAssignment(pSalary, newPersonel.getSalary());
-            foundPersonel.setAdministrator(pSalary.getAdministrator());
-            foundPersonel.setSalary(pSalary.getSalary());
+        // Update personnel type
+        if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
+            foundPersonel.setPersonelTypeId(newPersonel.getPersonelTypeId());
         }
 
-        // update unit
-        if (!ObjectUtils.isEmpty(newPersonel.getUnit())) {
-            Optional<DtoUnitIU> existingUnit = unitServiceImpl.findById(newPersonel.getUnit().getUnitId());
-
-            if (existingUnit.isEmpty()) {
-                return new ResponseEntity<>("You have not selected a suitable unit!", HttpStatus.NOT_FOUND);
-            }
-
-            foundPersonel.setUnit(unitMapper.dtoUnitIUToUnit(existingUnit.get()));
-        }
-
-        // update gate
-        if (!ObjectUtils.isEmpty(newPersonel.getGate())) {
-            Optional<DtoGateIU> existingGate = gateServiceImpl.findById(newPersonel.getGate().getGateId());
-
-            if (existingGate.isEmpty()) {
-                return new ResponseEntity<>("The specified gate could not be found!", HttpStatus.NOT_FOUND);
-            }
-
-            foundPersonel.setGate(gateMapper.dtoGateIUToGate(existingGate.get()));
-        }
-
-        // update working hours
-        if (!ObjectUtils.isEmpty(newPersonel.getWork())) {
-            LocalTime entry = newPersonel.getWork().getCheckInTime();
-            LocalTime exit = newPersonel.getWork().getCheckOutTime();
-
-            // validate check-in and check-out times
-            personelValidator.updatePersonelCheckEntryAndExit(entry, exit);
-
-            // if personnel already has a work record, update the existing one
-            WorkingHours existingWork = foundPersonel.getWork();
-            if (!ObjectUtils.isEmpty(existingWork)) {
-                // update existing work record
-                existingWork.setCheckInTime(entry);
-                existingWork.setCheckOutTime(exit);
-
-                // save the updated work record
-                workHoursCalculate2(foundPersonel);
-                workServiceImpl.save(existingWork);
-            } else {
-                // if no existing work record, create a new one
-                WorkingHours newWork = workMapper.dtoWorkToWork(newPersonel.getWork());
-                workHoursCalculate2(foundPersonel);
-                WorkingHours savedWork = workServiceImpl.save(newWork);
-                foundPersonel.setWork(savedWork);
-            }
+        // Update units
+        if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
+            foundPersonel.setUnitId(newPersonel.getUnitId());
         }
 
         try {
@@ -205,149 +120,54 @@ public class PersonelServiceImpl implements PersonelService  {
         }
     }
 
-
     @Override
     @Transactional
     public void deleteOnePersonel(Long id) {
         Optional<Personel> optPersonel = personelRepository.findById(id);
         if (optPersonel.isPresent()) {
-            // delete the shift record first
-            if (!ObjectUtils.isEmpty(optPersonel.get().getWork())) {
-                workServiceImpl.deleteById(optPersonel.get().getWork().getWorkId());
-            }
-
-             // Search for orhanRemove, you can handle these two operations in a single code
-
-            // then delete the personnel record
             personelRepository.deleteById(id);
-
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
         }
     }
 
-
-
-    @Override
-    public Set<DtoPersonel> getPersonelsByGateId(Long gateId) {
-        Set<DtoPersonel> personels = new HashSet<>();
-
-        Optional<DtoGateIU> optGate = gateServiceImpl.findById(gateId);
-
-        if (optGate.isPresent()) {
-            personels.addAll(optGate.get().getPersonels());
-        } else {
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
-        }
-
-        return personels;
-    }
-
-
     @Override
     public Set<DtoPersonel> getPersonelsByUnitId(Long unitId) {
         Set<DtoPersonel> personels = new HashSet<>();
-
-        Optional<DtoUnitIU> optUnit = unitServiceImpl.findById(unitId);
-
-        if (optUnit.isPresent()) {
-            personels.addAll(optUnit.get().getPersonels());
-        } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
-        }
-        return personels;
-    }
-
-
-
-
-    @Override
-    public DtoPersonel workHoursCalculate(Long personelId) {
-        Optional<Personel> optPersonel = personelRepository.findById(personelId);
-
-        if(!ObjectUtils.isEmpty(optPersonel.isPresent()) && !ObjectUtils.isEmpty(optPersonel.get().getWork())){
-            WorkingHours work = optPersonel.get().getWork();
-
-            LocalTime checkInHour = work.getCheckInTime();
-            LocalTime checkOutHour = work.getCheckOutTime();
-
-            Duration workTime = personelValidator.calculateWorkTime(checkInHour, checkOutHour);
-
-            boolean valid = personelValidator.isWorkValid(checkInHour, checkOutHour);
-            optPersonel.get().getWork().setIsWorkValid(valid);
-
-            if (!valid) {
-                double penalty = personelValidator.calculatePenalty(workTime);
-                optPersonel.get().setSalary(optPersonel.get().getSalary() - penalty);
-            }
-
-            personelRepository.save(optPersonel.get());
-
-            return new DtoPersonel(optPersonel.get().getPersonelName(), optPersonel.get().getEmail(), optPersonel.get().getSalary());
-
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
-        }
-    }
-
-
-    @Override
-    public void workHoursCalculate2(Personel newPersonel) {
-
-        WorkingHours work = newPersonel.getWork();
-
-        Double salary = newPersonel.getSalary();
-
-        if(!ObjectUtils.isEmpty(work)){
-            LocalTime checkInHour = work.getCheckInTime();
-            LocalTime checkOutHour = work.getCheckOutTime();
-
-            Duration workTime = personelValidator.calculateWorkTime(checkInHour, checkOutHour);
-
-            boolean valid = personelValidator.isWorkValid(checkInHour, checkOutHour);
-            newPersonel.getWork().setIsWorkValid(valid);
-
-            // if employee is an admin then ignore the pay cut :)
-            if (!ObjectUtils.isEmpty(newPersonel.getAdministrator()) && newPersonel.getAdministrator()) {
-                newPersonel.setSalary(salary);
-            } else {
-                // if employee is not an admin then
-                if (!valid) {
-                    double penalty = personelValidator.calculatePenalty(workTime);
-                    newPersonel.setSalary(((newPersonel.getSalary()) - (penalty)));
+        
+        // Find all personnel that belong to the specified unit
+        List<Personel> personnelList = personelRepository.findAll();
+        
+        for (Personel personel : personnelList) {
+            if (personel.getUnitId() != null) {
+                for (Unit unit : personel.getUnitId()) {
+                    if (unit.getUnitId().equals(unitId)) {
+                        personels.add(personelMapper.personelToDtoPersonel(personel));
+                        break;
+                    }
                 }
             }
         }
-    }
-
-
-    @Override
-    public WorkingHours getOneWorkofPersonel(Long personelId) {
-        Optional<Personel> optPersonel = personelRepository.findById(personelId);
-
-        if (optPersonel.isPresent()) {
-            Long workId = optPersonel.get().getWork().getWorkId();
-            Optional<WorkingHours> dbWorkOpt = workServiceImpl.findById(workId);
-
-            if (dbWorkOpt.isPresent()) {
-                return personelMapper.DbWorktoWork(dbWorkOpt);
-            } else {
-                throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, "Work with ID: " + workId));
-            }
-        } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
+        
+        if (personels.isEmpty()) {
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
         }
+        
+        return personels;
     }
 
-
+    /*
     @Override
     public Map<String, Double> listSalaries() {
-
         List<Personel> allPersonels = personelRepository.findAll();
-
-        return personelMapper.personelsToSalaryMap(allPersonels);
+        
+        Map<String, Double> salaryMap = new HashMap<>();
+        
+        for (Personel personel : allPersonels) {
+            salaryMap.put(personel.getName(), 0.0);
+        }
+        
+        return salaryMap;
     }
-
+    */
 }

@@ -17,11 +17,11 @@ public interface GateRepository extends JpaRepository<Gate, Long> {
     Optional<Personel> findPrsnlById(@Param("personelId") Long personelId);
 
     @Modifying
-    @Query("UPDATE Personel p SET p.gate = NULL WHERE p.gate = :gate")
-    void updatePersonelGateReferences(@Param("gate") Gate gate);
+    @Query("UPDATE Unit u SET u.gate = NULL WHERE u.gate = :gate")
+    void updateUnitGateReferences(@Param("gate") Gate gate);
 
     boolean existsByGateName(String existingGateName);
 
-    boolean existsByGateId(Long existingGateID);
+    boolean existsById(Long existingGateID);
 
 }

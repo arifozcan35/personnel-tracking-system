@@ -2,8 +2,8 @@ package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
-import com.personneltrackingsystem.dto.FloorCreateUpdateRequestDTO;
-import com.personneltrackingsystem.dto.FloorResponseDTO;
+import com.personneltrackingsystem.dto.DtoFloorIU;
+import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.entity.Floor;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
@@ -39,7 +39,7 @@ public class FloorServiceImpl implements FloorService {
     private final KafkaProducerService kafkaProducerService;
 
     @Override
-    public Optional<FloorResponseDTO> findById(Long floorId) {
+    public Optional<DtoFloor> findById(Long floorId) {
 
         // Don't make the outgoing returns optional, just make them dto
 
@@ -50,7 +50,7 @@ public class FloorServiceImpl implements FloorService {
     }
 
     @Override
-    public List<FloorResponseDTO> getAllFloors(){
+    public List<DtoFloor> getAllFloors(){
 
         List<Floor> floorList =  floorRepository.findAll();
 
@@ -59,7 +59,7 @@ public class FloorServiceImpl implements FloorService {
 
 
     @Override
-    public FloorResponseDTO getOneFloor(Long floorId){
+    public DtoFloor getOneFloor(Long floorId){
         Optional<Floor> optFloor =  floorRepository.findById(floorId);
         if(optFloor.isEmpty()){
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
@@ -72,7 +72,7 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     @Transactional
-    public FloorResponseDTO saveOneFloor(FloorCreateUpdateRequestDTO floor) {
+    public DtoFloor saveOneFloor(DtoFloorIU floor) {
 
         if (!ObjectUtils.isEmpty(floor.getFloorId())) {
             if (floorRepository.existsByFloorId(floor.getFloorId())) {
@@ -98,7 +98,7 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     @Transactional
-    public FloorResponseDTO updateOneFloor(Long id, FloorCreateUpdateRequestDTO newFloor) {
+    public DtoFloor updateOneFloor(Long id, DtoFloorIU newFloor) {
 
         Optional<Floor> optFloor = floorRepository.findById(id);
 
@@ -123,8 +123,8 @@ public class FloorServiceImpl implements FloorService {
         Optional<Floor> optFloor = floorRepository.findById(floorId);
 
         if(optFloor.isPresent()){
-            // update associated personnel records
-            floorRepository.updatePersonelFloorReferences(optFloor.get());
+            // update associated building records
+            floorRepository.updateBuildingFloorReferences(optFloor.get());
 
             // delete floor
             floorRepository.delete(optFloor.get());

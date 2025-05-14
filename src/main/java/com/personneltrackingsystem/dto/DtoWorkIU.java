@@ -8,11 +8,15 @@ import lombok.Setter;
 
 import java.time.LocalTime;
 
+import com.personneltrackingsystem.entity.PersonelType;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class DtoWorkIU {
+
+    private Long workingHoursId;
 
     @Schema(description = "Entry time for work", example = "09:18")
     private LocalTime checkInTime;
@@ -20,6 +24,6 @@ public class DtoWorkIU {
     @Schema(description = "Exit time for work", example = "18:00")
     private LocalTime checkOutTime;
 
-    @Schema(description = "validation of working hours", example = "0")
-    private Boolean isWorkValid;
+
+    private PersonelType personelTypeId;
 }

@@ -12,6 +12,10 @@ import org.springframework.stereotype.Repository;
 public interface UnitRepository extends JpaRepository<Unit, Long> {
 
     @Modifying
+    @Query("UPDATE Floor f SET f.unit = NULL WHERE f.unit = :unit")
+    void detachFloorFromUnit(@Param("unit") Unit unit);
+
+    @Modifying
     @Query("UPDATE Personel p SET p.unit = NULL WHERE p.unit = :unit")
     void detachPersonelFromUnit(@Param("unit") Unit unit);
 

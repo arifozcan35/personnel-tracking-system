@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import com.personneltrackingsystem.entity.Floor;
+import com.personneltrackingsystem.entity.Personel;
 
 @Getter
 @Setter
@@ -22,5 +23,7 @@ public class DtoUnitIU {
     @Schema(description = "The name of unit", example = "Information Technologies")
     private String birimIsim;
 
-    private List<DtoPersonel> personels;
+    private Floor floorId;
+
+    private Personel administratorPersonelId;
 }

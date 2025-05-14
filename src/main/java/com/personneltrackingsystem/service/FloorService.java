@@ -1,7 +1,7 @@
 package com.personneltrackingsystem.service;
 
-import com.personneltrackingsystem.dto.FloorCreateUpdateRequestDTO;
-import com.personneltrackingsystem.dto.FloorResponseDTO;
+import com.personneltrackingsystem.dto.DtoFloorIU;
+import com.personneltrackingsystem.dto.DtoFloor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -12,15 +12,15 @@ import java.util.Optional;
 @Validated
 public interface FloorService {
 
-    Optional<FloorResponseDTO> findById(Long floorId);
+    Optional<DtoFloor> findById(Long floorId);
 
-    List<FloorResponseDTO> getAllFloors();
+    List<DtoFloor> getAllFloors();
 
-    FloorResponseDTO getOneFloor(Long floorId);
+    DtoFloor getOneFloor(Long floorId);
 
-    FloorResponseDTO saveOneFloor(FloorCreateUpdateRequestDTO floor);
+    DtoFloor saveOneFloor(DtoFloorIU floor);
 
-    FloorResponseDTO updateOneFloor(Long id, FloorCreateUpdateRequestDTO newFloor);
+    DtoFloor updateOneFloor(Long id, DtoFloorIU newFloor);
 
     void deleteOneFloor(Long floorId);
 

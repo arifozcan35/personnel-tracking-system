@@ -1,5 +1,10 @@
 package com.personneltrackingsystem.dto;
 
+import java.util.List;
+
+import com.personneltrackingsystem.entity.PersonelType;
+import com.personneltrackingsystem.entity.Unit;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DtoPersonelIU {
 
+
     @Schema(description = "The name of Personnel", example = "Arif Ozcan")
     private String name;
 
@@ -22,13 +28,9 @@ public class DtoPersonelIU {
     @Schema(description = "Staff position", example = "0")
     private Boolean administrator;
 
-    @Schema(description = "The salary amount of Personnel", example = "25000")
-    private Double salary;
 
 
-    private DtoUnit unit;
+    private List<Unit> unitId;
 
-    private DtoGate gate;
-
-    private DtoWork work;
+    private PersonelType personelTypeId;
 }

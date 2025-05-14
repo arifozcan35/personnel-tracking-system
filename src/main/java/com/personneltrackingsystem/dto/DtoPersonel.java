@@ -18,6 +18,4 @@ public class DtoPersonel {
     @Schema(description = "The e-mail of Personnel", example = "zcanarif@gmail.com")
     private String email;
 
-    @Schema(description = "The salary amount of Personnel", example = "25000")
-    private Double salary;
 }

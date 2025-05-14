@@ -14,4 +14,8 @@ public interface WorkRepository extends JpaRepository<WorkingHours, Long> {
     @Query("UPDATE Personel p SET p.work = NULL WHERE p.work = :work")
     void detachPersonelFromWork(@Param("work") WorkingHours work);
 
+    boolean existsByWorkId(Long existingWorkID);
+
+    boolean existsByWorkName(String existingWorkName);
+
 }

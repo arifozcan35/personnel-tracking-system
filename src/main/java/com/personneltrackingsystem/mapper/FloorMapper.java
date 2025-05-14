@@ -3,36 +3,21 @@ package com.personneltrackingsystem.mapper;
 import java.util.List;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
-import com.personneltrackingsystem.dto.FloorCreateUpdateRequestDTO;
-import com.personneltrackingsystem.dto.FloorResponseDTO;
+import com.personneltrackingsystem.dto.DtoFloor;
+import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.entity.Floor;
-import com.personneltrackingsystem.entity.Building;
 
 @Mapper(componentModel = "spring")
 public interface FloorMapper {
 
-    @Mapping(target = "buildingId", source = "buildingId", qualifiedByName = "buildingIdToBuilding")
-    Floor floorCreateUpdateRequestDTOToFloor(FloorCreateUpdateRequestDTO floorCreateUpdateRequestDTO);
-    
-    Floor floorResponseDTOToFloor(FloorResponseDTO floorResponseDTO);   
+    Floor dtoFloorIUToFloor(DtoFloorIU dtoFloorIU);
 
-    @Mapping(target = "buildingId", source = "buildingId.buildingId")
-    FloorCreateUpdateRequestDTO floorToFloorCreateUpdateRequestDTO(Floor floor);
+    Floor dtoFloorToFloor(DtoFloor dtoFloor);
 
-    FloorResponseDTO floorToFloorResponseDTO(Floor floor);
+    List<DtoFloor> floorListToDtoFloorList(List<Floor> floorList);
 
-    List<FloorResponseDTO> floorListToFloorResponseDTOList(List<Floor> floorList);
+    DtoFloor floorToDtoFloor(Floor floor);
 
-    @Named("buildingIdToBuilding")
-    default Building buildingIdToBuilding(Long buildingId) {
-        if (buildingId == null) {
-            return null;
-        }
-        Building building = new Building();
-        building.setBuildingId(buildingId);
-        return building;
-    }
+    DtoFloorIU floorToDtoFloorIU(Floor floor);
 }
