@@ -8,9 +8,14 @@ import java.util.Optional;
 
 public interface TurnstileService {
     List<DtoTurnstile> getAllTurnstiles();
+
     Optional<DtoTurnstile> getTurnstileById(Long id);
+
     DtoTurnstile getOneTurnstile(Long id);
-    DtoTurnstile saveOneTurnstile(DtoTurnstileIU turnstile);
+
+    DtoTurnstile saveOneTurnstile(DtoTurnstile newTurnstile);
+
     DtoTurnstile updateOneTurnstile(Long id, DtoTurnstileIU newTurnstile);
+
     void deleteOneTurnstile(Long id);
 } 

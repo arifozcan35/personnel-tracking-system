@@ -22,7 +22,7 @@ public interface PersonelTypeController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoPersonelType createPersonelType(@RequestBody DtoPersonelTypeIU newPersonelType);
+    DtoPersonelType createPersonelType(@RequestBody DtoPersonelType newPersonelType);
 
     @PutMapping("/{personelTypeId}")
     @PreAuthorize("hasRole('ADMIN')")

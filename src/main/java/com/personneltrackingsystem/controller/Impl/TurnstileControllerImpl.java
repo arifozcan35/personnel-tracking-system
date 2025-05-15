@@ -26,7 +26,7 @@ public class TurnstileControllerImpl implements TurnstileController {
     }
 
     @Override
-    public DtoTurnstile createTurnstile(DtoTurnstileIU newTurnstile) {
+    public DtoTurnstile createTurnstile(DtoTurnstile newTurnstile) {
         return turnstileService.saveOneTurnstile(newTurnstile);
     }
 

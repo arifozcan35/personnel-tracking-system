@@ -2,9 +2,6 @@ package com.personneltrackingsystem.dto;
 
 import java.time.LocalDateTime;
 
-import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Turnstile;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +15,9 @@ public class DtoTurnstileRegistrationLogIU {
 
     private Long turnstileRegistrationLogId;
 
-    private Personel personelId;
+    private Long personelId;
 
-    private Turnstile turnstileId;
+    private Long turnstileId;
 
     private LocalDateTime operationTime;
 

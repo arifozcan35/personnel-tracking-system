@@ -62,13 +62,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
     @Override
     @Transactional
-    public DtoPersonelType saveOnePersonelType(DtoPersonelTypeIU personelType) {
-
-        if (!ObjectUtils.isEmpty(personelType.getPersonelTypeId())) {
-            if (personelTypeRepository.existsById(personelType.getPersonelTypeId())) {
-                throw new ValidationException("Personel type with this personel type ID already exists!");
-            }
-        }
+    public DtoPersonelType saveOnePersonelType(DtoPersonelType personelType) {
 
         String personelTypeName = personelType.getPersonelTypeName();
         if (ObjectUtils.isEmpty(personelTypeName)) {
@@ -79,7 +73,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
             throw new ValidationException("Personel type with this personel type name already exists!");
         }
 
-        PersonelType pPersonelType = personelTypeMapper.dtoPersonelTypeIUToPersonelType(personelType);
+        PersonelType pPersonelType = personelTypeMapper.dtoPersonelTypeToPersonelType(personelType);
         PersonelType dbPersonelType = personelTypeRepository.save(pPersonelType);
 
         return personelTypeMapper.personelTypeToDtoPersonelType(dbPersonelType);

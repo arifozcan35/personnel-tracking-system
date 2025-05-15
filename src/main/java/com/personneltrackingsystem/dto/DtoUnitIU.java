@@ -6,9 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import com.personneltrackingsystem.entity.Floor;
-import com.personneltrackingsystem.entity.Personel;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,7 +20,7 @@ public class DtoUnitIU {
     @Schema(description = "The name of unit", example = "Information Technologies")
     private String birimIsim;
 
-    private Floor floorId;
+    private Long floorId;
 
-    private Personel administratorPersonelId;
+    private Long administratorPersonelId;
 }

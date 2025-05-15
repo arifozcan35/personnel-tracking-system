@@ -22,7 +22,7 @@ public interface GateController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoGate createGate(@RequestBody DtoGateIU newGate);
+    DtoGate createGate(@RequestBody DtoGate newGate);
 
     @PutMapping("/{gateId}")
     @PreAuthorize("hasRole('ADMIN')")

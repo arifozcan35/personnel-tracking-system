@@ -26,7 +26,7 @@ public class BuildingControllerImpl implements BuildingController {
     }
 
     @Override
-    public DtoBuilding createBuilding(DtoBuildingIU newBuilding) {
+    public DtoBuilding createBuilding(DtoBuilding newBuilding) {
         return buildingService.saveOneBuilding(newBuilding);
     }
 

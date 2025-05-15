@@ -8,9 +8,14 @@ import java.util.Optional;
 
 public interface GateService {
     List<DtoGate> getAllGates();
+
     Optional<DtoGate> getGateById(Long id);
+
     DtoGate getOneGate(Long gateId);
-    DtoGate saveOneGate(DtoGateIU gate);
+
+    DtoGate saveOneGate(DtoGate newGate);
+
     DtoGate updateOneGate(Long id, DtoGateIU newGate);
+
     void deleteOneGate(Long gateId);
 } 

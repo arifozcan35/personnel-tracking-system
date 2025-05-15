@@ -62,13 +62,8 @@ public class BuildingServiceImpl implements BuildingService {
 
     @Override
     @Transactional
-    public DtoBuilding saveOneBuilding(DtoBuildingIU building) {
+    public DtoBuilding saveOneBuilding(DtoBuilding building) {
 
-        if (!ObjectUtils.isEmpty(building.getBuildingId())) {
-            if (buildingRepository.existsById(building.getBuildingId())) {
-                throw new ValidationException("Building with this building ID already exists!");
-            }
-        }
 
         String buildingName = building.getBuildingName();
         if (ObjectUtils.isEmpty(buildingName)) {
@@ -79,7 +74,7 @@ public class BuildingServiceImpl implements BuildingService {
             throw new ValidationException("Building with this building name already exists!");
         }
 
-        Building pBuilding = buildingMapper.dtoBuildingIUToBuilding(building);
+        Building pBuilding = buildingMapper.dtoBuildingToBuilding(building);
         Building dbBuilding = buildingRepository.save(pBuilding);
 
         return buildingMapper.buildingToDtoBuilding(dbBuilding);

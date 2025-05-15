@@ -4,14 +4,13 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 
+import com.personneltrackingsystem.dto.DtoBuildingIU;
 import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.entity.Floor;
 
 @Mapper(componentModel = "spring")
 public interface FloorMapper {
-
-    Floor dtoFloorIUToFloor(DtoFloorIU dtoFloorIU);
 
     Floor dtoFloorToFloor(DtoFloor dtoFloor);
 
@@ -21,5 +20,10 @@ public interface FloorMapper {
 
     DtoFloorIU floorToDtoFloorIU(Floor floor);
 
-    
+
+
+    default Long map(DtoBuildingIU buildingId) {
+        return buildingId.getBuildingId();
+    }
+
 }

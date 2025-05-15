@@ -5,13 +5,11 @@ import java.util.List;
 import org.mapstruct.Mapper;
 
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLog;
-import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 
 @Mapper(componentModel = "spring")
 public interface TurnstileRegistrationLogMapper {
 
-    TurnstileRegistrationLog dtoTurnstileRegistrationLogIUToTurnstileRegistrationLog(DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU);
 
     TurnstileRegistrationLog dtoTurnstileRegistrationLogToTurnstileRegistrationLog(DtoTurnstileRegistrationLog dtoTurnstileRegistrationLog);
 
@@ -19,6 +17,5 @@ public interface TurnstileRegistrationLogMapper {
 
     DtoTurnstileRegistrationLog turnstileRegistrationLogToDtoTurnstileRegistrationLog(TurnstileRegistrationLog turnstileRegistrationLog);
 
-    DtoTurnstileRegistrationLogIU turnstileRegistrationLogToDtoTurnstileRegistrationLogIU(TurnstileRegistrationLog turnstileRegistrationLog);
-    
+
 }

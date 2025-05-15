@@ -8,9 +8,14 @@ import java.util.Optional;
 
 public interface WorkingHoursService {
     List<DtoWorkingHours> getAllWorkingHours();
+
     Optional<DtoWorkingHours> getWorkingHoursById(Long id);
+
     DtoWorkingHours getOneWorkingHours(Long id);
-    DtoWorkingHours saveOneWorkingHours(DtoWorkingHoursIU workingHours);
+
+    DtoWorkingHours saveOneWorkingHours(DtoWorkingHours newWorkingHours);
+
     DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHoursIU workingHours);
+
     void deleteOneWorkingHours(Long id);
 } 

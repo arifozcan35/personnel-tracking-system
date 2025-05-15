@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface UnitService {
 
-    Optional<DtoUnitIU> findById(Long unitId);
+    Optional<DtoUnit> findById(Long unitId);
 
     List<DtoUnit> getAllUnits();
 

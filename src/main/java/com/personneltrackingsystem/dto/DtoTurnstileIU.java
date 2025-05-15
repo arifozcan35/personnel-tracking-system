@@ -1,7 +1,5 @@
 package com.personneltrackingsystem.dto;
 
-import com.personneltrackingsystem.entity.Gate;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +15,5 @@ public class DtoTurnstileIU {
 
     private String turnstileName;
 
-    private Gate gateId;
+    private Long gateId;
 }

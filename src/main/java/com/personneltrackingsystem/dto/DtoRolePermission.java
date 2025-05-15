@@ -14,5 +14,6 @@ import lombok.Setter;
 public class DtoRolePermission {
 
     private Role role;
+    
     private Permission permission;
 } 

@@ -1,5 +1,8 @@
 package com.personneltrackingsystem.entity;
 
+import com.personneltrackingsystem.dto.DtoFloorIU;
+import com.personneltrackingsystem.dto.DtoPersonelIU;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,9 +24,9 @@ public class Unit {
 
     @ManyToOne
     @JoinColumn(name = "fk_floor_id")
-    private Floor floorId;
+    private DtoFloorIU floorId;
 
     @OneToOne
     @JoinColumn(name = "fk_administrator_personel_id")
-    private Personel administratorPersonelId;
+    private DtoPersonelIU administratorPersonelId;
 }

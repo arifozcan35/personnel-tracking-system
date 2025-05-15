@@ -29,7 +29,7 @@ public class FloorControllerImpl implements FloorController {
 
 
     @Override
-    public DtoFloor createFloor(DtoFloorIU newFloor) {
+    public DtoFloor createFloor(DtoFloor newFloor) {
         return gateServiceImpl.saveOneFloor(newFloor);
     }
 

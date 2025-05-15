@@ -23,7 +23,7 @@ public interface WorkingHoursController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoWorkingHours createWorkingHours(@RequestBody DtoWorkingHoursIU newWorkingHours);
+    DtoWorkingHours createWorkingHours(@RequestBody DtoWorkingHours newWorkingHours);
 
     @PutMapping("/{workingHoursId}")
     @PreAuthorize("hasRole('ADMIN')")

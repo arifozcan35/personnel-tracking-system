@@ -9,9 +9,14 @@ import java.util.Optional;
 public interface PersonelTypeService {
 
     List<DtoPersonelType> getAllPersonelTypes();
+
     Optional<DtoPersonelType> getPersonelTypeById(Long id);
+
     DtoPersonelType getOnePersonelType(Long id);
-    DtoPersonelType saveOnePersonelType(DtoPersonelTypeIU personelTypeDto);
-    DtoPersonelType updateOnePersonelType(Long id, DtoPersonelTypeIU personelTypeDto);
+
+    DtoPersonelType saveOnePersonelType(DtoPersonelType newPersonelType);
+
+    DtoPersonelType updateOnePersonelType(Long id, DtoPersonelTypeIU newPersonelType);
+    
     void deleteOnePersonelType(Long id);
 } 

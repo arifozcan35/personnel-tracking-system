@@ -1,7 +1,11 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.dto.DtoPersonelType;
+import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 import com.personneltrackingsystem.dto.DtoWorkingHours;
 import com.personneltrackingsystem.dto.DtoWorkingHoursIU;
+import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
@@ -19,6 +23,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +40,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
     @Override
     public List<DtoWorkingHours> getAllWorkingHours(){
 
-        List<WorkingHours> workingHoursList =  workingHoursRepository.findAll();
+        List<WorkingHours> workingHoursList = workingHoursRepository.findAll();
 
         return workingHoursMapper.workingHoursListToDtoWorkingHoursList(workingHoursList);
     }
@@ -62,23 +67,17 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
 
     @Override
     @Transactional
-    public DtoWorkingHours saveOneWorkingHours(DtoWorkingHoursIU workingHours) {
+    public DtoWorkingHours saveOneWorkingHours(DtoWorkingHours workingHours) {
 
-        if (!ObjectUtils.isEmpty(workingHours.getWorkingHoursId())) {
-            if (workingHoursRepository.existsById(workingHours.getWorkingHoursId())) {
-                throw new ValidationException("WorkingHours with this workingHours ID already exists!");
-            }
-        }
-
-        if (ObjectUtils.isEmpty(workingHours.getWorkingHoursId())) {
+        LocalTime checkInTime = workingHours.getCheckInTime();
+        LocalTime checkOutTime = workingHours.getCheckOutTime();
+        Long personelTypeId = workingHours.getPersonelTypeId();
+        if (ObjectUtils.isEmpty(checkInTime) || ObjectUtils.isEmpty(checkOutTime) || ObjectUtils.isEmpty(personelTypeId)) {
             throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
         }
 
-        if (workingHoursRepository.existsByWorkingHoursId(workingHours.getWorkingHoursId())) {
-            throw new ValidationException("WorkingHours with this workingHours name already exists!");
-        }
 
-        WorkingHours pWorkingHours = workingHoursMapper.dtoWorkingHoursIUToWorkingHours(workingHours);
+        WorkingHours pWorkingHours = workingHoursMapper.dtoWorkingHoursToWorkingHours(workingHours);
         WorkingHours dbWorkingHours = workingHoursRepository.save(pWorkingHours);
 
         return workingHoursMapper.workingHoursToDtoWorkingHours(dbWorkingHours);

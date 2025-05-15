@@ -14,9 +14,14 @@ import lombok.Setter;
 public class DtoPermissionIU {
 
     private Long id;
+
     private String name;
+
     private String resource;
+
     private String method;
+
     private String pathPattern;
+    
     private String description;
 }

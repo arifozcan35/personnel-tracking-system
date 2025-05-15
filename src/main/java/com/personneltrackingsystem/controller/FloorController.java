@@ -25,7 +25,7 @@ public interface FloorController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoFloor createFloor(@RequestBody DtoFloorIU newFloor);
+    DtoFloor createFloor(@RequestBody DtoFloor newFloor);
 
     @PutMapping("/{floorId}")
     @PreAuthorize("hasRole('ADMIN')")

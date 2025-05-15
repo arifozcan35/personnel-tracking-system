@@ -64,13 +64,7 @@ public class GateServiceImpl implements GateService {
 
     @Override
     @Transactional
-    public DtoGate saveOneGate(DtoGateIU gate) {
-
-        if (!ObjectUtils.isEmpty(gate.getGateId())) {
-            if (gateRepository.existsById(gate.getGateId())) {
-                throw new ValidationException("Gate with this gate ID already exists!");
-            }
-        }
+    public DtoGate saveOneGate(DtoGate gate) {
 
         String gateName = gate.getGateName();
         if (ObjectUtils.isEmpty(gateName)) {
@@ -81,7 +75,7 @@ public class GateServiceImpl implements GateService {
             throw new ValidationException("Gate with this gate name already exists!");
         }
 
-        Gate pGate = gateMapper.dtoGateIUToGate(gate);
+        Gate pGate = gateMapper.dtoGateToGate(gate);
         Gate dbGate = gateRepository.save(pGate);
 
         return gateMapper.gateToDtoGate(dbGate);

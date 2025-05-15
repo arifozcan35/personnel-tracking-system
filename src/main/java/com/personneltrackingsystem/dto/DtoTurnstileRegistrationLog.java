@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.dto;
 
-import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Turnstile;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DtoTurnstileRegistrationLog {
 
-    private Personel personelId;
+    private LocalDateTime operationTime;
 
-    private Turnstile turnstileId;
+    private String operationType;
 }

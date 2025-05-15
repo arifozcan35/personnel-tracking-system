@@ -2,9 +2,6 @@ package com.personneltrackingsystem.dto;
 
 import java.util.List;
 
-import com.personneltrackingsystem.entity.PersonelType;
-import com.personneltrackingsystem.entity.Unit;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,12 +22,8 @@ public class DtoPersonelIU {
     @Schema(description = "The e-mail of Personnel", example = "zcanarif@gmail.com")
     private String email;
 
-    @Schema(description = "Staff position", example = "0")
-    private Boolean administrator;
 
+    private List<Long> unitId;
 
-
-    private List<Unit> unitId;
-
-    private PersonelType personelTypeId;
+    private Long personelTypeId;
 }

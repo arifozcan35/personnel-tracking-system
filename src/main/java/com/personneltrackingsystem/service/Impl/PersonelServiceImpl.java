@@ -51,7 +51,7 @@ public class PersonelServiceImpl implements PersonelService  {
             throw new ValidationException("Personnel name and email are required!");
         }
 
-        Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(newPersonel);
+        DtoPersonelIU personelToPut = newPersonel;
 
         // Check email uniqueness
         Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
@@ -61,13 +61,16 @@ public class PersonelServiceImpl implements PersonelService  {
 
         // Handle personnel type if provided
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
-            personelToSave.setPersonelTypeId(newPersonel.getPersonelTypeId());
+            personelToPut.setPersonelTypeId(newPersonel.getPersonelTypeId());
         }
 
         // Handle units if provided
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
-            personelToSave.setUnitId(newPersonel.getUnitId());
+            personelToPut.setUnitId(newPersonel.getUnitId());
         }
+
+        Personel personelToSave = personelMapper.dtoPersonelIUToPersonel(personelToPut);
+
 
         try {
             Personel savedPersonnel = personelRepository.save(personelToSave);
@@ -104,12 +107,12 @@ public class PersonelServiceImpl implements PersonelService  {
 
         // Update personnel type
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
-            foundPersonel.setPersonelTypeId(newPersonel.getPersonelTypeId());
+            foundPersonel.setPersonelTypeId(personelMapper.map(newPersonel.getPersonelTypeId()));
         }
 
         // Update units
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
-            foundPersonel.setUnitId(newPersonel.getUnitId());
+            foundPersonel.setUnitId(personelMapper.map2(newPersonel.getUnitId()));
         }
 
         try {
@@ -140,7 +143,7 @@ public class PersonelServiceImpl implements PersonelService  {
         
         for (Personel personel : personnelList) {
             if (personel.getUnitId() != null) {
-                for (Unit unit : personel.getUnitId()) {
+                for (DtoUnitIU unit : personel.getUnitId()) {
                     if (unit.getUnitId().equals(unitId)) {
                         personels.add(personelMapper.personelToDtoPersonel(personel));
                         break;

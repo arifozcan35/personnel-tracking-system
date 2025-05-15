@@ -12,7 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DtoRolePermissionIU {
+
     private Long rolePermissionId;
+
     private Role role;
+    
     private Permission permission;
 } 

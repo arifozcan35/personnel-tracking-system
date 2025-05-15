@@ -26,7 +26,7 @@ public class PersonelTypeControllerImpl implements PersonelTypeController {
     }
 
     @Override
-    public DtoPersonelType createPersonelType(DtoPersonelTypeIU newPersonelType) {
+    public DtoPersonelType createPersonelType(DtoPersonelType newPersonelType) {
         return personelTypeService.saveOnePersonelType(newPersonelType);
     }
 

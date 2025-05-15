@@ -62,13 +62,7 @@ public class TurnstileServiceImpl implements TurnstileService {
 
     @Override
     @Transactional
-    public DtoTurnstile saveOneTurnstile(DtoTurnstileIU turnstile) {
-
-        if (!ObjectUtils.isEmpty(turnstile.getTurnstileId())) {
-            if (turnstileRepository.existsById(turnstile.getTurnstileId())) {
-                throw new ValidationException("Turnstile with this turnstile ID already exists!");
-            }
-        }
+    public DtoTurnstile saveOneTurnstile(DtoTurnstile turnstile) {
 
         String turnstileName = turnstile.getTurnstileName();
         if (ObjectUtils.isEmpty(turnstileName)) {
@@ -79,7 +73,7 @@ public class TurnstileServiceImpl implements TurnstileService {
             throw new ValidationException("Turnstile with this turnstile name already exists!");
         }
 
-        Turnstile pTurnstile = turnstileMapper.dtoTurnstileIUToTurnstile(turnstile);
+        Turnstile pTurnstile = turnstileMapper.dtoTurnstileToTurnstile(turnstile);
         Turnstile dbTurnstile = turnstileRepository.save(pTurnstile);
 
         return turnstileMapper.turnstileToDtoTurnstile(dbTurnstile);

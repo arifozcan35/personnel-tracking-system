@@ -2,7 +2,6 @@ package com.personneltrackingsystem.dto;
 
 import java.time.LocalTime;
 
-import com.personneltrackingsystem.entity.PersonelType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +20,5 @@ public class DtoWorkingHoursIU {
 
     private LocalTime checkOutTime;
 
-    
-    private PersonelType personelTypeId;
+    private Long personelTypeId;
 }

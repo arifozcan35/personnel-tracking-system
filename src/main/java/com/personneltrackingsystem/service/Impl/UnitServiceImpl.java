@@ -29,10 +29,10 @@ public class UnitServiceImpl implements UnitService {
     // Solid example : article 1 (Single Responsibility Principle)
 
     @Override
-    public Optional<DtoUnitIU> findById(Long unitId) {
+    public Optional<DtoUnit> findById(Long unitId) {
         Unit unit = unitRepository.findById(unitId)
                 .orElseThrow(() -> new EntityNotFoundException("Unit not found with id: " + unitId));
-        return Optional.ofNullable(unitMapper.unitToDtoUnitIU(unit));
+        return Optional.ofNullable(unitMapper.unitToDtoUnit(unit));
     }
 
     @Override
@@ -61,12 +61,6 @@ public class UnitServiceImpl implements UnitService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public DtoUnit saveOneUnit(DtoUnit unit) {
-
-        if (!ObjectUtils.isEmpty(unit.getUnitId())) {
-            if (unitRepository.existsByUnitId(unit.getUnitId())) {
-                throw new ValidationException("Unit with this unit ID already exists!");
-            }
-        }
 
         String unitName = unit.getBirimIsim();
         if (ObjectUtils.isEmpty(unitName)) {

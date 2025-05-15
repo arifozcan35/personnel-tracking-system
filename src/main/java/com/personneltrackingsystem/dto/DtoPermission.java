@@ -14,6 +14,7 @@ import lombok.Setter;
 public class DtoPermission {
 
     private String name;
+    
     private String resource;
 
 }

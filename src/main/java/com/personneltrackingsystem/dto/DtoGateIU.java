@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import com.personneltrackingsystem.entity.Unit;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,5 +21,5 @@ public class DtoGateIU {
     private Boolean mainEntrance;
 
 
-    private Unit unitId;
+    private Long unitId;
 }

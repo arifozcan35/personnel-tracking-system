@@ -2,6 +2,9 @@ package com.personneltrackingsystem.entity;
 
 import java.time.LocalDateTime;
 
+import com.personneltrackingsystem.dto.DtoPersonelIU;
+import com.personneltrackingsystem.dto.DtoTurnstileIU;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,11 +35,11 @@ public class TurnstileRegistrationLog {
 
     @ManyToOne
     @JoinColumn(name = "fk_personel_id")
-    private Personel personelId;
+    private DtoPersonelIU personelId;
 
     @ManyToOne
     @JoinColumn(name = "fk_turnstile_id")
-    private Turnstile turnstileId;
+    private DtoTurnstileIU turnstileId;
 
     private LocalDateTime operationTime;
 

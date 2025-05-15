@@ -8,5 +8,4 @@ import com.personneltrackingsystem.entity.WorkingHours;
 @Repository
 public interface WorkingHoursRepository extends JpaRepository<WorkingHours, Long> {
 
-    boolean existsByWorkingHoursId(Long existingWorkingHoursID);
 }

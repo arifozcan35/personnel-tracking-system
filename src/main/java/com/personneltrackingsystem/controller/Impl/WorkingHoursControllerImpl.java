@@ -26,7 +26,7 @@ public class WorkingHoursControllerImpl implements WorkingHoursController {
     }
 
     @Override
-    public DtoWorkingHours createWorkingHours(DtoWorkingHoursIU newWorkingHours) {
+    public DtoWorkingHours createWorkingHours(DtoWorkingHours newWorkingHours) {
         return workingHoursService.saveOneWorkingHours(newWorkingHours);
     }
 

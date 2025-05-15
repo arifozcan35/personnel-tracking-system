@@ -22,7 +22,7 @@ public interface BuildingController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoBuilding createBuilding(@RequestBody DtoBuildingIU newBuilding);
+    DtoBuilding createBuilding(@RequestBody DtoBuilding newBuilding);
 
     @PutMapping("/{buildingId}")
     @PreAuthorize("hasRole('ADMIN')")

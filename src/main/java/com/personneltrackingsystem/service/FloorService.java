@@ -3,7 +3,6 @@ package com.personneltrackingsystem.service;
 import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.dto.DtoFloor;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public interface FloorService {
 
     DtoFloor getOneFloor(Long floorId);
 
-    DtoFloor saveOneFloor(DtoFloorIU floor);
+    DtoFloor saveOneFloor(DtoFloor newFloor);
 
     DtoFloor updateOneFloor(Long id, DtoFloorIU newFloor);
 

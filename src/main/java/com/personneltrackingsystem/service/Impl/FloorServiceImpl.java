@@ -72,13 +72,7 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     @Transactional
-    public DtoFloor saveOneFloor(DtoFloorIU floor) {
-
-        if (!ObjectUtils.isEmpty(floor.getFloorId())) {
-            if (floorRepository.existsByFloorId(floor.getFloorId())) {
-                throw new ValidationException("Floor with this floor ID already exists!");
-            }
-        }
+    public DtoFloor saveOneFloor(DtoFloor floor) {
 
         String floorName = floor.getFloorName();
         if (ObjectUtils.isEmpty(floorName)) {
@@ -89,7 +83,7 @@ public class FloorServiceImpl implements FloorService {
             throw new ValidationException("Floor with this floor name already exists!");
         }
 
-        Floor pFloor = floorMapper.dtoFloorIUToFloor(floor);
+        Floor pFloor = floorMapper.dtoFloorToFloor(floor);
         Floor dbFloor = floorRepository.save(pFloor);
 
         return floorMapper.floorToDtoFloor(dbFloor);
