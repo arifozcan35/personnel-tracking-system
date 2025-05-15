@@ -5,7 +5,6 @@ import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.controller.FloorController;
 import com.personneltrackingsystem.service.FloorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,8 +47,10 @@ public class FloorControllerImpl implements FloorController {
 
 
 
+    /*
     @Override
     public ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId){
         return gateServiceImpl.passFloor(wantedToEnterFloor, personelId);
     }
+    */
 }

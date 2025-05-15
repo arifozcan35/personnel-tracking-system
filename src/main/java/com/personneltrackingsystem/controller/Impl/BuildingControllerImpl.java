@@ -27,16 +27,16 @@ public class BuildingControllerImpl implements BuildingController {
 
     @Override
     public DtoBuilding createBuilding(DtoBuildingIU newBuilding) {
-        return buildingService.createBuilding(newBuilding);
+        return buildingService.saveOneBuilding(newBuilding);
     }
 
     @Override
     public DtoBuilding updateBuilding(Long buildingId, DtoBuildingIU newBuilding) {
-        return buildingService.updateBuilding(buildingId, newBuilding);
+        return buildingService.updateOneBuilding(buildingId, newBuilding);
     }
 
     @Override
     public void deleteBuilding(Long buildingId) {
-        buildingService.deleteBuilding(buildingId);
+        buildingService.deleteOneBuilding(buildingId);
     }
 } 

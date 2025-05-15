@@ -114,10 +114,6 @@ public class GateServiceImpl implements GateService {
         Optional<Gate> optGate = gateRepository.findById(gateId);
 
         if(optGate.isPresent()){
-            // update associated unit records
-            gateRepository.updateUnitGateReferences(optGate.get());
-
-            // delete gate
             gateRepository.delete(optGate.get());
         }
         else{

@@ -46,7 +46,7 @@ public class FloorServiceImpl implements FloorService {
         Floor floor = floorRepository.findById(floorId)
                 .orElseThrow(() -> new EntityNotFoundException("Floor not found with id: " + floorId));
 
-        return Optional.ofNullable(floorMapper.floorToFloorResponseDTO(floor));
+        return Optional.ofNullable(floorMapper.floorToDtoFloor(floor));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class FloorServiceImpl implements FloorService {
 
         List<Floor> floorList =  floorRepository.findAll();
 
-        return floorMapper.floorListToFloorResponseDTOList(floorList);
+        return floorMapper.floorListToDtoFloorList(floorList);
     }
 
 
@@ -65,7 +65,7 @@ public class FloorServiceImpl implements FloorService {
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
         }else{
-            return floorMapper.floorToFloorResponseDTO(optFloor.get());
+            return floorMapper.floorToDtoFloor(optFloor.get());
         }
     }
 
@@ -89,10 +89,10 @@ public class FloorServiceImpl implements FloorService {
             throw new ValidationException("Floor with this floor name already exists!");
         }
 
-        Floor pFloor = floorMapper.floorCreateUpdateRequestDTOToFloor(floor);
+        Floor pFloor = floorMapper.dtoFloorIUToFloor(floor);
         Floor dbFloor = floorRepository.save(pFloor);
 
-        return floorMapper.floorToFloorResponseDTO(dbFloor);
+        return floorMapper.floorToDtoFloor(dbFloor);
 
     }
 
@@ -108,7 +108,7 @@ public class FloorServiceImpl implements FloorService {
 
             Floor updatedFloor = floorRepository.save(foundFloor);
 
-            return floorMapper.floorToFloorResponseDTO(updatedFloor);
+            return floorMapper.floorToDtoFloor(updatedFloor);
         }else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
@@ -123,10 +123,6 @@ public class FloorServiceImpl implements FloorService {
         Optional<Floor> optFloor = floorRepository.findById(floorId);
 
         if(optFloor.isPresent()){
-            // update associated building records
-            floorRepository.updateBuildingFloorReferences(optFloor.get());
-
-            // delete floor
             floorRepository.delete(optFloor.get());
         }
         else{
@@ -137,6 +133,7 @@ public class FloorServiceImpl implements FloorService {
 
 
 
+    /* 
     @Override
     public ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId) {
 
@@ -177,5 +174,6 @@ public class FloorServiceImpl implements FloorService {
 
         return new ResponseEntity<>("Personnel entered the floor!", HttpStatus.CREATED);
     }
+    */
 
 }

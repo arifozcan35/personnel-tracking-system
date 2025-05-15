@@ -112,10 +112,6 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
         Optional<PersonelType> optPersonelType = personelTypeRepository.findById(personelTypeId);
 
         if(optPersonelType.isPresent()){
-            // update associated personnel records
-            personelTypeRepository.updatePersonelPersonelTypeReferences(optPersonelType.get());
-
-            // delete personel type
             personelTypeRepository.delete(optPersonelType.get());
         }
         else{

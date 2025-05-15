@@ -36,11 +36,12 @@ public interface FloorController {
     void deleteFloor(@PathVariable Long floorId);
 
 
-
+    /* 
     @Operation(
             summary = "Entry Permit Check",
             description = "Checking whether the given personnel has permission to enter the gate they want to enter."
     )
     @PostMapping("personelpass/{wantedToEnterFloor}")
     ResponseEntity<String> passFloor(@PathVariable Long wantedToEnterFloor, @RequestBody Long personelId);
+    */
 }

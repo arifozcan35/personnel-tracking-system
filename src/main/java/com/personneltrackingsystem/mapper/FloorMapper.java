@@ -20,4 +20,6 @@ public interface FloorMapper {
     DtoFloor floorToDtoFloor(Floor floor);
 
     DtoFloorIU floorToDtoFloorIU(Floor floor);
+
+    
 }

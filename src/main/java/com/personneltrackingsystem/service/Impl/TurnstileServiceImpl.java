@@ -112,10 +112,6 @@ public class TurnstileServiceImpl implements TurnstileService {
         Optional<Turnstile> optTurnstile = turnstileRepository.findById(turnstileId);
 
         if(optTurnstile.isPresent()){
-            // update associated gate records
-            turnstileRepository.updateGateTurnstileReferences(optTurnstile.get());
-
-            // delete turnstile
             turnstileRepository.delete(optTurnstile.get());
         }
         else{

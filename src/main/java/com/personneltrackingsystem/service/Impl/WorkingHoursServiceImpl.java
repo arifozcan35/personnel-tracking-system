@@ -112,10 +112,6 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
         Optional<WorkingHours> optWorkingHours = workingHoursRepository.findById(workingHoursId);
 
         if(optWorkingHours.isPresent()){
-            // update associated personel type records
-            workingHoursRepository.updatePersonelTypeWorkingHoursReferences(optWorkingHours.get());
-
-            // delete workingHours
             workingHoursRepository.delete(optWorkingHours.get());
         }
         else{

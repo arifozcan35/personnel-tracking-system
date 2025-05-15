@@ -62,4 +62,4 @@ public class PermissionBasedSecurityFilter extends OncePerRequestFilter {
         int slashIndex = path.indexOf('/');
         return slashIndex > 0 ? path.substring(0, slashIndex) : path;
     }
-} 
+}  

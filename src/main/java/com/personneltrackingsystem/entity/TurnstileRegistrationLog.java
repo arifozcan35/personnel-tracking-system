@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,8 +30,12 @@ public class TurnstileRegistrationLog {
     @Column(name = "turnstile_registration_log_id")
     private Long turnstileRegistrationLogId;
 
+    @ManyToOne
+    @JoinColumn(name = "fk_personel_id")
     private Personel personelId;
 
+    @ManyToOne
+    @JoinColumn(name = "fk_turnstile_id")
     private Turnstile turnstileId;
 
     private LocalDateTime operationTime;

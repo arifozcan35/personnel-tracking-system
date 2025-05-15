@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class Turnstile {
     private String turnstileName;
 
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "fk_gate_id")
     private Gate gateId;
 }

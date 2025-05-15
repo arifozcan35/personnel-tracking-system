@@ -26,19 +26,6 @@ public interface PersonelMapper {
     Personel dtoPersonelIUToPersonel(DtoPersonelIU personelIU);
 
 
-    // converts personnel list to Map<String, Double>
-    default Map<String, Double> personelsToSalaryMap(List<Personel> personels) {
-        if (personels == null) {
-            return Collections.emptyMap();
-        }
-
-        return personels.stream()
-                .collect(Collectors.toMap(
-                        Personel::getEmail,
-                        Personel::getSalary
-                ));
-    }
-
-
+    
     WorkingHours DbWorktoWork(Optional<WorkingHours> dbWorkOpt);
 }

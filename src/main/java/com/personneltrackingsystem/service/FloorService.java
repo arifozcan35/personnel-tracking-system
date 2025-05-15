@@ -25,6 +25,6 @@ public interface FloorService {
     void deleteOneFloor(Long floorId);
 
 
-    ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId);
+    // ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId);
 
 }

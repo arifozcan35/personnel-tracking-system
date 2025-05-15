@@ -27,16 +27,16 @@ public class PersonelTypeControllerImpl implements PersonelTypeController {
 
     @Override
     public DtoPersonelType createPersonelType(DtoPersonelTypeIU newPersonelType) {
-        return personelTypeService.createPersonelType(newPersonelType);
+        return personelTypeService.saveOnePersonelType(newPersonelType);
     }
 
     @Override
     public DtoPersonelType updatePersonelType(Long personelTypeId, DtoPersonelTypeIU newPersonelType) {
-        return personelTypeService.updatePersonelType(personelTypeId, newPersonelType);
+        return personelTypeService.updateOnePersonelType(personelTypeId, newPersonelType);
     }
 
     @Override
     public void deletePersonelType(Long personelTypeId) {
-        personelTypeService.deletePersonelType(personelTypeId);
+        personelTypeService.deleteOnePersonelType(personelTypeId);
     }
 } 

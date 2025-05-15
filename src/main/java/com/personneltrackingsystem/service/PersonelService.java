@@ -24,5 +24,5 @@ public interface PersonelService {
 
     Set<DtoPersonel> getPersonelsByUnitId(Long unitId);
 
-    Map<String, Double> listSalaries();
+    // Map<String, Double> listSalaries();
 }

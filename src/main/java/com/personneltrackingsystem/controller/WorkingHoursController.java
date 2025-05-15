@@ -1,7 +1,8 @@
 package com.personneltrackingsystem.controller;
 
-import com.personneltrackingsystem.dto.DtoWork;
-import com.personneltrackingsystem.dto.DtoWorkIU;
+import com.personneltrackingsystem.dto.DtoWorkingHours;
+import com.personneltrackingsystem.dto.DtoWorkingHoursIU;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,19 +15,19 @@ public interface WorkingHoursController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    List<DtoWork> getAllWorkingHours();
+    List<DtoWorkingHours> getAllWorkingHours();
 
     @GetMapping("/{workingHoursId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    DtoWork getOneWorkingHours(@PathVariable Long workingHoursId);
+    DtoWorkingHours getOneWorkingHours(@PathVariable Long workingHoursId);
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoWork createWorkingHours(@RequestBody DtoWorkIU newWorkingHours);
+    DtoWorkingHours createWorkingHours(@RequestBody DtoWorkingHoursIU newWorkingHours);
 
     @PutMapping("/{workingHoursId}")
     @PreAuthorize("hasRole('ADMIN')")
-    DtoWork updateWorkingHours(@PathVariable Long workingHoursId, @RequestBody DtoWorkIU newWorkingHours);
+    DtoWorkingHours updateWorkingHours(@PathVariable Long workingHoursId, @RequestBody DtoWorkingHoursIU newWorkingHours);
 
     @DeleteMapping("/{workingHoursId}")
     @PreAuthorize("hasRole('ADMIN')")

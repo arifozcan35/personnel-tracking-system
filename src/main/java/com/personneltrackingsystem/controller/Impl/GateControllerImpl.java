@@ -27,16 +27,16 @@ public class GateControllerImpl implements GateController {
 
     @Override
     public DtoGate createGate(DtoGateIU newGate) {
-        return gateService.createGate(newGate);
+        return gateService.saveOneGate(newGate);
     }
 
     @Override
     public DtoGate updateGate(Long gateId, DtoGateIU newGate) {
-        return gateService.updateGate(gateId, newGate);
+        return gateService.updateOneGate(gateId, newGate);
     }
 
     @Override
     public void deleteGate(Long gateId) {
-        gateService.deleteGate(gateId);
+        gateService.deleteOneGate(gateId);
     }
 } 
