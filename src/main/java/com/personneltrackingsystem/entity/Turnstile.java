@@ -1,7 +1,5 @@
 package com.personneltrackingsystem.entity;
 
-import com.personneltrackingsystem.dto.DtoGateIU;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,5 +33,5 @@ public class Turnstile {
 
     @ManyToOne
     @JoinColumn(name = "fk_gate_id")
-    private DtoGateIU gateId;
+    private Gate gateId;
 }

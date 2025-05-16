@@ -2,9 +2,6 @@ package com.personneltrackingsystem.entity;
 
 import java.util.List;
 
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
-import com.personneltrackingsystem.dto.DtoUnitIU;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -36,10 +33,10 @@ public class Personel {
     @JoinTable(name = "personel_unit",
     joinColumns = @JoinColumn(name = "personel_id"),
     inverseJoinColumns = @JoinColumn(name = "unit_id"))
-    private List<DtoUnitIU> unitId;
+    private List<Unit> unitId;
 
     @ManyToOne
     @JoinColumn(name = "fk_personel_type_id")
-    private DtoPersonelTypeIU personelTypeId;
+    private PersonelType personelTypeId;
 
 }

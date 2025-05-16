@@ -1,7 +1,5 @@
 package com.personneltrackingsystem.entity;
 
-import com.personneltrackingsystem.dto.DtoUnitIU;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,5 +24,5 @@ public class Gate {
 
     @ManyToOne
     @JoinColumn(name = "fk_unit_id")
-    private DtoUnitIU unitId;
+    private Unit unitId;
 }

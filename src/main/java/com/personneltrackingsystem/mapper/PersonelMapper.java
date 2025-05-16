@@ -5,6 +5,8 @@ import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.PersonelType;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.WorkingHours;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,52 +24,45 @@ public interface PersonelMapper {
 
     DtoPersonel personelToDtoPersonel(Personel personel);
     
-    @Mapping(source = "personelTypeId", target = "personelTypeId", qualifiedByName = "personelTypeToId")
-    @Mapping(source = "unitId", target = "unitId", qualifiedByName = "unitListToIdList")
+    @Mapping(source = "personelTypeId", target = "personelTypeId", qualifiedByName = "personelTypeEntityToLong")
+    @Mapping(source = "unitId", target = "unitId", qualifiedByName = "unitEntityListToLongList")
     DtoPersonelIU personelToDtoPersonelIU(Personel personel);
 
     // DTO to Entity mappings
-    @Mapping(source = "personelTypeId", target = "personelTypeId", qualifiedByName = "idToPersonelType")
-    @Mapping(source = "unitId", target = "unitId", qualifiedByName = "idListToUnitList")
+    @Mapping(source = "personelTypeId", target = "personelTypeId", qualifiedByName = "longToPersonelTypeEntity")
+    @Mapping(source = "unitId", target = "unitId", qualifiedByName = "longListToUnitEntityList")
     Personel dtoPersonelIUToPersonel(DtoPersonelIU dtoPersonelIU);
     
     // Helper methods
     WorkingHours DbWorktoWork(Optional<WorkingHours> dbWorkOpt);
 
-    // Converter methods
-    DtoPersonelTypeIU map(Long personelTypeId);
-
-    DtoUnitIU map2(Long unitId);
-
-    List<DtoUnitIU> map2(List<Long> unitId);
-    
-    @Named("personelTypeToId")
-    default Long personelTypeToId(DtoPersonelTypeIU personelTypeIU) {
-        return personelTypeIU != null ? personelTypeIU.getPersonelTypeId() : null;
+    @Named("personelTypeEntityToLong")
+    default Long personelTypeEntityToLong(PersonelType personelType) {
+        return personelType != null ? personelType.getPersonelTypeId() : null;
     }
     
-    @Named("unitListToIdList")
-    default List<Long> unitListToIdList(List<DtoUnitIU> units) {
+    @Named("unitEntityListToLongList")
+    default List<Long> unitEntityListToLongList(List<Unit> units) {
         return units != null ? units.stream()
-                .map(DtoUnitIU::getUnitId)
+                .map(Unit::getUnitId)
                 .collect(Collectors.toList()) : null;
     }
     
-    @Named("idToPersonelType")
-    default DtoPersonelTypeIU idToPersonelType(Long id) {
+    @Named("longToPersonelTypeEntity")
+    default PersonelType longToPersonelTypeEntity(Long id) {
         if (id == null) {
             return null;
         }
-        DtoPersonelTypeIU type = new DtoPersonelTypeIU();
+        PersonelType type = new PersonelType();
         type.setPersonelTypeId(id);
         return type;
     }
     
-    @Named("idListToUnitList")
-    default List<DtoUnitIU> idListToUnitList(List<Long> ids) {
+    @Named("longListToUnitEntityList")
+    default List<Unit> longListToUnitEntityList(List<Long> ids) {
         return ids != null ? ids.stream()
                 .map(id -> {
-                    DtoUnitIU unit = new DtoUnitIU();
+                    Unit unit = new Unit();
                     unit.setUnitId(id);
                     return unit;
                 })

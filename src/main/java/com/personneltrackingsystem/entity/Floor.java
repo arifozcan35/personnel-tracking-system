@@ -1,7 +1,5 @@
 package com.personneltrackingsystem.entity;
 
-import com.personneltrackingsystem.dto.DtoBuildingIU;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +32,6 @@ public class Floor {
 
     @ManyToOne
     @JoinColumn(name = "fk_building_id")
-    private DtoBuildingIU buildingId;
+    private Building building;
 
 }

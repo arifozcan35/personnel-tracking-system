@@ -8,8 +8,6 @@ import lombok.Setter;
 
 import java.time.LocalTime;
 
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
-
 @Entity
 @Table(name = "working_hours", schema = "dbpersonel")
 @NoArgsConstructor
@@ -30,6 +28,6 @@ public class WorkingHours {
 
     @OneToOne
     @JoinColumn(name = "fk_personel_type_id")
-    private DtoPersonelTypeIU personelTypeId;
+    private PersonelType personelTypeId;
 
 }

@@ -17,5 +17,4 @@ public interface TurnstileRegistrationLogMapper {
 
     DtoTurnstileRegistrationLog turnstileRegistrationLogToDtoTurnstileRegistrationLog(TurnstileRegistrationLog turnstileRegistrationLog);
 
-
 }

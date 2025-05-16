@@ -107,12 +107,12 @@ public class PersonelServiceImpl implements PersonelService  {
 
         // Update personnel type
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
-            foundPersonel.setPersonelTypeId(personelMapper.map(newPersonel.getPersonelTypeId()));
+            foundPersonel.setPersonelTypeId(personelMapper.longToPersonelTypeEntity(newPersonel.getPersonelTypeId()));
         }
 
         // Update units
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
-            foundPersonel.setUnitId(personelMapper.map2(newPersonel.getUnitId()));
+            foundPersonel.setUnitId(personelMapper.longListToUnitEntityList(newPersonel.getUnitId()));
         }
 
         try {
@@ -143,7 +143,7 @@ public class PersonelServiceImpl implements PersonelService  {
         
         for (Personel personel : personnelList) {
             if (personel.getUnitId() != null) {
-                for (DtoUnitIU unit : personel.getUnitId()) {
+                for (Unit unit : personel.getUnitId()) {
                     if (unit.getUnitId().equals(unitId)) {
                         personels.add(personelMapper.personelToDtoPersonel(personel));
                         break;
