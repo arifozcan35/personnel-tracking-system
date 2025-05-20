@@ -2,10 +2,11 @@ package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
+import com.personneltrackingsystem.entity.Personel;
+
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface PersonelService {
@@ -23,6 +24,8 @@ public interface PersonelService {
     void deleteOnePersonel(Long id);
 
     Set<DtoPersonel> getPersonelsByUnitId(Long unitId);
+
+    Personel checkIfPersonelExists(Long administratorPersonelId);
 
     // Map<String, Double> listSalaries();
 }

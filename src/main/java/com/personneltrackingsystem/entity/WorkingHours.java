@@ -18,7 +18,7 @@ public class WorkingHours {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "workingHoursSeq")
-    @SequenceGenerator(name = "workingHoursSeq", allocationSize = 1)
+    @SequenceGenerator(name = "workingHoursSeq", sequenceName = "workingHoursSeq", allocationSize = 1)
     @Column(name = "working_hours_id")
     private Long workingHoursId;
 

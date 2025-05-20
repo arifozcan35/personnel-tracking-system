@@ -13,7 +13,7 @@ import lombok.*;
 public class Unit {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "unitSeq")
-    @SequenceGenerator(name = "unitSeq", allocationSize = 1)
+    @SequenceGenerator(name = "unitSeq", sequenceName = "unitSeq", allocationSize = 1)
     @Column(name = "unit_id")
     private Long unitId;
 
@@ -24,6 +24,6 @@ public class Unit {
     private Floor floorId;
 
     @OneToOne
-    @JoinColumn(name = "fk_administrator_personel_id")
+    @JoinColumn(name = "fk_administrator_personel_id", nullable = true)
     private Personel administratorPersonelId;
 }

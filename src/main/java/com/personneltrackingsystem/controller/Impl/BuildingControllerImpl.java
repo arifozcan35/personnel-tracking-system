@@ -2,7 +2,6 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.BuildingController;
 import com.personneltrackingsystem.dto.DtoBuilding;
-import com.personneltrackingsystem.dto.DtoBuildingIU;
 import com.personneltrackingsystem.service.BuildingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +30,7 @@ public class BuildingControllerImpl implements BuildingController {
     }
 
     @Override
-    public DtoBuilding updateBuilding(Long buildingId, DtoBuildingIU newBuilding) {
+    public DtoBuilding updateBuilding(Long buildingId, DtoBuilding newBuilding) {
         return buildingService.updateOneBuilding(buildingId, newBuilding);
     }
 

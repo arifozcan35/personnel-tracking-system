@@ -3,6 +3,7 @@ package com.personneltrackingsystem.service.Impl;
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
@@ -11,6 +12,7 @@ import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
+import com.personneltrackingsystem.service.UnitService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +30,20 @@ public class GateServiceImpl implements GateService {
 
     private final GateRepository gateRepository;
 
+    private final UnitService unitService;
+
     private final MessageResolver messageResolver;
 
     private final GateMapper gateMapper;
 
+
+    @Override
+    public Gate checkIfGateExists(Long gateId){
+        return gateRepository.findById(gateId)
+                .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
+    }
+    
+    
     @Override
     public List<DtoGate> getAllGates(){
 
@@ -64,7 +76,7 @@ public class GateServiceImpl implements GateService {
 
     @Override
     @Transactional
-    public DtoGate saveOneGate(DtoGate gate) {
+    public DtoGate saveOneGate(DtoGateIU gate) {
 
         String gateName = gate.getGateName();
         if (ObjectUtils.isEmpty(gateName)) {
@@ -75,7 +87,17 @@ public class GateServiceImpl implements GateService {
             throw new ValidationException("Gate with this gate name already exists!");
         }
 
-        Gate pGate = gateMapper.dtoGateToGate(gate);
+        // Find and set floor if floorId is provided
+        if (ObjectUtils.isNotEmpty(gate.getUnitId())) {
+            Unit unit = unitService.checkIfUnitExists(gate.getUnitId());
+            gate.setUnitId(unit.getUnitId());
+        }
+
+        if(ObjectUtils.isNotEmpty(gate.getMainEntrance())){
+            gate.setMainEntrance(gate.getMainEntrance());
+        }
+
+        Gate pGate = gateMapper.dtoGateIUToGate(gate);
         Gate dbGate = gateRepository.save(pGate);
 
         return gateMapper.gateToDtoGate(dbGate);
@@ -92,8 +114,16 @@ public class GateServiceImpl implements GateService {
             Gate foundGate = optGate.get();
             foundGate.setGateName(newGate.getGateName());
 
-            Gate updatedGate = gateRepository.save(foundGate);
+            if(ObjectUtils.isNotEmpty(newGate.getUnitId())){    
+                Unit unit = unitService.checkIfUnitExists(newGate.getUnitId());
+                foundGate.setUnitId(unit);
+            }
 
+            if(ObjectUtils.isNotEmpty(newGate.getMainEntrance())){
+                foundGate.setMainEntrance(newGate.getMainEntrance());
+            }
+
+            Gate updatedGate = gateRepository.save(foundGate);
             return gateMapper.gateToDtoGate(updatedGate);
         }else{
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());

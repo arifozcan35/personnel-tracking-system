@@ -1,3 +1,4 @@
+/* 
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.EmailNotificationEventDto;
@@ -43,4 +44,6 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
         log.info("Sending email notification event to Kafka: {}", emailNotificationEvent);
         kafkaTemplate.send(emailNotificationTopic, emailNotificationEvent);
     }
+    
 } 
+    */

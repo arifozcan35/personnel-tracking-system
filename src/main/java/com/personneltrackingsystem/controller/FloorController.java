@@ -1,6 +1,5 @@
 package com.personneltrackingsystem.controller;
 
-import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.dto.DtoFloor;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +28,7 @@ public interface FloorController {
 
     @PutMapping("/{floorId}")
     @PreAuthorize("hasRole('ADMIN')")
-    DtoFloor updateFloor(@PathVariable Long floorId, @RequestBody DtoFloorIU newFloor);
+    DtoFloor updateFloor(@PathVariable Long floorId, @RequestBody DtoFloor newFloor);
 
     @DeleteMapping("/{floorId}")
     @PreAuthorize("hasRole('ADMIN')")

@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoWorkingHours;
-import com.personneltrackingsystem.dto.DtoWorkingHoursIU;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +14,7 @@ public interface WorkingHoursService {
 
     DtoWorkingHours saveOneWorkingHours(DtoWorkingHours newWorkingHours);
 
-    DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHoursIU workingHours);
+    DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHours newWorkingHours);
 
     void deleteOneWorkingHours(Long id);
 } 

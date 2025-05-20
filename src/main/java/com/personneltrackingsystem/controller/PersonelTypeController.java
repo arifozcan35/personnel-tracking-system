@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonelType;
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +25,7 @@ public interface PersonelTypeController {
 
     @PutMapping("/{personelTypeId}")
     @PreAuthorize("hasRole('ADMIN')")
-    DtoPersonelType updatePersonelType(@PathVariable Long personelTypeId, @RequestBody DtoPersonelTypeIU newPersonelType);
+    DtoPersonelType updatePersonelType(@PathVariable Long personelTypeId, @RequestBody DtoPersonelType newPersonelType);
 
     @DeleteMapping("/{personelTypeId}")
     @PreAuthorize("hasRole('ADMIN')")

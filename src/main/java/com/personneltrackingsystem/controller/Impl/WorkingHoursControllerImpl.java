@@ -2,7 +2,6 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.WorkingHoursController;
 import com.personneltrackingsystem.dto.DtoWorkingHours;
-import com.personneltrackingsystem.dto.DtoWorkingHoursIU;
 import com.personneltrackingsystem.service.WorkingHoursService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +30,7 @@ public class WorkingHoursControllerImpl implements WorkingHoursController {
     }
 
     @Override
-    public DtoWorkingHours updateWorkingHours(Long workingHoursId, DtoWorkingHoursIU newWorkingHours) {
+    public DtoWorkingHours updateWorkingHours(Long workingHoursId, DtoWorkingHours newWorkingHours) {
         return workingHoursService.updateOneWorkingHours(workingHoursId, newWorkingHours);
     }
 

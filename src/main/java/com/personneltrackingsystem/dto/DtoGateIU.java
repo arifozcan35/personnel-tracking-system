@@ -12,14 +12,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DtoGateIU {
 
-    @Schema(description = "Unique identity of gate", example = "2")
-    private Long gateId;
-
-    @Schema(description = "The name of gate", example = "3. Floor")
+    @Schema(description = "The name of gate", example = "Gate 1")
     private String gateName;
 
+    @Schema(description = "The main entrance of gate", example = "true")
     private Boolean mainEntrance;
 
-
+    @Schema(description = "The unit id of gate", example = "1")
     private Long unitId;
 }

@@ -22,7 +22,7 @@ public class Building {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "buildingSeq")
-    @SequenceGenerator(name = "buildingSeq", allocationSize = 1)
+    @SequenceGenerator(name = "buildingSeq", sequenceName = "buildingSeq", allocationSize = 1)
     @Column(name = "building_id")
     private Long buildingId;
 

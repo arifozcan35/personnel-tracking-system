@@ -34,7 +34,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userSeq")
-    @SequenceGenerator(name = "userSeq", allocationSize = 1)
+    @SequenceGenerator(name = "userSeq", sequenceName = "userSeq", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 

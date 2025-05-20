@@ -26,7 +26,7 @@ public class GateControllerImpl implements GateController {
     }
 
     @Override
-    public DtoGate createGate(DtoGate newGate) {
+    public DtoGate createGate(DtoGateIU newGate) {
         return gateService.saveOneGate(newGate);
     }
 

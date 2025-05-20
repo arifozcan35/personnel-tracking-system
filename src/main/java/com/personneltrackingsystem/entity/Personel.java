@@ -19,7 +19,7 @@ public class Personel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "personelSeq")
-    @SequenceGenerator(name = "personelSeq", allocationSize = 1)
+    @SequenceGenerator(name = "personelSeq", sequenceName = "personelSeq", allocationSize = 1)
     @Column(name = "personel_id")
     private Long personelId;
 
@@ -31,6 +31,7 @@ public class Personel {
 
     @ManyToMany
     @JoinTable(name = "personel_unit",
+    schema = "dbpersonel",
     joinColumns = @JoinColumn(name = "personel_id"),
     inverseJoinColumns = @JoinColumn(name = "unit_id"))
     private List<Unit> unitId;

@@ -31,7 +31,7 @@ public class UnitControllerImpl implements UnitController {
 
 
     @Override
-    public DtoUnit createUnit(DtoUnit newUnit) {
+    public DtoUnit createUnit(DtoUnitIU newUnit) {
         return unitServiceImpl.saveOneUnit(newUnit);
     }
 

@@ -2,7 +2,6 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.PersonelTypeController;
 import com.personneltrackingsystem.dto.DtoPersonelType;
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 import com.personneltrackingsystem.service.PersonelTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +30,7 @@ public class PersonelTypeControllerImpl implements PersonelTypeController {
     }
 
     @Override
-    public DtoPersonelType updatePersonelType(Long personelTypeId, DtoPersonelTypeIU newPersonelType) {
+    public DtoPersonelType updatePersonelType(Long personelTypeId, DtoPersonelType newPersonelType) {
         return personelTypeService.updateOnePersonelType(personelTypeId, newPersonelType);
     }
 

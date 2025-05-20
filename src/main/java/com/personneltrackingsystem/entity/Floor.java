@@ -24,7 +24,7 @@ public class Floor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "floorSeq")
-    @SequenceGenerator(name = "floorSeq", allocationSize = 1)
+    @SequenceGenerator(name = "floorSeq", sequenceName = "floorSeq", allocationSize = 1)
     @Column(name = "floor_id")
     private Long floorId;
 

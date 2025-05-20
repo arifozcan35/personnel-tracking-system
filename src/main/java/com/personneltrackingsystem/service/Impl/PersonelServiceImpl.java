@@ -7,6 +7,8 @@ import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.PersonelService;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,6 +27,11 @@ public class PersonelServiceImpl implements PersonelService  {
 
     private final PersonelMapper personelMapper;
 
+
+    public Personel checkIfPersonelExists(Long personelId){
+        return personelRepository.findById(personelId)
+            .orElseThrow(() -> new EntityNotFoundException("Personel not found with id: " + personelId));
+    }
 
     @Override
     public List<DtoPersonel> getAllPersonels() {

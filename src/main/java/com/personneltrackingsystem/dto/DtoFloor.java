@@ -1,7 +1,5 @@
 package com.personneltrackingsystem.dto;
 
-import com.personneltrackingsystem.entity.Building;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,5 +14,8 @@ public class DtoFloor {
 
     @Schema(description = "The name of floor", example = "3. Floor")
     private String floorName;
+
+    @Schema(description = "The id of building", example = "1")
+    private Long buildingId;
 
 }

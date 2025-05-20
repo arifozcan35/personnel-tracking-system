@@ -2,6 +2,7 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public interface UnitController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoUnit createUnit(@RequestBody DtoUnit newUnit);
+    DtoUnit createUnit(@RequestBody DtoUnitIU newUnit);
 
     @PutMapping("/{unitId}")
     @PreAuthorize("hasRole('ADMIN')")

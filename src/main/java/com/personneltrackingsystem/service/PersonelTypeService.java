@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoPersonelType;
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +15,7 @@ public interface PersonelTypeService {
 
     DtoPersonelType saveOnePersonelType(DtoPersonelType newPersonelType);
 
-    DtoPersonelType updateOnePersonelType(Long id, DtoPersonelTypeIU newPersonelType);
+    DtoPersonelType updateOnePersonelType(Long id, DtoPersonelType newPersonelType);
     
     void deleteOnePersonelType(Long id);
 } 

@@ -1,7 +1,7 @@
 package com.personneltrackingsystem.service;
 
-import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.dto.DtoFloor;
+import com.personneltrackingsystem.entity.Floor;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -19,9 +19,11 @@ public interface FloorService {
 
     DtoFloor saveOneFloor(DtoFloor newFloor);
 
-    DtoFloor updateOneFloor(Long id, DtoFloorIU newFloor);
+    DtoFloor updateOneFloor(Long id, DtoFloor newFloor);
 
     void deleteOneFloor(Long floorId);
+
+    Floor checkIfFloorExists(Long floorId);
 
 
     // ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId);

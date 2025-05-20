@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoPersonelType;
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
@@ -82,7 +81,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
     @Override
     @Transactional
-    public DtoPersonelType updateOnePersonelType(Long id, DtoPersonelTypeIU newPersonelType) {
+    public DtoPersonelType updateOnePersonelType(Long id, DtoPersonelType newPersonelType) {
 
         Optional<PersonelType> optPersonelType = personelTypeRepository.findById(id);
 

@@ -2,6 +2,7 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public interface GateController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoGate createGate(@RequestBody DtoGate newGate);
+    DtoGate createGate(@RequestBody DtoGateIU newGate);
 
     @PutMapping("/{gateId}")
     @PreAuthorize("hasRole('ADMIN')")

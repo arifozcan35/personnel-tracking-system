@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Gate {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gateSeq")
-    @SequenceGenerator(name = "gateSeq", allocationSize = 1)
+    @SequenceGenerator(name = "gateSeq", sequenceName = "gateSeq", allocationSize = 1)
     @Column(name = "gate_id")
     private Long gateId;
 

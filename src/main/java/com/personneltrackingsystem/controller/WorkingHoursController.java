@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoWorkingHours;
-import com.personneltrackingsystem.dto.DtoWorkingHoursIU;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +26,7 @@ public interface WorkingHoursController {
 
     @PutMapping("/{workingHoursId}")
     @PreAuthorize("hasRole('ADMIN')")
-    DtoWorkingHours updateWorkingHours(@PathVariable Long workingHoursId, @RequestBody DtoWorkingHoursIU newWorkingHours);
+    DtoWorkingHours updateWorkingHours(@PathVariable Long workingHoursId, @RequestBody DtoWorkingHours newWorkingHours);
 
     @DeleteMapping("/{workingHoursId}")
     @PreAuthorize("hasRole('ADMIN')")

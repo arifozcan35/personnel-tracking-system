@@ -1,6 +1,5 @@
 package com.personneltrackingsystem.controller.Impl;
 
-import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.controller.FloorController;
 import com.personneltrackingsystem.service.FloorService;
@@ -35,7 +34,7 @@ public class FloorControllerImpl implements FloorController {
 
 
     @Override
-    public DtoFloor updateFloor(Long floorId, DtoFloorIU newFloor) {
+    public DtoFloor updateFloor(Long floorId, DtoFloor newFloor) {
         return gateServiceImpl.updateOneFloor(floorId, newFloor);
     }
 

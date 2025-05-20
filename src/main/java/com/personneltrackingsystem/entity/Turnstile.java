@@ -24,7 +24,7 @@ public class Turnstile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "turnstileSeq")
-    @SequenceGenerator(name = "turnstileSeq", allocationSize = 1)
+    @SequenceGenerator(name = "turnstileSeq", sequenceName = "turnstileSeq", allocationSize = 1)
     @Column(name = "turnstile_id")
     private Long turnstileId;
 

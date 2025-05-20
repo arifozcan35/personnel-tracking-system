@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoBuilding;
-import com.personneltrackingsystem.dto.DtoBuildingIU;
 import com.personneltrackingsystem.entity.Building;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
@@ -31,6 +30,12 @@ public class BuildingServiceImpl implements BuildingService {
     private final BuildingMapper buildingMapper;
 
     private final MessageResolver messageResolver;
+
+
+    public Building checkIfBuildingExists(Long buildingId){
+        return buildingRepository.findById(buildingId)
+            .orElseThrow(() -> new EntityNotFoundException("Building not found with id: " + buildingId));
+    }
 
     @Override
     public List<DtoBuilding> getAllBuildings(){
@@ -83,7 +88,7 @@ public class BuildingServiceImpl implements BuildingService {
 
     @Override
     @Transactional
-    public DtoBuilding updateOneBuilding(Long id, DtoBuildingIU newBuilding) {
+    public DtoBuilding updateOneBuilding(Long id, DtoBuilding newBuilding) {
 
         Optional<Building> optBuilding = buildingRepository.findById(id);
 

@@ -2,8 +2,6 @@ package com.personneltrackingsystem.mapper;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
-import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.entity.Unit;

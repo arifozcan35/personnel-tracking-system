@@ -1,7 +1,6 @@
 package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoBuilding;
-import com.personneltrackingsystem.dto.DtoBuildingIU;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +25,7 @@ public interface BuildingController {
 
     @PutMapping("/{buildingId}")
     @PreAuthorize("hasRole('ADMIN')")
-    DtoBuilding updateBuilding(@PathVariable Long buildingId, @RequestBody DtoBuildingIU newBuilding);
+    DtoBuilding updateBuilding(@PathVariable Long buildingId, @RequestBody DtoBuilding newBuilding);
 
     @DeleteMapping("/{buildingId}")
     @PreAuthorize("hasRole('ADMIN')")

@@ -14,7 +14,7 @@ public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tokenSeq")
-    @SequenceGenerator(name = "tokenSeq", allocationSize = 1)
+    @SequenceGenerator(name = "tokenSeq", sequenceName = "tokenSeq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)

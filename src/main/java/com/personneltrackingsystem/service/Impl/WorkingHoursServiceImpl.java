@@ -1,9 +1,7 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoPersonelType;
-import com.personneltrackingsystem.dto.DtoPersonelTypeIU;
 import com.personneltrackingsystem.dto.DtoWorkingHours;
-import com.personneltrackingsystem.dto.DtoWorkingHoursIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.entity.WorkingHours;
@@ -86,7 +84,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
 
     @Override
     @Transactional
-    public DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHoursIU newWorkingHours) {
+    public DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHours newWorkingHours) {
 
         Optional<WorkingHours> optWorkingHours = workingHoursRepository.findById(id);
 

@@ -2,6 +2,7 @@ package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
+import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Turnstile;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
@@ -10,6 +11,7 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.TurnstileMapper;
 import com.personneltrackingsystem.repository.TurnstileRepository;
+import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.TurnstileService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -27,6 +29,8 @@ import java.util.Optional;
 public class TurnstileServiceImpl implements TurnstileService {
 
     private final TurnstileRepository turnstileRepository;
+
+    private final GateService gateService;
 
     private final TurnstileMapper turnstileMapper;
 
@@ -62,7 +66,7 @@ public class TurnstileServiceImpl implements TurnstileService {
 
     @Override
     @Transactional
-    public DtoTurnstile saveOneTurnstile(DtoTurnstile turnstile) {
+    public DtoTurnstile saveOneTurnstile(DtoTurnstileIU turnstile) {
 
         String turnstileName = turnstile.getTurnstileName();
         if (ObjectUtils.isEmpty(turnstileName)) {
@@ -73,7 +77,13 @@ public class TurnstileServiceImpl implements TurnstileService {
             throw new ValidationException("Turnstile with this turnstile name already exists!");
         }
 
-        Turnstile pTurnstile = turnstileMapper.dtoTurnstileToTurnstile(turnstile);
+        // Find and set gate if gateId is provided
+        if (ObjectUtils.isNotEmpty(turnstile.getGateId())) {
+            Gate gate = gateService.checkIfGateExists(turnstile.getGateId());
+            turnstile.setGateId(gate.getGateId());
+        }
+
+        Turnstile pTurnstile = turnstileMapper.dtoTurnstileIUToTurnstile(turnstile);
         Turnstile dbTurnstile = turnstileRepository.save(pTurnstile);
 
         return turnstileMapper.turnstileToDtoTurnstile(dbTurnstile);

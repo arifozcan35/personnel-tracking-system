@@ -14,13 +14,12 @@ public class DtoUnitIU {
 
     // solid example : article 2 (Open Closed Principle)
 
-    @Schema(description = "Unique identity of unit", example = "3")
-    private Long unitId;
-
     @Schema(description = "The name of unit", example = "Information Technologies")
     private String birimIsim;
 
+    @Schema(description = "The floor id of unit", example = "4")
     private Long floorId;
 
+    @Schema(description = "The administrator personel id of unit", example = "2")
     private Long administratorPersonelId;
 }

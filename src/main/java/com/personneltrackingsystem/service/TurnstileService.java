@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TurnstileService {
+    
     List<DtoTurnstile> getAllTurnstiles();
 
     Optional<DtoTurnstile> getTurnstileById(Long id);
 
     DtoTurnstile getOneTurnstile(Long id);
 
-    DtoTurnstile saveOneTurnstile(DtoTurnstile newTurnstile);
+    DtoTurnstile saveOneTurnstile(DtoTurnstileIU newTurnstile);
 
     DtoTurnstile updateOneTurnstile(Long id, DtoTurnstileIU newTurnstile);
 

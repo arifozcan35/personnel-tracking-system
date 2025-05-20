@@ -1,20 +1,21 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.dto.DtoGate;
-import com.personneltrackingsystem.dto.DtoGateIU;
-import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.entity.Floor;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Building;
 import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.FloorMapper;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.FloorRepository;
 import com.personneltrackingsystem.repository.GateRepository;
+import com.personneltrackingsystem.repository.BuildingRepository;
+import com.personneltrackingsystem.service.BuildingService;
 import com.personneltrackingsystem.service.FloorService;
 import com.personneltrackingsystem.dto.GatePassageEventDto;
-import com.personneltrackingsystem.service.KafkaProducerService;
+// import com.personneltrackingsystem.service.KafkaProducerService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -32,11 +33,19 @@ public class FloorServiceImpl implements FloorService {
 
     private final FloorRepository floorRepository;
 
+    private final BuildingService buildingService;
+
     private final MessageResolver messageResolver;
 
     private final FloorMapper floorMapper;
 
-    private final KafkaProducerService kafkaProducerService;
+    // private final KafkaProducerService kafkaProducerService;
+
+
+    public Floor checkIfFloorExists(Long floorId){
+        return floorRepository.findById(floorId)
+            .orElseThrow(() -> new EntityNotFoundException("Floor not found with id: " + floorId));
+    }
 
     @Override
     public Optional<DtoFloor> findById(Long floorId) {
@@ -79,26 +88,36 @@ public class FloorServiceImpl implements FloorService {
             throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
         }
 
-        if (floorRepository.existsByFloorName(floorName)) {
-            throw new ValidationException("Floor with this floor name already exists!");
-        }
 
         Floor pFloor = floorMapper.dtoFloorToFloor(floor);
+        
+        // Find and set building if buildingId is provided
+        if (floor.getBuildingId() != null) {
+            Building building = buildingService.checkIfBuildingExists(floor.getBuildingId());
+            pFloor.setBuilding(building);
+        }
+
         Floor dbFloor = floorRepository.save(pFloor);
 
         return floorMapper.floorToDtoFloor(dbFloor);
-
     }
 
+    
     @Override
     @Transactional
-    public DtoFloor updateOneFloor(Long id, DtoFloorIU newFloor) {
+    public DtoFloor updateOneFloor(Long id, DtoFloor newFloor) {
 
         Optional<Floor> optFloor = floorRepository.findById(id);
 
         if(optFloor.isPresent()){
             Floor foundFloor = optFloor.get();
             foundFloor.setFloorName(newFloor.getFloorName());
+            
+            // Find and set building if buildingId is provided
+            if (newFloor.getBuildingId() != null) {
+                Building building = buildingService.checkIfBuildingExists(newFloor.getBuildingId());
+                foundFloor.setBuilding(building);
+            }
 
             Floor updatedFloor = floorRepository.save(foundFloor);
 

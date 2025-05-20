@@ -26,7 +26,7 @@ public class TurnstileRegistrationLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "turnstileRegistrationLogSeq")
-    @SequenceGenerator(name = "turnstileRegistrationLogSeq", allocationSize = 1)
+    @SequenceGenerator(name = "turnstileRegistrationLogSeq", sequenceName = "turnstileRegistrationLogSeq", allocationSize = 1)
     @Column(name = "turnstile_registration_log_id")
     private Long turnstileRegistrationLogId;
 

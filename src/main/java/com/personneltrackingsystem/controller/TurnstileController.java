@@ -22,7 +22,7 @@ public interface TurnstileController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    DtoTurnstile createTurnstile(@RequestBody DtoTurnstile newTurnstile);
+    DtoTurnstile createTurnstile(@RequestBody DtoTurnstileIU newTurnstile);
 
     @PutMapping("/{turnstileId}")
     @PreAuthorize("hasRole('ADMIN')")

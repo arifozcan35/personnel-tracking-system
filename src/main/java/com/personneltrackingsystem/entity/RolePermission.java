@@ -18,7 +18,7 @@ public class RolePermission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rolePermissionSeq")
-    @SequenceGenerator(name = "rolePermissionSeq", allocationSize = 1)
+    @SequenceGenerator(name = "rolePermissionSeq", sequenceName = "rolePermissionSeq", allocationSize = 1)
     private Long id;
 
     @Enumerated(EnumType.STRING)

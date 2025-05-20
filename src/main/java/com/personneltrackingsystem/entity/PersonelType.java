@@ -22,7 +22,7 @@ public class PersonelType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "personelTypeSeq")
-    @SequenceGenerator(name = "personelTypeSeq", allocationSize = 1)
+    @SequenceGenerator(name = "personelTypeSeq", sequenceName = "personelTypeSeq", allocationSize = 1)
     @Column(name = "personel_type_id")
     private Long personelTypeId;
 

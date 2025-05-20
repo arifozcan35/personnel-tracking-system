@@ -7,7 +7,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import com.personneltrackingsystem.dto.DtoFloor;
-import com.personneltrackingsystem.dto.DtoFloorIU;
 import com.personneltrackingsystem.entity.Building;
 import com.personneltrackingsystem.entity.Floor;
 
@@ -18,13 +17,9 @@ public interface FloorMapper {
 
     List<DtoFloor> floorListToDtoFloorList(List<Floor> floorList);
 
+    @Mapping(target = "buildingId", source = "building", qualifiedByName = "buildingToLong")
     DtoFloor floorToDtoFloor(Floor floor);
 
-    @Mapping(target = "building", source = "buildingId", qualifiedByName = "longToBuilding")
-    Floor dtoFloorIUToFloor(DtoFloorIU dtoFloorIU);
-
-    @Mapping(target = "buildingId", source = "building", qualifiedByName = "buildingToLong")
-    DtoFloorIU floorToDtoFloorIU(Floor floor);
     
     @Named("buildingToLong")
     default Long buildingToLong(Building building) {
