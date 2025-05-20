@@ -1,15 +1,11 @@
 package com.personneltrackingsystem.service.Impl;
 
-import com.personneltrackingsystem.dto.DtoPersonelType;
 import com.personneltrackingsystem.dto.DtoWorkingHours;
-import com.personneltrackingsystem.entity.Gate;
-import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
-import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.WorkingHoursMapper;
 import com.personneltrackingsystem.repository.WorkingHoursRepository;
 import com.personneltrackingsystem.service.WorkingHoursService;
@@ -85,22 +81,19 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
     @Override
     @Transactional
     public DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHours newWorkingHours) {
+        WorkingHours existingWorkingHours = workingHoursRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
 
-        Optional<WorkingHours> optWorkingHours = workingHoursRepository.findById(id);
-
-        if(optWorkingHours.isPresent()){
-            WorkingHours foundWorkingHours = optWorkingHours.get();
-            foundWorkingHours.setCheckInTime(newWorkingHours.getCheckInTime());
-            foundWorkingHours.setCheckOutTime(newWorkingHours.getCheckOutTime());
-
-            WorkingHours updatedWorkingHours = workingHoursRepository.save(foundWorkingHours);
-
-            return workingHoursMapper.workingHoursToDtoWorkingHours(updatedWorkingHours);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+        if (ObjectUtils.isNotEmpty(newWorkingHours.getCheckInTime())) {
+            existingWorkingHours.setCheckInTime(newWorkingHours.getCheckInTime());
+        }
+        
+        if (ObjectUtils.isNotEmpty(newWorkingHours.getCheckOutTime())) {
+            existingWorkingHours.setCheckOutTime(newWorkingHours.getCheckOutTime());
         }
 
+        WorkingHours updatedWorkingHours = workingHoursRepository.save(existingWorkingHours);
+        return workingHoursMapper.workingHoursToDtoWorkingHours(updatedWorkingHours);
     }
 
     @Override

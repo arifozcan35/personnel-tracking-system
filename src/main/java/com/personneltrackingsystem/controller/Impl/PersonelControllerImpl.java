@@ -2,6 +2,7 @@ package com.personneltrackingsystem.controller.Impl;
 
 import com.personneltrackingsystem.controller.PersonelController;
 import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelAll;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.service.PersonelService;
 
@@ -24,7 +25,7 @@ public class PersonelControllerImpl implements PersonelController {
     }
 
     @Override
-    public DtoPersonel getOnePersonel(Long personelId){
+    public DtoPersonelAll getOnePersonel(Long personelId){
         return personelServiceImpl.getAOnePersonel(personelId);
     }
 

@@ -1,8 +1,10 @@
 package com.personneltrackingsystem.service.Impl;
 
+import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Turnstile;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
@@ -12,6 +14,7 @@ import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.TurnstileMapper;
 import com.personneltrackingsystem.repository.TurnstileRepository;
 import com.personneltrackingsystem.service.GateService;
+import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.TurnstileService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -31,6 +34,8 @@ public class TurnstileServiceImpl implements TurnstileService {
     private final TurnstileRepository turnstileRepository;
 
     private final GateService gateService;
+
+    private final PersonelService personelService;
 
     private final TurnstileMapper turnstileMapper;
 
@@ -93,21 +98,20 @@ public class TurnstileServiceImpl implements TurnstileService {
     @Override
     @Transactional
     public DtoTurnstile updateOneTurnstile(Long id, DtoTurnstileIU newTurnstile) {
+        Turnstile existingTurnstile = turnstileRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
 
-        Optional<Turnstile> optTurnstile = turnstileRepository.findById(id);
-
-        if(optTurnstile.isPresent()){
-            Turnstile foundTurnstile = optTurnstile.get();
-            foundTurnstile.setTurnstileName(newTurnstile.getTurnstileName());
-
-            Turnstile updatedTurnstile = turnstileRepository.save(foundTurnstile);
-
-            return turnstileMapper.turnstileToDtoTurnstile(updatedTurnstile);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+        if (ObjectUtils.isNotEmpty(newTurnstile.getTurnstileName())) {
+            existingTurnstile.setTurnstileName(newTurnstile.getTurnstileName());
+        }
+        
+        if (ObjectUtils.isNotEmpty(newTurnstile.getGateId())) {
+            Gate gate = gateService.checkIfGateExists(newTurnstile.getGateId());
+            existingTurnstile.setGateId(gate);
         }
 
+        Turnstile updatedTurnstile = turnstileRepository.save(existingTurnstile);
+        return turnstileMapper.turnstileToDtoTurnstile(updatedTurnstile);
     }
 
     @Override
@@ -122,5 +126,22 @@ public class TurnstileServiceImpl implements TurnstileService {
             ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
             throw new BaseException(errorMessage);
         }
+    }
+
+
+
+    public void passTurnstile(Long turnstileId, Long personelId){
+        Turnstile turnstile = turnstileRepository.findById(turnstileId)
+                .orElseThrow(() -> new EntityNotFoundException("Turnstile not found with id: " + turnstileId));
+
+        
+        Personel personel = personelService.checkIfPersonelExists(personelId);
+
+        DtoTurnstile dtoTurnstile = turnstileMapper.turnstileToDtoTurnstile(turnstile);
+
+        DtoPersonel dtoPersonel = personelService.personelMapper(personel);
+
+        turnstile.setPersonelId(dtoPersonel.getPersonelId());
+
     }
 } 

@@ -89,21 +89,15 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional
     public DtoBuilding updateOneBuilding(Long id, DtoBuilding newBuilding) {
+        Building existingBuilding = buildingRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
 
-        Optional<Building> optBuilding = buildingRepository.findById(id);
-
-        if(optBuilding.isPresent()){
-            Building foundBuilding = optBuilding.get();
-            foundBuilding.setBuildingName(newBuilding.getBuildingName());
-
-            Building updatedBuilding = buildingRepository.save(foundBuilding);
-
-            return buildingMapper.buildingToDtoBuilding(updatedBuilding);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+        if (ObjectUtils.isNotEmpty(newBuilding.getBuildingName())) {
+            existingBuilding.setBuildingName(newBuilding.getBuildingName());
         }
 
+        Building updatedBuilding = buildingRepository.save(existingBuilding);
+        return buildingMapper.buildingToDtoBuilding(updatedBuilding);
     }
 
     @Override

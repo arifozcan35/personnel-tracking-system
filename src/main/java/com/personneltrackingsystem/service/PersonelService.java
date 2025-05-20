@@ -1,6 +1,7 @@
 package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelAll;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import com.personneltrackingsystem.entity.Personel;
 
@@ -15,7 +16,7 @@ public interface PersonelService {
 
     List<DtoPersonel> getAllPersonels();
 
-    DtoPersonel getAOnePersonel(Long personelId);
+    DtoPersonelAll getAOnePersonel(Long personelId);
 
     ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel);
 
@@ -26,6 +27,8 @@ public interface PersonelService {
     Set<DtoPersonel> getPersonelsByUnitId(Long unitId);
 
     Personel checkIfPersonelExists(Long administratorPersonelId);
+
+    DtoPersonel personelMapper(Personel personel);
 
     // Map<String, Double> listSalaries();
 }

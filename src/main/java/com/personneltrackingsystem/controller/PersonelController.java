@@ -1,6 +1,7 @@
 package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoPersonel;
+import com.personneltrackingsystem.dto.DtoPersonelAll;
 import com.personneltrackingsystem.dto.DtoPersonelIU;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +21,7 @@ public interface PersonelController {
     List<DtoPersonel> getAllPersonels();
 
     @GetMapping("/{personelId}")
-    DtoPersonel getOnePersonel(@PathVariable Long personelId);
+    DtoPersonelAll getOnePersonel(@PathVariable Long personelId);
 
     @PostMapping
     ResponseEntity<String> createPersonel(@RequestBody DtoPersonelIU newPersonel);

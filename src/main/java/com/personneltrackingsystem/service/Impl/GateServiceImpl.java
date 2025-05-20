@@ -107,29 +107,24 @@ public class GateServiceImpl implements GateService {
     @Override
     @Transactional
     public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
+        Gate existingGate = gateRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
 
-        Optional<Gate> optGate = gateRepository.findById(id);
-
-        if(optGate.isPresent()){
-            Gate foundGate = optGate.get();
-            foundGate.setGateName(newGate.getGateName());
-
-            if(ObjectUtils.isNotEmpty(newGate.getUnitId())){    
-                Unit unit = unitService.checkIfUnitExists(newGate.getUnitId());
-                foundGate.setUnitId(unit);
-            }
-
-            if(ObjectUtils.isNotEmpty(newGate.getMainEntrance())){
-                foundGate.setMainEntrance(newGate.getMainEntrance());
-            }
-
-            Gate updatedGate = gateRepository.save(foundGate);
-            return gateMapper.gateToDtoGate(updatedGate);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+        if (ObjectUtils.isNotEmpty(newGate.getGateName())) {
+            existingGate.setGateName(newGate.getGateName());
         }
 
+        if (ObjectUtils.isNotEmpty(newGate.getUnitId())) {    
+            Unit unit = unitService.checkIfUnitExists(newGate.getUnitId());
+            existingGate.setUnitId(unit);
+        }
+
+        if (ObjectUtils.isNotEmpty(newGate.getMainEntrance())) {
+            existingGate.setMainEntrance(newGate.getMainEntrance());
+        }
+
+        Gate updatedGate = gateRepository.save(existingGate);
+        return gateMapper.gateToDtoGate(updatedGate);
     }
 
     @Override

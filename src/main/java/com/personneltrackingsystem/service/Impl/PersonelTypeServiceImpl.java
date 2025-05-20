@@ -82,21 +82,15 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
     @Override
     @Transactional
     public DtoPersonelType updateOnePersonelType(Long id, DtoPersonelType newPersonelType) {
+        PersonelType existingPersonelType = personelTypeRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
 
-        Optional<PersonelType> optPersonelType = personelTypeRepository.findById(id);
-
-        if(optPersonelType.isPresent()){
-            PersonelType foundPersonelType = optPersonelType.get();
-            foundPersonelType.setPersonelTypeName(newPersonelType.getPersonelTypeName());
-
-            PersonelType updatedPersonelType = personelTypeRepository.save(foundPersonelType);
-
-            return personelTypeMapper.personelTypeToDtoPersonelType(updatedPersonelType);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+        if (ObjectUtils.isNotEmpty(newPersonelType.getPersonelTypeName())) {
+            existingPersonelType.setPersonelTypeName(newPersonelType.getPersonelTypeName());
         }
 
+        PersonelType updatedPersonelType = personelTypeRepository.save(existingPersonelType);
+        return personelTypeMapper.personelTypeToDtoPersonelType(updatedPersonelType);
     }
 
     @Override

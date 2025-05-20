@@ -28,9 +28,15 @@ public class PersonelServiceImpl implements PersonelService  {
     private final PersonelMapper personelMapper;
 
 
+    @Override
     public Personel checkIfPersonelExists(Long personelId){
         return personelRepository.findById(personelId)
             .orElseThrow(() -> new EntityNotFoundException("Personel not found with id: " + personelId));
+    }
+
+    @Override
+    public DtoPersonel personelMapper(Personel personel){
+        return personelMapper.personelToDtoPersonel(personel);
     }
 
     @Override
@@ -40,11 +46,21 @@ public class PersonelServiceImpl implements PersonelService  {
     }
 
     @Override
-    public DtoPersonel getAOnePersonel(Long personelId) {
+    public DtoPersonelAll getAOnePersonel(Long personelId) {
         Optional<Personel> optPersonel = personelRepository.findById(personelId);
 
         if(optPersonel.isPresent()) {
-            return personelMapper.personelToDtoPersonel(optPersonel.get());
+            Personel personel = optPersonel.get();
+            
+            if (ObjectUtils.isNotEmpty(personel.getPersonelTypeId())) {
+                personel.getPersonelTypeId().getPersonelTypeName();
+            }
+            
+            if (ObjectUtils.isNotEmpty(personel.getUnitId()) && !personel.getUnitId().isEmpty()) {
+                personel.getUnitId().forEach(unit -> unit.getUnitName());
+            }
+            
+            return personelMapper.personelToDtoPersonelAll(personel);
         } else {
             throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
         }

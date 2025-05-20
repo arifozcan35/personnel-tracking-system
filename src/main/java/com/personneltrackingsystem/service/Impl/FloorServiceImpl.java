@@ -106,27 +106,20 @@ public class FloorServiceImpl implements FloorService {
     @Override
     @Transactional
     public DtoFloor updateOneFloor(Long id, DtoFloor newFloor) {
+        Floor existingFloor = floorRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
 
-        Optional<Floor> optFloor = floorRepository.findById(id);
-
-        if(optFloor.isPresent()){
-            Floor foundFloor = optFloor.get();
-            foundFloor.setFloorName(newFloor.getFloorName());
-            
-            // Find and set building if buildingId is provided
-            if (newFloor.getBuildingId() != null) {
-                Building building = buildingService.checkIfBuildingExists(newFloor.getBuildingId());
-                foundFloor.setBuilding(building);
-            }
-
-            Floor updatedFloor = floorRepository.save(foundFloor);
-
-            return floorMapper.floorToDtoFloor(updatedFloor);
-        }else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+        if (ObjectUtils.isNotEmpty(newFloor.getFloorName())) {
+            existingFloor.setFloorName(newFloor.getFloorName());
+        }
+        
+        if (ObjectUtils.isNotEmpty(newFloor.getBuildingId())) {
+            Building building = buildingService.checkIfBuildingExists(newFloor.getBuildingId());
+            existingFloor.setBuilding(building);
         }
 
+        Floor updatedFloor = floorRepository.save(existingFloor);
+        return floorMapper.floorToDtoFloor(updatedFloor);
     }
 
 

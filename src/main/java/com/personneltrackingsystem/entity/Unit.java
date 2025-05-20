@@ -11,6 +11,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 public class Unit {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "unitSeq")
     @SequenceGenerator(name = "unitSeq", sequenceName = "unitSeq", allocationSize = 1)

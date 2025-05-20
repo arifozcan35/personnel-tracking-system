@@ -115,32 +115,26 @@ public class UnitServiceImpl implements UnitService {
     @Override
     @Transactional
     public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit) {
+        Unit existingUnit = unitRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString())));
 
-        Optional<Unit> optUnit = unitRepository.findById(id);
-
-        if(optUnit.isPresent()){
-            DtoUnitIU foundUnit = unitMapper.unitToDtoUnitIU(optUnit.get());
-            foundUnit.setBirimIsim(newUnit.getBirimIsim());
-
-            if (ObjectUtils.isNotEmpty(newUnit.getFloorId())) {
-                Floor floor = floorService.checkIfFloorExists(newUnit.getFloorId());
-                foundUnit.setFloorId(floor.getFloorId());
-            }
-
-            if (ObjectUtils.isNotEmpty(newUnit.getAdministratorPersonelId())) {
-                Personel personel = personelService.checkIfPersonelExists(newUnit.getAdministratorPersonelId());
-                foundUnit.setAdministratorPersonelId(personel.getPersonelId());
-            }
-
-            Unit updatedUnit = unitMapper.dtoUnitIUToUnit(foundUnit);
-            updatedUnit = unitRepository.save(updatedUnit);
-
-            return unitMapper.unitToDtoUnit(updatedUnit);
-
-
-        } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
+        if (ObjectUtils.isNotEmpty(newUnit.getBirimIsim())) {
+            existingUnit.setUnitName(newUnit.getBirimIsim());
         }
+
+        if (ObjectUtils.isNotEmpty(newUnit.getFloorId())) {
+            Floor floor = floorService.checkIfFloorExists(newUnit.getFloorId());
+            existingUnit.setFloorId(floor);
+        }
+
+        if (ObjectUtils.isNotEmpty(newUnit.getAdministratorPersonelId())) {
+            Personel personel = personelService.checkIfPersonelExists(newUnit.getAdministratorPersonelId());
+            existingUnit.setAdministratorPersonelId(personel);
+        }
+
+        Unit updatedUnit = unitRepository.save(existingUnit);
+
+        return unitMapper.unitToDtoUnit(updatedUnit);
     }
 
 
