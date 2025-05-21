@@ -5,6 +5,8 @@ import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.service.TurnstileService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -38,5 +40,12 @@ public class TurnstileControllerImpl implements TurnstileController {
     @Override
     public void deleteTurnstile(Long turnstileId) {
         turnstileService.deleteOneTurnstile(turnstileId);
+    }
+
+
+
+    @Override
+    public ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId) {
+        return turnstileService.passTurnstile(turnstileId, personelId);
     }
 } 

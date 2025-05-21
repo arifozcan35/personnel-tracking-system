@@ -12,44 +12,35 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FloorControllerImpl implements FloorController {
 
-    private final FloorService gateServiceImpl;
+    private final FloorService floorServiceImpl;
 
 
     @Override
     public List<DtoFloor> getAllFloors() {
-        return gateServiceImpl.getAllFloors();
+        return floorServiceImpl.getAllFloors();
     }
 
 
     @Override
     public DtoFloor getOneFloor(Long floorId) {
-        return gateServiceImpl.getOneFloor(floorId);
+        return floorServiceImpl.getOneFloor(floorId);
     }
 
 
     @Override
     public DtoFloor createFloor(DtoFloor newFloor) {
-        return gateServiceImpl.saveOneFloor(newFloor);
+        return floorServiceImpl.saveOneFloor(newFloor);
     }
 
 
     @Override
     public DtoFloor updateFloor(Long floorId, DtoFloor newFloor) {
-        return gateServiceImpl.updateOneFloor(floorId, newFloor);
+        return floorServiceImpl.updateOneFloor(floorId, newFloor);
     }
 
 
     @Override
     public void deleteFloor(Long floorId) {
-        gateServiceImpl.deleteOneFloor(floorId);
+        floorServiceImpl.deleteOneFloor(floorId);
     }
-
-
-
-    /*
-    @Override
-    public ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId){
-        return gateServiceImpl.passFloor(wantedToEnterFloor, personelId);
-    }
-    */
 }

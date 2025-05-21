@@ -1,8 +1,8 @@
 package com.personneltrackingsystem.service.Impl;
 
-import com.personneltrackingsystem.dto.DtoPersonel;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
+import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Turnstile;
@@ -15,23 +15,28 @@ import com.personneltrackingsystem.mapper.TurnstileMapper;
 import com.personneltrackingsystem.repository.TurnstileRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class TurnstileServiceImpl implements TurnstileService {
 
     private final TurnstileRepository turnstileRepository;
+
+    private final TurnstileRegistrationLogService turnstileRegistrationLogService;
 
     private final GateService gateService;
 
@@ -129,19 +134,31 @@ public class TurnstileServiceImpl implements TurnstileService {
     }
 
 
-
-    public void passTurnstile(Long turnstileId, Long personelId){
+    @Override
+    public ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId){
         Turnstile turnstile = turnstileRepository.findById(turnstileId)
                 .orElseThrow(() -> new EntityNotFoundException("Turnstile not found with id: " + turnstileId));
 
-        
         Personel personel = personelService.checkIfPersonelExists(personelId);
 
-        DtoTurnstile dtoTurnstile = turnstileMapper.turnstileToDtoTurnstile(turnstile);
 
-        DtoPersonel dtoPersonel = personelService.personelMapper(personel);
+        DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
 
-        turnstile.setPersonelId(dtoPersonel.getPersonelId());
+
+        dtoTurnstileRegistrationLogIU.setPersonelId((Long)personel.getPersonelId());
+        dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
+        dtoTurnstileRegistrationLogIU.setOperationTime(LocalDateTime.now());
+
+        if(turnstileRegistrationLogService.ifPersonelPassedTurnstile(personel.getPersonelId(), turnstile.getTurnstileId())){
+            dtoTurnstileRegistrationLogIU.setOperationType("OUT");
+        }else{
+            dtoTurnstileRegistrationLogIU.setOperationType("IN");
+        }
+
+
+        turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
+
+        return ResponseEntity.ok("Turnstile passed successfully");
 
     }
 } 

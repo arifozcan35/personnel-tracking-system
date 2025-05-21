@@ -6,6 +6,8 @@ import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
+
 public interface TurnstileService {
     
     List<DtoTurnstile> getAllTurnstiles();
@@ -19,4 +21,7 @@ public interface TurnstileService {
     DtoTurnstile updateOneTurnstile(Long id, DtoTurnstileIU newTurnstile);
 
     void deleteOneTurnstile(Long id);
+
+
+    ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId);
 } 

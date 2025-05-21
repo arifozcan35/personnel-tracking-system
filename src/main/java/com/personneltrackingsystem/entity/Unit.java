@@ -27,4 +27,6 @@ public class Unit {
     @OneToOne
     @JoinColumn(name = "fk_administrator_personel_id", nullable = true)
     private Personel administratorPersonelId;
+
+    
 }
