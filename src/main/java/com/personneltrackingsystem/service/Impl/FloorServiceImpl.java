@@ -14,8 +14,6 @@ import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.repository.BuildingRepository;
 import com.personneltrackingsystem.service.BuildingService;
 import com.personneltrackingsystem.service.FloorService;
-import com.personneltrackingsystem.dto.GatePassageEventDto;
-// import com.personneltrackingsystem.service.KafkaProducerService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -136,50 +134,4 @@ public class FloorServiceImpl implements FloorService {
             throw new BaseException(errorMessage);
         }
     }
-
-
-
-    /* 
-    @Override
-    public ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId) {
-
-        Personel personel = floorRepository.findPrsnlById(personelId)
-                .orElseThrow(() -> new BaseException(
-                        new ErrorMessage(MessageType.NO_RECORD_EXIST, "This personnel is not available! Entry from outside the institution is prohibited!")
-                ));
-
-        Floor floor = floorRepository.findById(wantedToEnterFloor)
-                .orElseThrow(() -> new BaseException(
-                        new ErrorMessage(MessageType.NO_RECORD_EXIST, "The floor you want to enter is not available!")
-                ));
-
-        if (!personel.getFloor().getFloorId().equals(floor.getFloorId())) {
-            throw new BaseException(
-                    new ErrorMessage(MessageType.GENERAL_EXCEPTION, "Personnel is not authorized to enter this floor!")
-            );
-        }
-
-        if (personel.getWork() == null) {
-            throw new BaseException(
-                    new ErrorMessage(MessageType.NO_RECORD_EXIST, "Personnel does not have work hours record!")
-            );
-        }
-
-        // Create and publish gate passage event to Kafka
-        GatePassageEventDto gatePassageEvent = new GatePassageEventDto(
-                personel.getPersonelId(),
-                personel.getName(),
-                personel.getEmail(),
-                floor.getFloorId(),
-                floor.getFloorName(),
-                LocalDateTime.now()
-        );
-        
-        // Send to Kafka topic
-        kafkaProducerService.sendGatePassageEvent(gatePassageEvent);
-
-        return new ResponseEntity<>("Personnel entered the floor!", HttpStatus.CREATED);
-    }
-    */
-
 }

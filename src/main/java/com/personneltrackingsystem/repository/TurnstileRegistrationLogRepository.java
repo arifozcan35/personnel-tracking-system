@@ -12,4 +12,7 @@ public interface TurnstileRegistrationLogRepository extends JpaRepository<Turnst
 
     @Query("SELECT COUNT(t) > 0 FROM TurnstileRegistrationLog t WHERE t.personelId.personelId = :personelId AND t.turnstileId.turnstileId = :turnstileId")
     boolean passedTurnstile(@Param("personelId") Long personelId, @Param("turnstileId") Long turnstileId);
+    
+    @Query(value = "SELECT t.operationType FROM TurnstileRegistrationLog t WHERE t.personelId.personelId = :personelId AND t.turnstileId.turnstileId = :turnstileId ORDER BY t.operationTime DESC", nativeQuery = false)
+    java.util.List<String> findOperationTypesByPersonelAndTurnstile(@Param("personelId") Long personelId, @Param("turnstileId") Long turnstileId);
 }

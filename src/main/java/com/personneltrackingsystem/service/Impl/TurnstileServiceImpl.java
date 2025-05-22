@@ -6,6 +6,7 @@ import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Turnstile;
+import com.personneltrackingsystem.event.TurnstilePassageEvent;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
@@ -14,6 +15,7 @@ import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.TurnstileMapper;
 import com.personneltrackingsystem.repository.TurnstileRepository;
 import com.personneltrackingsystem.service.GateService;
+import com.personneltrackingsystem.service.KafkaProducerService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
@@ -45,6 +47,8 @@ public class TurnstileServiceImpl implements TurnstileService {
     private final TurnstileMapper turnstileMapper;
 
     private final MessageResolver messageResolver;
+    
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     public List<DtoTurnstile> getAllTurnstiles(){
@@ -141,24 +145,34 @@ public class TurnstileServiceImpl implements TurnstileService {
 
         Personel personel = personelService.checkIfPersonelExists(personelId);
 
+        // Use the same timestamp for both database record and Kafka event
+        LocalDateTime operationTime = LocalDateTime.now();
 
         DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
 
-
         dtoTurnstileRegistrationLogIU.setPersonelId((Long)personel.getPersonelId());
         dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
-        dtoTurnstileRegistrationLogIU.setOperationTime(LocalDateTime.now());
+        dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
 
-        if(turnstileRegistrationLogService.ifPersonelPassedTurnstile(personel.getPersonelId(), turnstile.getTurnstileId())){
-            dtoTurnstileRegistrationLogIU.setOperationType("OUT");
-        }else{
-            dtoTurnstileRegistrationLogIU.setOperationType("IN");
-        }
-
+        // Get the next operation type based on the last operation for this personnel and turnstile
+        String operationType = turnstileRegistrationLogService.getNextOperationType(personel.getPersonelId(), turnstile.getTurnstileId());
+        dtoTurnstileRegistrationLogIU.setOperationType(operationType);
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
 
-        return ResponseEntity.ok("Turnstile passed successfully");
+        // Publish turnstile passage event to Kafka
+        TurnstilePassageEvent event = new TurnstilePassageEvent(
+            personel.getPersonelId(),
+            personel.getName(),
+            personel.getEmail(),
+            turnstile.getTurnstileId(),
+            turnstile.getTurnstileName(),
+            operationTime,
+            operationType
+        );
+        
+        kafkaProducerService.sendTurnstilePassageEvent(event);
 
+        return ResponseEntity.ok("Turnstile passed successfully");
     }
 } 

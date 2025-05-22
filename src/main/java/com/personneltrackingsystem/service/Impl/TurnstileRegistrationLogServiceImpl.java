@@ -30,6 +30,17 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         return turnstileRegistrationLogRepository.passedTurnstile(personelId, turnstileId);
     }
 
-
+    @Override
+    public String getNextOperationType(Long personelId, Long turnstileId) {
+        java.util.List<String> operationTypes = turnstileRegistrationLogRepository.findOperationTypesByPersonelAndTurnstile(personelId, turnstileId);
+        
+        // If there are no previous records or the last operation was OUT, the next should be IN
+        if (operationTypes == null || operationTypes.isEmpty() || "OUT".equals(operationTypes.get(0))) {
+            return "IN";
+        } else {
+            // If the last operation was IN, the next should be OUT
+            return "OUT";
+        }
+    }
 
 }

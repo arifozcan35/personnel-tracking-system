@@ -8,5 +8,7 @@ public interface TurnstileRegistrationLogService {
 
     
     boolean ifPersonelPassedTurnstile(Long personelId, Long turnstileId);
+    
+    String getNextOperationType(Long personelId, Long turnstileId);
 
 }
