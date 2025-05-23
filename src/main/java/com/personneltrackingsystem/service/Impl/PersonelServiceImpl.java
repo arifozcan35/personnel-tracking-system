@@ -8,7 +8,6 @@ import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.PersonelService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +30,7 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     public Personel checkIfPersonelExists(Long personelId){
         return personelRepository.findById(personelId)
-            .orElseThrow(() -> new EntityNotFoundException("Personel not found with id: " + personelId));
+            .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString())));
     }
 
     @Override
@@ -39,11 +38,13 @@ public class PersonelServiceImpl implements PersonelService  {
         return personelMapper.personelToDtoPersonel(personel);
     }
 
+
     @Override
     public List<DtoPersonel> getAllPersonels() {
         List<Personel> personelList = personelRepository.findAll();
         return personelMapper.personelsToDtoPersonels(personelList);
     }
+
 
     @Override
     public DtoPersonelAll getAOnePersonel(Long personelId) {
@@ -62,16 +63,22 @@ public class PersonelServiceImpl implements PersonelService  {
             
             return personelMapper.personelToDtoPersonelAll(personel);
         } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, personelId.toString()));
+            throw new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString()));
         }
     }
+
+
 
     @Override
     @Transactional
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
         // Basic data validation
-        if (ObjectUtils.isEmpty(newPersonel.getName()) || ObjectUtils.isEmpty(newPersonel.getEmail())) {
-            throw new ValidationException("Personnel name and email are required!");
+        if (ObjectUtils.isEmpty(newPersonel.getName())) {
+            throw new ValidationException(MessageType.PERSONNEL_NAME_REQUIRED);
+        }
+        
+        if (ObjectUtils.isEmpty(newPersonel.getEmail())) {
+            throw new ValidationException(MessageType.PERSONNEL_EMAIL_REQUIRED);
         }
 
         DtoPersonelIU personelToPut = newPersonel;
@@ -79,7 +86,7 @@ public class PersonelServiceImpl implements PersonelService  {
         // Check email uniqueness
         Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
         if (existingPersonnel.isPresent()) {
-            throw new ValidationException("Personnel with this email already exists!");
+            throw new ValidationException(MessageType.PERSONNEL_EMAIL_ALREADY_EXISTS, newPersonel.getEmail());
         }
 
         // Handle personnel type if provided
@@ -103,13 +110,14 @@ public class PersonelServiceImpl implements PersonelService  {
         }
     }
 
+
     @Override
     @Transactional
     public ResponseEntity<String> updateOnePersonel(Long id, DtoPersonelIU newPersonel) {
         Optional<Personel> optPersonel = personelRepository.findById(id);
 
         if (optPersonel.isEmpty()) {
-            return new ResponseEntity<>("No personnel found!", HttpStatus.NOT_FOUND);
+            throw new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, id.toString()));
         }
 
         Personel foundPersonel = optPersonel.get();
@@ -123,7 +131,7 @@ public class PersonelServiceImpl implements PersonelService  {
         if (!ObjectUtils.isEmpty(newPersonel.getEmail())) {
             Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
             if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
-                throw new ValidationException("Email is already in use by another personnel!");
+                throw new ValidationException(MessageType.PERSONNEL_EMAIL_ALREADY_EXISTS, newPersonel.getEmail());
             }
             foundPersonel.setEmail(newPersonel.getEmail());
         }
@@ -146,6 +154,7 @@ public class PersonelServiceImpl implements PersonelService  {
         }
     }
 
+
     @Override
     @Transactional
     public void deleteOnePersonel(Long id) {
@@ -153,9 +162,10 @@ public class PersonelServiceImpl implements PersonelService  {
         if (optPersonel.isPresent()) {
             personelRepository.deleteById(id);
         } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString()));
+            throw new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, id.toString()));
         }
     }
+
 
     @Override
     public Set<DtoPersonel> getPersonelsByUnitId(Long unitId) {
@@ -176,24 +186,10 @@ public class PersonelServiceImpl implements PersonelService  {
         }
         
         if (personels.isEmpty()) {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
+            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, "No personnel found for unit ID: " + unitId.toString()));
         }
         
         return personels;
     }
 
-    /*
-    @Override
-    public Map<String, Double> listSalaries() {
-        List<Personel> allPersonels = personelRepository.findAll();
-        
-        Map<String, Double> salaryMap = new HashMap<>();
-        
-        for (Personel personel : allPersonels) {
-            salaryMap.put(personel.getName(), 0.0);
-        }
-        
-        return salaryMap;
-    }
-    */
 }

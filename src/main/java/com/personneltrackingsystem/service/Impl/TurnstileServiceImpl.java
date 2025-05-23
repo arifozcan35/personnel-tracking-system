@@ -4,6 +4,7 @@ import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.entity.Gate;
+import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Turnstile;
 import com.personneltrackingsystem.event.TurnstilePassageEvent;
@@ -20,7 +21,6 @@ import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -50,6 +50,7 @@ public class TurnstileServiceImpl implements TurnstileService {
     
     private final KafkaProducerService kafkaProducerService;
 
+
     @Override
     public List<DtoTurnstile> getAllTurnstiles(){
 
@@ -58,25 +59,27 @@ public class TurnstileServiceImpl implements TurnstileService {
         return turnstileMapper.turnstileListToDtoTurnstileList(turnstileList);
     }
 
+
     @Override
     public Optional<DtoTurnstile> getTurnstileById(Long turnstileId) {
 
         Turnstile turnstile = turnstileRepository.findById(turnstileId)
-                .orElseThrow(() -> new EntityNotFoundException("Turnstile not found with id: " + turnstileId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString())));
 
         return Optional.ofNullable(turnstileMapper.turnstileToDtoTurnstile(turnstile));
     }
+
 
     @Override
     public DtoTurnstile getOneTurnstile(Long turnstileId){
         Optional<Turnstile> optTurnstile =  turnstileRepository.findById(turnstileId);
         if(optTurnstile.isEmpty()){
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString()));
         }else{
             return turnstileMapper.turnstileToDtoTurnstile(optTurnstile.get());
         }
     }
+
 
     @Override
     @Transactional
@@ -84,11 +87,11 @@ public class TurnstileServiceImpl implements TurnstileService {
 
         String turnstileName = turnstile.getTurnstileName();
         if (ObjectUtils.isEmpty(turnstileName)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.TURNSTILE_NAME_REQUIRED);
         }
 
         if (turnstileRepository.existsByTurnstileName(turnstileName)) {
-            throw new ValidationException("Turnstile with this turnstile name already exists!");
+            throw new ValidationException(MessageType.TURNSTILE_NAME_ALREADY_EXISTS, turnstileName);
         }
 
         // Find and set gate if gateId is provided
@@ -104,13 +107,19 @@ public class TurnstileServiceImpl implements TurnstileService {
 
     }
 
+
     @Override
     @Transactional
     public DtoTurnstile updateOneTurnstile(Long id, DtoTurnstileIU newTurnstile) {
         Turnstile existingTurnstile = turnstileRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newTurnstile.getTurnstileName())) {
+            // Check uniqueness if the name is being changed
+            if (!existingTurnstile.getTurnstileName().equals(newTurnstile.getTurnstileName()) && 
+                turnstileRepository.existsByTurnstileName(newTurnstile.getTurnstileName())) {
+                throw new ValidationException(MessageType.TURNSTILE_NAME_ALREADY_EXISTS, newTurnstile.getTurnstileName());
+            }
             existingTurnstile.setTurnstileName(newTurnstile.getTurnstileName());
         }
         
@@ -123,6 +132,7 @@ public class TurnstileServiceImpl implements TurnstileService {
         return turnstileMapper.turnstileToDtoTurnstile(updatedTurnstile);
     }
 
+
     @Override
     @Transactional
     public void deleteOneTurnstile(Long turnstileId) {
@@ -132,20 +142,20 @@ public class TurnstileServiceImpl implements TurnstileService {
             turnstileRepository.delete(optTurnstile.get());
         }
         else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString()));
         }
     }
+
 
 
     @Override
     public ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId){
         Turnstile turnstile = turnstileRepository.findById(turnstileId)
-                .orElseThrow(() -> new EntityNotFoundException("Turnstile not found with id: " + turnstileId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString())));
 
         Personel personel = personelService.checkIfPersonelExists(personelId);
 
-        // Use the same timestamp for both database record and Kafka event
+        // same timestamp for both database record and Kafka event
         LocalDateTime operationTime = LocalDateTime.now();
 
         DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
@@ -154,8 +164,8 @@ public class TurnstileServiceImpl implements TurnstileService {
         dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
 
-        // Get the next operation type based on the last operation for this personnel and turnstile
-        String operationType = turnstileRegistrationLogService.getNextOperationType(personel.getPersonelId(), turnstile.getTurnstileId());
+        // next operation type based on the last operation for this personnel and turnstile
+        OperationType operationType = turnstileRegistrationLogService.getNextOperationType(personel.getPersonelId(), turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationType(operationType);
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);

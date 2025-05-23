@@ -14,7 +14,6 @@ import com.personneltrackingsystem.repository.GateRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.UnitService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -40,7 +39,7 @@ public class GateServiceImpl implements GateService {
     @Override
     public Gate checkIfGateExists(Long gateId){
         return gateRepository.findById(gateId)
-                .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.GATE_NOT_FOUND, gateId.toString())));
     }
     
     
@@ -55,10 +54,8 @@ public class GateServiceImpl implements GateService {
     @Override
     public Optional<DtoGate> getGateById(Long gateId) {
 
-        // Don't make the outgoing returns optional, just make them dto
-
         Gate gate = gateRepository.findById(gateId)
-                .orElseThrow(() -> new EntityNotFoundException("Gate not found with id: " + gateId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.GATE_NOT_FOUND, gateId.toString())));
 
         return Optional.ofNullable(gateMapper.gateToDtoGate(gate));
     }
@@ -67,8 +64,7 @@ public class GateServiceImpl implements GateService {
     public DtoGate getOneGate(Long gateId){
         Optional<Gate> optGate =  gateRepository.findById(gateId);
         if(optGate.isEmpty()){
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.GATE_NOT_FOUND, gateId.toString()));
         }else{
             return gateMapper.gateToDtoGate(optGate.get());
         }
@@ -80,14 +76,14 @@ public class GateServiceImpl implements GateService {
 
         String gateName = gate.getGateName();
         if (ObjectUtils.isEmpty(gateName)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.GATE_NAME_REQUIRED);
         }
 
         if (gateRepository.existsByGateName(gateName)) {
-            throw new ValidationException("Gate with this gate name already exists!");
+            throw new ValidationException(MessageType.GATE_NAME_ALREADY_EXISTS, gateName);
         }
 
-        // Find and set floor if floorId is provided
+        // Find and set unit if unitId is provided
         if (ObjectUtils.isNotEmpty(gate.getUnitId())) {
             Unit unit = unitService.checkIfUnitExists(gate.getUnitId());
             gate.setUnitId(unit.getUnitId());
@@ -108,9 +104,14 @@ public class GateServiceImpl implements GateService {
     @Transactional
     public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
         Gate existingGate = gateRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.GATE_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newGate.getGateName())) {
+            // Check uniqueness if the name is being changed
+            if (!existingGate.getGateName().equals(newGate.getGateName()) && 
+                gateRepository.existsByGateName(newGate.getGateName())) {
+                throw new ValidationException(MessageType.GATE_NAME_ALREADY_EXISTS, newGate.getGateName());
+            }
             existingGate.setGateName(newGate.getGateName());
         }
 
@@ -136,8 +137,7 @@ public class GateServiceImpl implements GateService {
             gateRepository.delete(optGate.get());
         }
         else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.GATE_NOT_FOUND, gateId.toString()));
         }
     }
 

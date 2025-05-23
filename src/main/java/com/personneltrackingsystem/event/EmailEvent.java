@@ -11,9 +11,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmailEvent implements Serializable {
+
     private String recipientEmail;
+
     private String recipientName;
+
     private String subject;
+
     private String message;
+    
     private LocalDateTime timestamp;
 } 

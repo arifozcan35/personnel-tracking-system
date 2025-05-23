@@ -11,7 +11,6 @@ import com.personneltrackingsystem.mapper.BuildingMapper;
 import com.personneltrackingsystem.repository.BuildingRepository;
 import com.personneltrackingsystem.service.BuildingService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -34,7 +33,7 @@ public class BuildingServiceImpl implements BuildingService {
 
     public Building checkIfBuildingExists(Long buildingId){
         return buildingRepository.findById(buildingId)
-            .orElseThrow(() -> new EntityNotFoundException("Building not found with id: " + buildingId));
+            .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, buildingId.toString())));
     }
 
     @Override
@@ -49,7 +48,7 @@ public class BuildingServiceImpl implements BuildingService {
     public Optional<DtoBuilding> getBuildingById(Long buildingId) {
 
         Building building = buildingRepository.findById(buildingId)
-                .orElseThrow(() -> new EntityNotFoundException("Building not found with id: " + buildingId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, buildingId.toString())));
 
         return Optional.ofNullable(buildingMapper.buildingToDtoBuilding(building));
     }
@@ -58,8 +57,7 @@ public class BuildingServiceImpl implements BuildingService {
     public DtoBuilding getOneBuilding(Long buildingId){
         Optional<Building> optBuilding =  buildingRepository.findById(buildingId);
         if(optBuilding.isEmpty()){
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, buildingId.toString()));
         }else{
             return buildingMapper.buildingToDtoBuilding(optBuilding.get());
         }
@@ -69,14 +67,13 @@ public class BuildingServiceImpl implements BuildingService {
     @Transactional
     public DtoBuilding saveOneBuilding(DtoBuilding building) {
 
-
         String buildingName = building.getBuildingName();
         if (ObjectUtils.isEmpty(buildingName)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.BUILDING_NAME_REQUIRED);
         }
 
         if (buildingRepository.existsByBuildingName(buildingName)) {
-            throw new ValidationException("Building with this building name already exists!");
+            throw new ValidationException(MessageType.BUILDING_NAME_ALREADY_EXISTS, buildingName);
         }
 
         Building pBuilding = buildingMapper.dtoBuildingToBuilding(building);
@@ -90,9 +87,14 @@ public class BuildingServiceImpl implements BuildingService {
     @Transactional
     public DtoBuilding updateOneBuilding(Long id, DtoBuilding newBuilding) {
         Building existingBuilding = buildingRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newBuilding.getBuildingName())) {
+            // Check uniqueness if the name is being changed
+            if (!existingBuilding.getBuildingName().equals(newBuilding.getBuildingName()) && 
+                buildingRepository.existsByBuildingName(newBuilding.getBuildingName())) {
+                throw new ValidationException(MessageType.BUILDING_NAME_ALREADY_EXISTS, newBuilding.getBuildingName());
+            }
             existingBuilding.setBuildingName(newBuilding.getBuildingName());
         }
 
@@ -106,12 +108,10 @@ public class BuildingServiceImpl implements BuildingService {
         Optional<Building> optBuilding = buildingRepository.findById(buildingId);
 
         if(optBuilding.isPresent()){
-     
             buildingRepository.delete(optBuilding.get());
         }
         else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, buildingId.toString()));
         }
     }
 

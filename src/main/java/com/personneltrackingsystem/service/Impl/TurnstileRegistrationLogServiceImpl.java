@@ -3,6 +3,7 @@ package com.personneltrackingsystem.service.Impl;
 import org.springframework.stereotype.Service;
 
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
+import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 import com.personneltrackingsystem.mapper.TurnstileRegistrationLogMapper;
 import com.personneltrackingsystem.repository.TurnstileRegistrationLogRepository;
@@ -31,15 +32,15 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     }
 
     @Override
-    public String getNextOperationType(Long personelId, Long turnstileId) {
+    public OperationType getNextOperationType(Long personelId, Long turnstileId) {
         java.util.List<String> operationTypes = turnstileRegistrationLogRepository.findOperationTypesByPersonelAndTurnstile(personelId, turnstileId);
         
         // If there are no previous records or the last operation was OUT, the next should be IN
-        if (operationTypes == null || operationTypes.isEmpty() || "OUT".equals(operationTypes.get(0))) {
-            return "IN";
+        if (operationTypes == null || operationTypes.isEmpty() || OperationType.OUT.getValue().equals(operationTypes.get(0))) {
+            return OperationType.IN;
         } else {
             // If the last operation was IN, the next should be OUT
-            return "OUT";
+            return OperationType.OUT;
         }
     }
 

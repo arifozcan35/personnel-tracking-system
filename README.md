@@ -20,8 +20,9 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 - Java Mail Sender
 - Lombok
 - Thymeleaf
-- PostgreSQL, MySQL, Liquibase
+- PostgreSQL, Liquibase
 - Apache Kafka
+- Redis
 - Docker, Docker Compose
 - Postman, Swagger (for testing)
 - Maven

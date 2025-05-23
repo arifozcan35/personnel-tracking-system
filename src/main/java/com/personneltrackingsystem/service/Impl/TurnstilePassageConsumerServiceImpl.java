@@ -1,6 +1,7 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.config.KafkaConfig;
+import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.event.EmailEvent;
 import com.personneltrackingsystem.event.TurnstilePassageEvent;
 import com.personneltrackingsystem.service.KafkaProducerService;
@@ -32,8 +33,8 @@ public class TurnstilePassageConsumerServiceImpl {
     }
     
     private EmailEvent createEmailEvent(TurnstilePassageEvent event) {
-        String action = event.getOperationType().equals("IN") ? "entered" : "exited";
-        String subject = "Turnstile Passage Notification - " + event.getOperationType();
+        String action = event.getOperationType() == OperationType.IN ? "entered" : "exited";
+        String subject = "Turnstile Passage Notification - " + event.getOperationType().getValue();
         
         String message = String.format(
             "Dear %s,\n\n" +
@@ -51,7 +52,7 @@ public class TurnstilePassageConsumerServiceImpl {
             event.getPersonelName(),
             event.getTurnstileName(),
             event.getPassageTime().format(formatter),
-            event.getOperationType()
+            event.getOperationType().getValue()
         );
         
         return new EmailEvent(

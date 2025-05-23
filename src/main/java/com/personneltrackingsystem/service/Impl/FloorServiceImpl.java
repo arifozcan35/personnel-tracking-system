@@ -1,28 +1,18 @@
 package com.personneltrackingsystem.service.Impl;
 
-import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.entity.Floor;
-import com.personneltrackingsystem.entity.Gate;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Building;
 import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.FloorMapper;
-import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.FloorRepository;
-import com.personneltrackingsystem.repository.GateRepository;
-import com.personneltrackingsystem.repository.BuildingRepository;
 import com.personneltrackingsystem.service.BuildingService;
 import com.personneltrackingsystem.service.FloorService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -33,8 +23,6 @@ public class FloorServiceImpl implements FloorService {
 
     private final BuildingService buildingService;
 
-    private final MessageResolver messageResolver;
-
     private final FloorMapper floorMapper;
 
     // private final KafkaProducerService kafkaProducerService;
@@ -42,16 +30,14 @@ public class FloorServiceImpl implements FloorService {
 
     public Floor checkIfFloorExists(Long floorId){
         return floorRepository.findById(floorId)
-            .orElseThrow(() -> new EntityNotFoundException("Floor not found with id: " + floorId));
+            .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.FLOOR_NOT_FOUND, floorId.toString())));
     }
 
     @Override
     public Optional<DtoFloor> findById(Long floorId) {
 
-        // Don't make the outgoing returns optional, just make them dto
-
         Floor floor = floorRepository.findById(floorId)
-                .orElseThrow(() -> new EntityNotFoundException("Floor not found with id: " + floorId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.FLOOR_NOT_FOUND, floorId.toString())));
 
         return Optional.ofNullable(floorMapper.floorToDtoFloor(floor));
     }
@@ -69,8 +55,7 @@ public class FloorServiceImpl implements FloorService {
     public DtoFloor getOneFloor(Long floorId){
         Optional<Floor> optFloor =  floorRepository.findById(floorId);
         if(optFloor.isEmpty()){
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.FLOOR_NOT_FOUND, floorId.toString()));
         }else{
             return floorMapper.floorToDtoFloor(optFloor.get());
         }
@@ -83,9 +68,8 @@ public class FloorServiceImpl implements FloorService {
 
         String floorName = floor.getFloorName();
         if (ObjectUtils.isEmpty(floorName)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.FLOOR_NAME_REQUIRED);
         }
-
 
         Floor pFloor = floorMapper.dtoFloorToFloor(floor);
         
@@ -105,7 +89,7 @@ public class FloorServiceImpl implements FloorService {
     @Transactional
     public DtoFloor updateOneFloor(Long id, DtoFloor newFloor) {
         Floor existingFloor = floorRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.FLOOR_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newFloor.getFloorName())) {
             existingFloor.setFloorName(newFloor.getFloorName());
@@ -130,8 +114,7 @@ public class FloorServiceImpl implements FloorService {
             floorRepository.delete(optFloor.get());
         }
         else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.FLOOR_NOT_FOUND, floorId.toString()));
         }
     }
 }

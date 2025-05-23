@@ -2,6 +2,8 @@ package com.personneltrackingsystem.dto;
 
 import java.time.LocalDateTime;
 
+import com.personneltrackingsystem.entity.OperationType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,5 +20,5 @@ public class DtoTurnstileRegistrationLog {
     private LocalDateTime operationTime;
 
     @Schema(description = "The operation type", example = "IN")
-    private String operationType;
+    private OperationType operationType;
 }

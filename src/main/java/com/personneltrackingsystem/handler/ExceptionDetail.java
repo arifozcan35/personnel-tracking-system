@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class Exception<E> {
+public class ExceptionDetail<E> {
 
     private String hostName;
 

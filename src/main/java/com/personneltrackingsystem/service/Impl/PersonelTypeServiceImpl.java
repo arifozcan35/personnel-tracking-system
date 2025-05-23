@@ -4,14 +4,12 @@ import com.personneltrackingsystem.dto.DtoPersonelType;
 import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.PersonelTypeMapper;
 import com.personneltrackingsystem.repository.PersonelTypeRepository;
 import com.personneltrackingsystem.service.PersonelTypeService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -29,8 +27,6 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
     private final PersonelTypeMapper personelTypeMapper;
 
-    private final MessageResolver messageResolver;
-
     @Override
     public List<DtoPersonelType> getAllPersonelTypes(){
 
@@ -43,7 +39,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
     public Optional<DtoPersonelType> getPersonelTypeById(Long personelTypeId) {
 
         PersonelType personelType = personelTypeRepository.findById(personelTypeId)
-                .orElseThrow(() -> new EntityNotFoundException("Personel type not found with id: " + personelTypeId));
+                .orElseThrow(() -> new BaseException(MessageType.PERSONNEL_TYPE_NOT_FOUND, personelTypeId.toString()));
 
         return Optional.ofNullable(personelTypeMapper.personelTypeToDtoPersonelType(personelType));
     }
@@ -52,8 +48,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
     public DtoPersonelType getOnePersonelType(Long personelTypeId){
         Optional<PersonelType> optPersonelType =  personelTypeRepository.findById(personelTypeId);
         if(optPersonelType.isEmpty()){
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(MessageType.PERSONNEL_TYPE_NOT_FOUND, personelTypeId.toString());
         }else{
             return personelTypeMapper.personelTypeToDtoPersonelType(optPersonelType.get());
         }
@@ -65,11 +60,11 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
         String personelTypeName = personelType.getPersonelTypeName();
         if (ObjectUtils.isEmpty(personelTypeName)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.REQUIRED_FIELD_AVAILABLE);
         }
 
         if (personelTypeRepository.existsByPersonelTypeName(personelTypeName)) {
-            throw new ValidationException("Personel type with this personel type name already exists!");
+            throw new ValidationException(MessageType.PERSONNEL_TYPE_NAME_ALREADY_EXISTS, personelTypeName);
         }
 
         PersonelType pPersonelType = personelTypeMapper.dtoPersonelTypeToPersonelType(personelType);
@@ -83,9 +78,14 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
     @Transactional
     public DtoPersonelType updateOnePersonelType(Long id, DtoPersonelType newPersonelType) {
         PersonelType existingPersonelType = personelTypeRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
+                .orElseThrow(() -> new BaseException(MessageType.PERSONNEL_TYPE_NOT_FOUND, id.toString()));
 
         if (ObjectUtils.isNotEmpty(newPersonelType.getPersonelTypeName())) {
+            // Check uniqueness if the name is being changed
+            if (!existingPersonelType.getPersonelTypeName().equals(newPersonelType.getPersonelTypeName()) && 
+                personelTypeRepository.existsByPersonelTypeName(newPersonelType.getPersonelTypeName())) {
+                throw new ValidationException(MessageType.PERSONNEL_TYPE_NAME_ALREADY_EXISTS, newPersonelType.getPersonelTypeName());
+            }
             existingPersonelType.setPersonelTypeName(newPersonelType.getPersonelTypeName());
         }
 
@@ -102,8 +102,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
             personelTypeRepository.delete(optPersonelType.get());
         }
         else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(MessageType.PERSONNEL_TYPE_NOT_FOUND, personelTypeId.toString());
         }
     }
 } 

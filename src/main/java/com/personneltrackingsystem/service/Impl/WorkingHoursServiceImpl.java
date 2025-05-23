@@ -6,11 +6,11 @@ import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
+import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.WorkingHoursMapper;
 import com.personneltrackingsystem.repository.WorkingHoursRepository;
 import com.personneltrackingsystem.service.WorkingHoursService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -43,7 +43,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
     public Optional<DtoWorkingHours> getWorkingHoursById(Long workingHoursId) {
 
         WorkingHours workingHours = workingHoursRepository.findById(workingHoursId)
-                .orElseThrow(() -> new EntityNotFoundException("WorkingHours not found with id: " + workingHoursId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.WORKING_HOURS_NOT_FOUND, workingHoursId.toString())));
 
         return Optional.ofNullable(workingHoursMapper.workingHoursToDtoWorkingHours(workingHours));
     }
@@ -52,8 +52,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
     public DtoWorkingHours getOneWorkingHours(Long workingHoursId){
         Optional<WorkingHours> optWorkingHours =  workingHoursRepository.findById(workingHoursId);
         if(optWorkingHours.isEmpty()){
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.WORKING_HOURS_NOT_FOUND, workingHoursId.toString()));
         }else{
             return workingHoursMapper.workingHoursToDtoWorkingHours(optWorkingHours.get());
         }
@@ -66,10 +65,15 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
         LocalTime checkInTime = workingHours.getCheckInTime();
         LocalTime checkOutTime = workingHours.getCheckOutTime();
         Long personelTypeId = workingHours.getPersonelTypeId();
+        
         if (ObjectUtils.isEmpty(checkInTime) || ObjectUtils.isEmpty(checkOutTime) || ObjectUtils.isEmpty(personelTypeId)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.WORKING_HOURS_REQUIRED);
         }
 
+        // Business logic validation: check-in time should be before check-out time
+        if (checkInTime.isAfter(checkOutTime)) {
+            throw new ValidationException(MessageType.INVALID_TIME_RANGE);
+        }
 
         WorkingHours pWorkingHours = workingHoursMapper.dtoWorkingHoursToWorkingHours(workingHours);
         WorkingHours dbWorkingHours = workingHoursRepository.save(pWorkingHours);
@@ -82,7 +86,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
     @Transactional
     public DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHours newWorkingHours) {
         WorkingHours existingWorkingHours = workingHoursRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString())));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.WORKING_HOURS_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newWorkingHours.getCheckInTime())) {
             existingWorkingHours.setCheckInTime(newWorkingHours.getCheckInTime());
@@ -90,6 +94,11 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
         
         if (ObjectUtils.isNotEmpty(newWorkingHours.getCheckOutTime())) {
             existingWorkingHours.setCheckOutTime(newWorkingHours.getCheckOutTime());
+        }
+
+        // Business logic validation: check-in time should be before check-out time
+        if (existingWorkingHours.getCheckInTime().isAfter(existingWorkingHours.getCheckOutTime())) {
+            throw new ValidationException(MessageType.INVALID_TIME_RANGE);
         }
 
         WorkingHours updatedWorkingHours = workingHoursRepository.save(existingWorkingHours);
@@ -105,8 +114,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
             workingHoursRepository.delete(optWorkingHours.get());
         }
         else{
-            ErrorMessage errorMessage = new ErrorMessage(MessageType.NO_RECORD_EXIST, messageResolver.toString());
-            throw new BaseException(errorMessage);
+            throw new BaseException(new ErrorMessage(MessageType.WORKING_HOURS_NOT_FOUND, workingHoursId.toString()));
         }
     }
 } 

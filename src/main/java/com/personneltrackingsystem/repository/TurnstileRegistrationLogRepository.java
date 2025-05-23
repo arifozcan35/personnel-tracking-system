@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 
 @Repository
@@ -13,6 +14,6 @@ public interface TurnstileRegistrationLogRepository extends JpaRepository<Turnst
     @Query("SELECT COUNT(t) > 0 FROM TurnstileRegistrationLog t WHERE t.personelId.personelId = :personelId AND t.turnstileId.turnstileId = :turnstileId")
     boolean passedTurnstile(@Param("personelId") Long personelId, @Param("turnstileId") Long turnstileId);
     
-    @Query(value = "SELECT t.operationType FROM TurnstileRegistrationLog t WHERE t.personelId.personelId = :personelId AND t.turnstileId.turnstileId = :turnstileId ORDER BY t.operationTime DESC", nativeQuery = false)
+    @Query("SELECT CAST(t.operationType AS string) FROM TurnstileRegistrationLog t WHERE t.personelId.personelId = :personelId AND t.turnstileId.turnstileId = :turnstileId ORDER BY t.operationTime DESC")
     java.util.List<String> findOperationTypesByPersonelAndTurnstile(@Param("personelId") Long personelId, @Param("turnstileId") Long turnstileId);
 }

@@ -16,7 +16,6 @@ import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.service.FloorService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.UnitService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
@@ -42,14 +41,14 @@ public class UnitServiceImpl implements UnitService {
     @Override
     public Optional<DtoUnit> findById(Long unitId) {
         Unit unit = unitRepository.findById(unitId)
-                .orElseThrow(() -> new EntityNotFoundException("Unit not found with id: " + unitId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.UNIT_NOT_FOUND, unitId.toString())));
         return Optional.ofNullable(unitMapper.unitToDtoUnit(unit));
     }
 
     @Override
     public Unit checkIfUnitExists(Long unitId) {
         return unitRepository.findById(unitId)
-                .orElseThrow(() -> new EntityNotFoundException("Unit not found with id: " + unitId));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.UNIT_NOT_FOUND, unitId.toString())));
     }
 
 
@@ -70,7 +69,7 @@ public class UnitServiceImpl implements UnitService {
             return unitMapper.unitToDtoUnit(optUnit.get());
         }
         else{
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
+            throw new BaseException(new ErrorMessage(MessageType.UNIT_NOT_FOUND, unitId.toString()));
         }
 
     }
@@ -82,11 +81,11 @@ public class UnitServiceImpl implements UnitService {
 
         String unitName = unit.getBirimIsim();
         if (ObjectUtils.isEmpty(unitName)) {
-            throw new BaseException(new ErrorMessage(MessageType.REQUIRED_FIELD_AVAILABLE, null));
+            throw new ValidationException(MessageType.UNIT_NAME_REQUIRED);
         }
 
         if (unitRepository.existsByUnitName(unitName)) {
-            throw new ValidationException("Unit with this unit name already exists!");
+            throw new ValidationException(MessageType.UNIT_NAME_ALREADY_EXISTS, unitName);
         }
 
         // Find and set floor if floorId is provided
@@ -116,9 +115,14 @@ public class UnitServiceImpl implements UnitService {
     @Transactional
     public DtoUnit updateOneUnit(Long id, DtoUnitIU newUnit) {
         Unit existingUnit = unitRepository.findById(id)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, id.toString())));
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.UNIT_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newUnit.getBirimIsim())) {
+            // Check uniqueness if the name is being changed
+            if (!existingUnit.getUnitName().equals(newUnit.getBirimIsim()) && 
+                unitRepository.existsByUnitName(newUnit.getBirimIsim())) {
+                throw new ValidationException(MessageType.UNIT_NAME_ALREADY_EXISTS, newUnit.getBirimIsim());
+            }
             existingUnit.setUnitName(newUnit.getBirimIsim());
         }
 
@@ -146,7 +150,7 @@ public class UnitServiceImpl implements UnitService {
         if (optUnit.isPresent()) {
             unitRepository.delete(optUnit.get());
         } else {
-            throw new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, unitId.toString()));
+            throw new BaseException(new ErrorMessage(MessageType.UNIT_NOT_FOUND, unitId.toString()));
         }
     }
 

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +43,8 @@ public class TurnstileRegistrationLog {
     private LocalDateTime operationTime;
 
     // entry or exit
-    private String operationType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operation_type")
+    private OperationType operationType;
     
 }
