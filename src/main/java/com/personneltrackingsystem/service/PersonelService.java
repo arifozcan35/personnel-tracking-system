@@ -30,5 +30,7 @@ public interface PersonelService {
 
     DtoPersonel personelMapper(Personel personel);
 
+    Personel getPersonelWithCache(Long personelId);
+
     // Map<String, Double> listSalaries();
 }

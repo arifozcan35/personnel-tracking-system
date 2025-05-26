@@ -153,7 +153,8 @@ public class TurnstileServiceImpl implements TurnstileService {
         Turnstile turnstile = turnstileRepository.findById(turnstileId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString())));
 
-        Personel personel = personelService.checkIfPersonelExists(personelId);
+        // Get personnel from cache (if not cached, it will be cached automatically)
+        Personel personel = personelService.getPersonelWithCache(personelId);
 
         // same timestamp for both database record and Kafka event
         LocalDateTime operationTime = LocalDateTime.now();

@@ -7,6 +7,7 @@ import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.PersonelCacheService;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,6 +26,8 @@ public class PersonelServiceImpl implements PersonelService  {
     private final PersonelRepository personelRepository;
 
     private final PersonelMapper personelMapper;
+
+    private final PersonelCacheService personelCacheService;
 
 
     @Override
@@ -148,6 +151,10 @@ public class PersonelServiceImpl implements PersonelService  {
 
         try {
             Personel updatedPersonnel = personelRepository.save(foundPersonel);
+            
+            // Invalidate cache after update
+            personelCacheService.removePersonelFromCache(id);
+            
             return new ResponseEntity<>("Personnel updated successfully with ID: " + updatedPersonnel.getPersonelId(), HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             return new ResponseEntity<>("Could not update personnel due to a data integrity violation.", HttpStatus.BAD_REQUEST);
@@ -161,6 +168,9 @@ public class PersonelServiceImpl implements PersonelService  {
         Optional<Personel> optPersonel = personelRepository.findById(id);
         if (optPersonel.isPresent()) {
             personelRepository.deleteById(id);
+            
+            // Invalidate cache after delete
+            personelCacheService.removePersonelFromCache(id);
         } else {
             throw new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, id.toString()));
         }
@@ -190,6 +200,24 @@ public class PersonelServiceImpl implements PersonelService  {
         }
         
         return personels;
+    }
+
+    @Override
+    public Personel getPersonelWithCache(Long personelId) {
+        // First try to get from cache
+        Optional<Personel> cachedPersonel = personelCacheService.getPersonelFromCache(personelId);
+        if (cachedPersonel.isPresent()) {
+            return cachedPersonel.get();
+        }
+
+        // If not in cache, get from database and cache it
+        Personel personel = personelRepository.findById(personelId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString())));
+        
+        // Cache the personnel data
+        personelCacheService.cachePersonel(personelId, personel);
+        
+        return personel;
     }
 
 }
