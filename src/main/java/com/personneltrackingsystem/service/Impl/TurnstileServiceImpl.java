@@ -20,6 +20,7 @@ import com.personneltrackingsystem.service.KafkaProducerService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
+import com.personneltrackingsystem.service.HazelcastCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +51,8 @@ public class TurnstileServiceImpl implements TurnstileService {
     private final MessageResolver messageResolver;
     
     private final KafkaProducerService kafkaProducerService;
+
+    private final HazelcastCacheService hazelcastCacheService;
 
 
     @Override
@@ -170,6 +174,9 @@ public class TurnstileServiceImpl implements TurnstileService {
         dtoTurnstileRegistrationLogIU.setOperationType(operationType);
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
+
+        // Invalidate today's daily personnel cache since new entry is added
+        hazelcastCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
 
         // Publish turnstile passage event to Kafka
         TurnstilePassageEvent event = new TurnstilePassageEvent(

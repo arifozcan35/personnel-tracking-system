@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api/gate/personelpass/**").permitAll()
+                                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api/turnstile/personelpass/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(

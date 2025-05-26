@@ -3,12 +3,15 @@ package com.personneltrackingsystem.controller.Impl;
 import com.personneltrackingsystem.controller.TurnstileController;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
+import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 import com.personneltrackingsystem.service.TurnstileService;
+import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -16,6 +19,8 @@ import java.util.List;
 public class TurnstileControllerImpl implements TurnstileController {
 
     private final TurnstileService turnstileService;
+
+    private final TurnstileRegistrationLogService turnstileRegistrationLogService;
 
     @Override
     public List<DtoTurnstile> getAllTurnstiles() {
@@ -42,10 +47,15 @@ public class TurnstileControllerImpl implements TurnstileController {
         turnstileService.deleteOneTurnstile(turnstileId);
     }
 
-
-
     @Override
     public ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId) {
         return turnstileService.passTurnstile(turnstileId, personelId);
+    }
+
+    @Override
+    public List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date) {
+        // If no date is provided, use today's date
+        LocalDate targetDate = (date != null) ? date : LocalDate.now();
+        return turnstileRegistrationLogService.getDailyPersonnelList(targetDate);
     }
 } 
