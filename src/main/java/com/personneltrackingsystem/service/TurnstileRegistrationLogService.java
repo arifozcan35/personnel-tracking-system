@@ -17,4 +17,6 @@ public interface TurnstileRegistrationLogService {
 
     List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date);
 
+    List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(LocalDate date);
+
 }

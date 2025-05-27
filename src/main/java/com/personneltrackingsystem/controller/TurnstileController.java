@@ -66,4 +66,17 @@ public interface TurnstileController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
             LocalDate date
     );
+
+    @Operation(
+            summary = "Get Daily Personnel List with Redis",
+            description = "Get the list of all personnel who passed through turnstiles on a specific date. Uses Redis cache for performance."
+    )
+    @GetMapping("/daily-personnel-redis")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(
+            @Parameter(description = "Date in YYYY-MM-DD format", example = "2025-05-26")
+            @RequestParam(required = false) 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
+            LocalDate date
+    );
 } 

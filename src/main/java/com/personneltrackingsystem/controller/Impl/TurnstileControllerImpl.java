@@ -54,8 +54,15 @@ public class TurnstileControllerImpl implements TurnstileController {
 
     @Override
     public List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date) {
-        // If no date is provided, use today's date
+        // if no date entered, use today's date
         LocalDate targetDate = (date != null) ? date : LocalDate.now();
         return turnstileRegistrationLogService.getDailyPersonnelList(targetDate);
+    }
+
+    @Override
+    public List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(LocalDate date) {
+        // if no date entered, use today's date
+        LocalDate targetDate = (date != null) ? date : LocalDate.now();
+        return turnstileRegistrationLogService.getDailyPersonnelListWithRedis(targetDate);
     }
 } 

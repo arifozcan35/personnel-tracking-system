@@ -13,6 +13,7 @@ import com.personneltrackingsystem.repository.TurnstileRegistrationLogRepository
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.HazelcastCacheService;
+import com.personneltrackingsystem.service.RedisCacheService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +39,17 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
 
     private final HazelcastCacheService hazelcastCacheService;
 
+    private final RedisCacheService redisCacheService;
+
     
     @Override
     public void saveOneTurnstileRegistrationLog(DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU){
         TurnstileRegistrationLog turnstileRegistrationLog = turnstileRegistrationLogMapper.dtoTurnstileRegistrationLogIUToTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
         turnstileRegistrationLogRepository.save(turnstileRegistrationLog);
 
-        // Invalidate today's cache when new log is added
+        // invalidate today's cache when new log is added
         hazelcastCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
+        redisCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
     }
 
     @Override
@@ -57,30 +61,49 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     public OperationType getNextOperationType(Long personelId, Long turnstileId) {
         java.util.List<String> operationTypes = turnstileRegistrationLogRepository.findOperationTypesByPersonelAndTurnstile(personelId, turnstileId);
         
-        // If there are no previous records or the last operation was OUT, the next should be IN
+        // if there are no previous records or the last operation was OUT, the next should be IN
         if (operationTypes == null || operationTypes.isEmpty() || OperationType.OUT.getValue().equals(operationTypes.get(0))) {
             return OperationType.IN;
         } else {
-            // If the last operation was IN, the next should be OUT
+            // if the last operation was IN, the next should be OUT
             return OperationType.OUT;
         }
     }
 
     @Override
     public List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date) {
-        // First try to get from Hazelcast cache
+        // first try to get from hazelcast cache
         Optional<List<DtoDailyPersonnelEntry>> cachedResult = hazelcastCacheService.getDailyPersonnelListFromCache(date);
         if (cachedResult.isPresent()) {
-            log.info("Returning daily personnel list from Hazelcast cache for date: {}", date);
+            log.info("returning daily personnel list from hazelcast cache for date: {}", date);
             return cachedResult.get();
         }
 
-        // If not in cache, get from database
+        // if not in cache, get from database
         log.info("Daily personnel list not found in cache, fetching from database for date: {}", date);
         List<DtoDailyPersonnelEntry> dailyPersonnelList = getDailyPersonnelListFromDatabase(date);
 
-        // Cache the result in Hazelcast
+        // cache the result in hazelcast
         hazelcastCacheService.cacheDailyPersonnelList(date, dailyPersonnelList);
+
+        return dailyPersonnelList;
+    }
+
+    @Override
+    public List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(LocalDate date) {
+        // first try to get from redis cache
+        Optional<List<DtoDailyPersonnelEntry>> cachedResult = redisCacheService.getDailyPersonnelListFromCache(date);
+        if (cachedResult.isPresent()) {
+            log.info("returning daily personnel list from redis cache for date: {}", date);
+            return cachedResult.get();
+        }
+
+        // if not in cache, get from database
+        log.info("Daily personnel list not found in redis cache, fetching from database for date: {}", date);
+        List<DtoDailyPersonnelEntry> dailyPersonnelList = getDailyPersonnelListFromDatabase(date);
+
+        // cache the result in redis
+        redisCacheService.cacheDailyPersonnelList(date, dailyPersonnelList);
 
         return dailyPersonnelList;
     }
@@ -88,14 +111,13 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     private List<DtoDailyPersonnelEntry> getDailyPersonnelListFromDatabase(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         
-        // Get all turnstile logs for the given date
+        // get all turnstile logs according to date
         List<TurnstileRegistrationLog> allLogs = turnstileRegistrationLogRepository.findAllByDate(startOfDay);
         
         if (allLogs.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Group logs by personnel
         Map<Long, List<TurnstileRegistrationLog>> logsByPersonnel = allLogs.stream()
                 .collect(Collectors.groupingBy(log -> log.getPersonelId().getPersonelId()));
 
@@ -105,10 +127,10 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
             Long personelId = entry.getKey();
             List<TurnstileRegistrationLog> personnelLogs = entry.getValue();
 
-            // Get personnel details (using cache)
+            // get personel details with cache
             Personel personel = personelService.getPersonelWithCache(personelId);
 
-            // Create daily personnel entry
+            // create daily personel entry
             DtoDailyPersonnelEntry dailyEntry = createDailyPersonnelEntry(personel, personnelLogs);
             dailyPersonnelList.add(dailyEntry);
         }
@@ -123,28 +145,28 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         dailyEntry.setPersonelName(personel.getName());
         dailyEntry.setPersonelEmail(personel.getEmail());
 
-        // Sort logs by operation time
+        // sort logs by operation time
         logs.sort((log1, log2) -> log1.getOperationTime().compareTo(log2.getOperationTime()));
 
-        // Set first entry time (first IN operation)
+        // set first entry time (first IN operation)
         logs.stream()
              .filter(log -> log.getOperationType() == OperationType.IN)
              .findFirst()
              .ifPresent(log -> dailyEntry.setFirstEntryTime(log.getOperationTime()));
 
-        // Set last exit time (last OUT operation)
+        // set last exit time (last OUT operation)
         logs.stream()
              .filter(log -> log.getOperationType() == OperationType.OUT)
              .reduce((first, second) -> second)
              .ifPresent(log -> dailyEntry.setLastExitTime(log.getOperationTime()));
 
-        // Set current status (last operation type)
+        // set current status (last operation type)
         if (!logs.isEmpty()) {
             TurnstileRegistrationLog lastLog = logs.get(logs.size() - 1);
             dailyEntry.setCurrentStatus(lastLog.getOperationType());
         }
 
-        // Create passages list
+        // create passages list
         List<DtoTurnstilePassage> passages = logs.stream()
                 .map(this::createTurnstilePassage)
                 .collect(Collectors.toList());

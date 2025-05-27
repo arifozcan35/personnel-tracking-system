@@ -3,7 +3,6 @@ package com.personneltrackingsystem.service.Impl;
 import com.personneltrackingsystem.dto.DtoPersonelType;
 import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.exception.BaseException;
-import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.PersonelTypeMapper;

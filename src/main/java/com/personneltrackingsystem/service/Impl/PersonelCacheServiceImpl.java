@@ -20,6 +20,7 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
     private final RedisTemplate<String, Personel> redisTemplate;
     
     private static final String CACHE_KEY_PREFIX = "personnel:";
+    
     private static final long CACHE_TTL_HOURS = 1;
 
     @Override

@@ -10,7 +10,6 @@ import com.personneltrackingsystem.entity.Turnstile;
 import com.personneltrackingsystem.event.TurnstilePassageEvent;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.TurnstileMapper;
@@ -21,6 +20,7 @@ import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
 import com.personneltrackingsystem.service.HazelcastCacheService;
+import com.personneltrackingsystem.service.RedisCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,12 +47,12 @@ public class TurnstileServiceImpl implements TurnstileService {
     private final PersonelService personelService;
 
     private final TurnstileMapper turnstileMapper;
-
-    private final MessageResolver messageResolver;
     
     private final KafkaProducerService kafkaProducerService;
 
     private final HazelcastCacheService hazelcastCacheService;
+
+    private final RedisCacheService redisCacheService;
 
 
     @Override
@@ -157,7 +157,7 @@ public class TurnstileServiceImpl implements TurnstileService {
         Turnstile turnstile = turnstileRepository.findById(turnstileId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString())));
 
-        // Get personnel from cache (if not cached, it will be cached automatically)
+        // get personel from cache (if not cached, it will be cached automatically)
         Personel personel = personelService.getPersonelWithCache(personelId);
 
         // same timestamp for both database record and Kafka event
@@ -175,10 +175,11 @@ public class TurnstileServiceImpl implements TurnstileService {
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
 
-        // Invalidate today's daily personnel cache since new entry is added
+        // invalidate today's daily personnel cache since new entry is added
         hazelcastCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
+        redisCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
 
-        // Publish turnstile passage event to Kafka
+        // publish turnstile passage event to kafka
         TurnstilePassageEvent event = new TurnstilePassageEvent(
             personel.getPersonelId(),
             personel.getName(),

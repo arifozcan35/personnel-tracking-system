@@ -75,7 +75,7 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     @Transactional
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
-        // Basic data validation
+        // basic data validation
         if (ObjectUtils.isEmpty(newPersonel.getName())) {
             throw new ValidationException(MessageType.PERSONNEL_NAME_REQUIRED);
         }
@@ -86,18 +86,18 @@ public class PersonelServiceImpl implements PersonelService  {
 
         DtoPersonelIU personelToPut = newPersonel;
 
-        // Check email uniqueness
+        // check email uniqueness
         Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
         if (existingPersonnel.isPresent()) {
             throw new ValidationException(MessageType.PERSONNEL_EMAIL_ALREADY_EXISTS, newPersonel.getEmail());
         }
 
-        // Handle personnel type if provided
+        // handle personel type if provided
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
             personelToPut.setPersonelTypeId(newPersonel.getPersonelTypeId());
         }
 
-        // Handle units if provided
+        // handle units if provided
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
             personelToPut.setUnitId(newPersonel.getUnitId());
         }
@@ -125,12 +125,12 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Personel foundPersonel = optPersonel.get();
 
-        // Update name
+        // update name
         if (!ObjectUtils.isEmpty(newPersonel.getName())) {
             foundPersonel.setName(newPersonel.getName());
         }
 
-        // Update email with uniqueness check
+        // update email with uniqueness check
         if (!ObjectUtils.isEmpty(newPersonel.getEmail())) {
             Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
             if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
@@ -139,12 +139,12 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
-        // Update personnel type
+        // update personnel type
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
             foundPersonel.setPersonelTypeId(personelMapper.longToPersonelTypeEntity(newPersonel.getPersonelTypeId()));
         }
 
-        // Update units
+        // update units
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
             foundPersonel.setUnitId(personelMapper.longListToUnitEntityList(newPersonel.getUnitId()));
         }
@@ -152,7 +152,7 @@ public class PersonelServiceImpl implements PersonelService  {
         try {
             Personel updatedPersonnel = personelRepository.save(foundPersonel);
             
-            // Invalidate cache after update
+            // invalidate cache after update
             personelCacheService.removePersonelFromCache(id);
             
             return new ResponseEntity<>("Personnel updated successfully with ID: " + updatedPersonnel.getPersonelId(), HttpStatus.OK);
@@ -169,7 +169,7 @@ public class PersonelServiceImpl implements PersonelService  {
         if (optPersonel.isPresent()) {
             personelRepository.deleteById(id);
             
-            // Invalidate cache after delete
+            // invalidate cache after delete
             personelCacheService.removePersonelFromCache(id);
         } else {
             throw new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, id.toString()));
@@ -181,7 +181,7 @@ public class PersonelServiceImpl implements PersonelService  {
     public Set<DtoPersonel> getPersonelsByUnitId(Long unitId) {
         Set<DtoPersonel> personels = new HashSet<>();
         
-        // Find all personnel that belong to the specified unit
+        // find all personel that belong to the specified unit
         List<Personel> personnelList = personelRepository.findAll();
         
         for (Personel personel : personnelList) {
@@ -204,17 +204,17 @@ public class PersonelServiceImpl implements PersonelService  {
 
     @Override
     public Personel getPersonelWithCache(Long personelId) {
-        // First try to get from cache
+        // first try to get from cache
         Optional<Personel> cachedPersonel = personelCacheService.getPersonelFromCache(personelId);
         if (cachedPersonel.isPresent()) {
             return cachedPersonel.get();
         }
 
-        // If not in cache, get from database and cache it
+        // if not in cache, get from database and cache it
         Personel personel = personelRepository.findById(personelId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString())));
         
-        // Cache the personnel data
+        // cache the personel data
         personelCacheService.cachePersonel(personelId, personel);
         
         return personel;

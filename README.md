@@ -22,7 +22,7 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 - Thymeleaf
 - PostgreSQL, Liquibase
 - Apache Kafka
-- Redis
+- Redis, Hazelcast
 - Docker, Docker Compose
 - Postman, Swagger (for testing)
 - Maven
@@ -32,14 +32,15 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 ## 📋 Features
 
 - 👨‍💼 Personnel management (Add, Update, Delete, List)
-- 🏢 Unit management (Add, Update, Delete, List)
-- 🏢 Entry Authorisation management (Gate access permissions of personnel)
+- 🏢 Building, unit, floor, gate, turnstile management (Add, Update, Delete, List)
+- 🚪 Entry Authorisation management (Gate and turnstile access permissions of personnel)
 - ⏰ Monitoring working hours and detecting tardiness
 - 💰 Salary calculation (Salary deductions according to lateness)
 - 📊 Executive privileges (Full access, overtime exemption, high salary)
 - 🔍 Management and data extraction via API
 - 🕵️‍♂️ Role Mechanisms via APIs
 - 📧 Sending Mail to Personnel with Apache Kafka
+- ⏳ Cache operations with Redis and Hazelcast
 
 
 

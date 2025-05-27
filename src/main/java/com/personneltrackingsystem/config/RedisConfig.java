@@ -8,10 +8,11 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
+
+import java.util.List;
 
 @Configuration
 public class RedisConfig {
@@ -26,11 +27,38 @@ public class RedisConfig {
         template.setKeySerializer(stringRedisSerializer);
         template.setHashKeySerializer(stringRedisSerializer);
 
-        // Configure JSON serialization for values
-        Jackson2JsonRedisSerializer<Personel> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Personel.class);
+        // Create ObjectMapper with JSR310 module
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        jsonRedisSerializer.setObjectMapper(objectMapper);
+        
+        // Configure JSON serialization for values using constructor approach
+        Jackson2JsonRedisSerializer<Personel> jsonRedisSerializer = 
+            new Jackson2JsonRedisSerializer<>(objectMapper, Personel.class);
+        
+        template.setValueSerializer(jsonRedisSerializer);
+        template.setHashValueSerializer(jsonRedisSerializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, List<DtoDailyPersonnelEntry>> dailyPersonnelRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, List<DtoDailyPersonnelEntry>> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Configure serializers
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        template.setKeySerializer(stringRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+
+        // Create ObjectMapper with JSR310 module for proper date/time serialization
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        
+        // Configure JSON serialization for List<DtoDailyPersonnelEntry>
+        Jackson2JsonRedisSerializer<List> jsonRedisSerializer = 
+            new Jackson2JsonRedisSerializer<>(objectMapper, List.class);
         
         template.setValueSerializer(jsonRedisSerializer);
         template.setHashValueSerializer(jsonRedisSerializer);
