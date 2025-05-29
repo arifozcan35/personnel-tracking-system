@@ -1,9 +1,10 @@
 package com.personneltrackingsystem.service.Impl;
 
 import com.personneltrackingsystem.config.KafkaConfig;
-import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.event.EmailEvent;
 import com.personneltrackingsystem.event.TurnstilePassageEvent;
+import com.personneltrackingsystem.exception.BaseException;
+import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,45 +20,51 @@ import java.time.format.DateTimeFormatter;
 public class TurnstilePassageConsumerServiceImpl {
 
     private final KafkaProducerService kafkaProducerService;
+
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
 
     @KafkaListener(topics = KafkaConfig.TURNSTILE_PASSAGE_TOPIC, groupId = "${spring.kafka.consumer.group-id}")
     public void consumeTurnstilePassageEvent(TurnstilePassageEvent event) {
         log.info("Received turnstile passage event: {}", event);
         
-        // Create email event based on turnstile passage
         EmailEvent emailEvent = createEmailEvent(event);
         
-        // Send email event to Kafka
         kafkaProducerService.sendEmailEvent(emailEvent);
     }
     
     private EmailEvent createEmailEvent(TurnstilePassageEvent event) {
-        String action = event.getOperationType() == OperationType.IN ? "entered" : "exited";
-        String subject = "Turnstile Passage Notification - " + event.getOperationType().getValue();
+        // for admin notifications about late arrivals
+        if (Boolean.TRUE.equals(event.getIsAdminNotification()) && Boolean.TRUE.equals(event.getIsLateArrival())) {
+            return createLateArrivalEmailEvent(event);
+        }else{
+            throw new BaseException(MessageType.INVALID_EVENT_TYPE);
+        }
+    }
+    
+    private EmailEvent createLateArrivalEmailEvent(TurnstilePassageEvent event) {
+        String subject = "Late Arrival Notification - " + event.getPersonelName();
         
         String message = String.format(
             "Dear %s,\n\n" +
-            "This is to inform you that you have %s the facility through turnstile \"%s\" at %s.\n\n" +
+            "This is to inform you that %s has arrived late to work today.\n\n" +
             "Details:\n" +
             "- Personnel Name: %s\n" +
-            "- Turnstile Name: %s\n" +
-            "- Date/Time: %s\n" +
-            "- Operation: %s\n\n\n" +
-            "From the Personnel Tracking System\n",
+            "- Arrival Time: %s\n" +
+            "- Minutes Late: %d minutes\n" +
+            "- Entrance: %s\n\n\n" +
+            "This is an automated message from the Personnel Tracking System.\n",
+            event.getRecipientName(), // Admin's name
+            event.getPersonelName(),  // Late personnel
             event.getPersonelName(),
-            action,
-            event.getTurnstileName(),
             event.getPassageTime().format(formatter),
-            event.getPersonelName(),
-            event.getTurnstileName(),
-            event.getPassageTime().format(formatter),
-            event.getOperationType().getValue()
+            event.getMinutesLate(),
+            event.getTurnstileName()
         );
         
         return new EmailEvent(
-            event.getPersonelEmail(),
-            event.getPersonelName(),
+            event.getRecipientEmail(), // Admin's email
+            event.getRecipientName(),  // Admin's name
             subject,
             message,
             LocalDateTime.now()

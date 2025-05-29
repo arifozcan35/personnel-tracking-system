@@ -10,8 +10,6 @@ import com.personneltrackingsystem.exception.ErrorMessage;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.UnitMapper;
-import com.personneltrackingsystem.repository.FloorRepository;
-import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.repository.UnitRepository;
 import com.personneltrackingsystem.service.FloorService;
 import com.personneltrackingsystem.service.PersonelService;
@@ -45,6 +43,7 @@ public class UnitServiceImpl implements UnitService {
         return Optional.ofNullable(unitMapper.unitToDtoUnit(unit));
     }
 
+    
     @Override
     public Unit checkIfUnitExists(Long unitId) {
         return unitRepository.findById(unitId)

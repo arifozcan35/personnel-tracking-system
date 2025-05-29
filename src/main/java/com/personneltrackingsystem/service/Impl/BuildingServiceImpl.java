@@ -4,7 +4,6 @@ import com.personneltrackingsystem.dto.DtoBuilding;
 import com.personneltrackingsystem.entity.Building;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.BuildingMapper;
@@ -28,13 +27,12 @@ public class BuildingServiceImpl implements BuildingService {
 
     private final BuildingMapper buildingMapper;
 
-    private final MessageResolver messageResolver;
-
-
+    @Override
     public Building checkIfBuildingExists(Long buildingId){
         return buildingRepository.findById(buildingId)
             .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, buildingId.toString())));
     }
+
 
     @Override
     public List<DtoBuilding> getAllBuildings(){
@@ -43,6 +41,7 @@ public class BuildingServiceImpl implements BuildingService {
 
         return buildingMapper.buildingListToDtoBuildingList(buildingList);
     }
+
 
     @Override
     public Optional<DtoBuilding> getBuildingById(Long buildingId) {
@@ -53,6 +52,7 @@ public class BuildingServiceImpl implements BuildingService {
         return Optional.ofNullable(buildingMapper.buildingToDtoBuilding(building));
     }
 
+
     @Override
     public DtoBuilding getOneBuilding(Long buildingId){
         Optional<Building> optBuilding =  buildingRepository.findById(buildingId);
@@ -62,6 +62,7 @@ public class BuildingServiceImpl implements BuildingService {
             return buildingMapper.buildingToDtoBuilding(optBuilding.get());
         }
     }
+
 
     @Override
     @Transactional
@@ -83,6 +84,7 @@ public class BuildingServiceImpl implements BuildingService {
 
     }
 
+
     @Override
     @Transactional
     public DtoBuilding updateOneBuilding(Long id, DtoBuilding newBuilding) {
@@ -101,6 +103,7 @@ public class BuildingServiceImpl implements BuildingService {
         Building updatedBuilding = buildingRepository.save(existingBuilding);
         return buildingMapper.buildingToDtoBuilding(updatedBuilding);
     }
+
 
     @Override
     @Transactional

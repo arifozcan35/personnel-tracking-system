@@ -36,6 +36,7 @@ public class PersonelServiceImpl implements PersonelService  {
             .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString())));
     }
 
+
     @Override
     public DtoPersonel personelMapper(Personel personel){
         return personelMapper.personelToDtoPersonel(personel);
@@ -202,6 +203,7 @@ public class PersonelServiceImpl implements PersonelService  {
         return personels;
     }
 
+    
     @Override
     public Personel getPersonelWithCache(Long personelId) {
         // first try to get from cache

@@ -2,6 +2,7 @@ package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +24,5 @@ public interface TurnstileService {
     void deleteOneTurnstile(Long id);
 
 
-    ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId);
+    ResponseEntity<String> passTurnstile(Long turnstileId, DtoTurnstilePassageRequest request, String operationTimeStr);
 } 

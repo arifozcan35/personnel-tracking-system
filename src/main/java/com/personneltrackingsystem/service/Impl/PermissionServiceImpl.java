@@ -24,7 +24,9 @@ import java.util.stream.Collectors;
 public class PermissionServiceImpl implements PermissionService {
 
     private final PermissionRepository permissionRepository;
+
     private final RolePermissionRepository rolePermissionRepository;
+    
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 
@@ -34,11 +36,13 @@ public class PermissionServiceImpl implements PermissionService {
                 .orElseThrow(() -> new BaseException(MessageType.PERMISSION_NOT_FOUND, id.toString()));
     }
 
+
     @Override
     public Permission getPermissionByName(String name) {
         return permissionRepository.findByName(name)
                 .orElseThrow(() -> new BaseException(MessageType.PERMISSION_NOT_FOUND, name));
     }
+
 
     @Override
     public List<Permission> getAllPermissions() {

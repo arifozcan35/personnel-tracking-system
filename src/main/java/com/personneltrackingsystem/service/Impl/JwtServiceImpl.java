@@ -40,11 +40,13 @@ public class JwtServiceImpl implements JwtService {
         return new TokenPair(accessToken, refreshToken);
     }
 
+
     // Generate access token
     @Override
     public String generateAccessToken(Authentication authentication) {
         return generateToken(authentication, jwtExpirationMs, new HashMap<>());
     }
+
 
     // Generate refresh token
     @Override
@@ -53,6 +55,7 @@ public class JwtServiceImpl implements JwtService {
         claims.put("tokenType", "refresh");
         return generateToken(authentication, refreshExpirationMs, claims);
     }
+
 
     @Override
     public String generateToken(Authentication authentication, long expirationInMs, Map<String, String> claims) {
@@ -73,6 +76,7 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
+
     // Validate token
     @Override
     public boolean validateTokenForUser(String token, UserDetails userDetails) {
@@ -81,10 +85,12 @@ public class JwtServiceImpl implements JwtService {
                 && username.equals(userDetails.getUsername());
     }
 
+
     @Override
     public boolean isValidToken(String token) {
         return extractAllClaims(token) != null;
     }
+
 
     @Override
     public String extractUsernameFromToken(String token) {
@@ -96,6 +102,7 @@ public class JwtServiceImpl implements JwtService {
         return null;
     }
 
+
     // Validate if the token is refresh token
     @Override
     public boolean isRefreshToken(String token) {
@@ -105,6 +112,7 @@ public class JwtServiceImpl implements JwtService {
         }
         return "refresh".equals(claims.get("tokenType"));
     }
+
 
     @Override
     public Claims extractAllClaims(String token) {
@@ -123,6 +131,7 @@ public class JwtServiceImpl implements JwtService {
         return claims;
     }
 
+    
     @Override
     public SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);

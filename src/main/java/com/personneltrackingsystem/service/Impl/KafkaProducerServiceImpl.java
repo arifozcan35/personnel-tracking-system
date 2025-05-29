@@ -19,6 +19,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
+    
     @Override
     public void sendTurnstilePassageEvent(TurnstilePassageEvent event) {
         log.info("Sending turnstile passage event to Kafka: {}", event);
@@ -38,6 +39,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
             log.error("Error sending turnstile passage event: {}", e.getMessage(), e);
         }
     }
+
 
     @Override
     public void sendEmailEvent(EmailEvent event) {

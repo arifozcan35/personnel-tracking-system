@@ -6,7 +6,6 @@ import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.GateMapper;
@@ -31,8 +30,6 @@ public class GateServiceImpl implements GateService {
 
     private final UnitService unitService;
 
-    private final MessageResolver messageResolver;
-
     private final GateMapper gateMapper;
 
 
@@ -51,6 +48,7 @@ public class GateServiceImpl implements GateService {
         return gateMapper.gateListToDtoGateList(gateList);
     }
 
+
     @Override
     public Optional<DtoGate> getGateById(Long gateId) {
 
@@ -59,6 +57,7 @@ public class GateServiceImpl implements GateService {
 
         return Optional.ofNullable(gateMapper.gateToDtoGate(gate));
     }
+
 
     @Override
     public DtoGate getOneGate(Long gateId){
@@ -69,6 +68,7 @@ public class GateServiceImpl implements GateService {
             return gateMapper.gateToDtoGate(optGate.get());
         }
     }
+
 
     @Override
     @Transactional
@@ -100,6 +100,7 @@ public class GateServiceImpl implements GateService {
 
     }
 
+
     @Override
     @Transactional
     public DtoGate updateOneGate(Long id, DtoGateIU newGate) {
@@ -128,6 +129,7 @@ public class GateServiceImpl implements GateService {
         return gateMapper.gateToDtoGate(updatedGate);
     }
 
+    
     @Override
     @Transactional
     public void deleteOneGate(Long gateId) {

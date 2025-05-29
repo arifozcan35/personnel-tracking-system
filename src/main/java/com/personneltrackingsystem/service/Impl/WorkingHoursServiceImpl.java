@@ -4,7 +4,6 @@ import com.personneltrackingsystem.dto.DtoWorkingHours;
 import com.personneltrackingsystem.entity.WorkingHours;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.WorkingHoursMapper;
@@ -29,7 +28,6 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
 
     private final WorkingHoursMapper workingHoursMapper;
 
-    private final MessageResolver messageResolver;
 
     @Override
     public List<DtoWorkingHours> getAllWorkingHours(){
@@ -38,6 +36,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
 
         return workingHoursMapper.workingHoursListToDtoWorkingHoursList(workingHoursList);
     }
+
 
     @Override
     public Optional<DtoWorkingHours> getWorkingHoursById(Long workingHoursId) {
@@ -48,6 +47,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
         return Optional.ofNullable(workingHoursMapper.workingHoursToDtoWorkingHours(workingHours));
     }
 
+
     @Override
     public DtoWorkingHours getOneWorkingHours(Long workingHoursId){
         Optional<WorkingHours> optWorkingHours =  workingHoursRepository.findById(workingHoursId);
@@ -57,6 +57,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
             return workingHoursMapper.workingHoursToDtoWorkingHours(optWorkingHours.get());
         }
     }
+
 
     @Override
     @Transactional
@@ -82,6 +83,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
 
     }
 
+
     @Override
     @Transactional
     public DtoWorkingHours updateOneWorkingHours(Long id, DtoWorkingHours newWorkingHours) {
@@ -105,6 +107,7 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
         return workingHoursMapper.workingHoursToDtoWorkingHours(updatedWorkingHours);
     }
 
+    
     @Override
     @Transactional
     public void deleteOneWorkingHours(Long workingHoursId) {

@@ -23,6 +23,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
     
     private static final String DAILY_PERSONNEL_MAP_NAME = "dailyPersonnelList";
 
+    
     @Override
     public void cacheDailyPersonnelList(LocalDate date, List<DtoDailyPersonnelEntry> personnelList) {
         try {
@@ -37,6 +38,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
             log.error("Error caching daily personnel list for date: {}", date, e);
         }
     }
+
 
     @Override
     public Optional<List<DtoDailyPersonnelEntry>> getDailyPersonnelListFromCache(LocalDate date) {
@@ -60,6 +62,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
 
+
     @Override
     public void removeDailyPersonnelListFromCache(LocalDate date) {
         try {
@@ -74,6 +77,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
             log.error("Error removing daily personnel list from cache for date: {}", date, e);
         }
     }
+
 
     @Override
     public void clearAllDailyPersonnelCache() {

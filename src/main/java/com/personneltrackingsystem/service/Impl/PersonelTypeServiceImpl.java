@@ -26,6 +26,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
     private final PersonelTypeMapper personelTypeMapper;
 
+
     @Override
     public List<DtoPersonelType> getAllPersonelTypes(){
 
@@ -33,6 +34,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
         return personelTypeMapper.personelTypeListToDtoPersonelTypeList(personelTypeList);
     }
+
 
     @Override
     public Optional<DtoPersonelType> getPersonelTypeById(Long personelTypeId) {
@@ -43,6 +45,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
         return Optional.ofNullable(personelTypeMapper.personelTypeToDtoPersonelType(personelType));
     }
 
+
     @Override
     public DtoPersonelType getOnePersonelType(Long personelTypeId){
         Optional<PersonelType> optPersonelType =  personelTypeRepository.findById(personelTypeId);
@@ -52,6 +55,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
             return personelTypeMapper.personelTypeToDtoPersonelType(optPersonelType.get());
         }
     }
+
 
     @Override
     @Transactional
@@ -73,6 +77,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
 
     }
 
+
     @Override
     @Transactional
     public DtoPersonelType updateOnePersonelType(Long id, DtoPersonelType newPersonelType) {
@@ -92,6 +97,7 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
         return personelTypeMapper.personelTypeToDtoPersonelType(updatedPersonelType);
     }
 
+    
     @Override
     @Transactional
     public void deleteOnePersonelType(Long personelTypeId) {

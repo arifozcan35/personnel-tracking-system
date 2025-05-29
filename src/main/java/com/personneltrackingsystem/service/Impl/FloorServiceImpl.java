@@ -25,13 +25,13 @@ public class FloorServiceImpl implements FloorService {
 
     private final FloorMapper floorMapper;
 
-    // private final KafkaProducerService kafkaProducerService;
 
-
+    @Override
     public Floor checkIfFloorExists(Long floorId){
         return floorRepository.findById(floorId)
             .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.FLOOR_NOT_FOUND, floorId.toString())));
     }
+
 
     @Override
     public Optional<DtoFloor> findById(Long floorId) {
@@ -41,6 +41,7 @@ public class FloorServiceImpl implements FloorService {
 
         return Optional.ofNullable(floorMapper.floorToDtoFloor(floor));
     }
+
 
     @Override
     public List<DtoFloor> getAllFloors(){

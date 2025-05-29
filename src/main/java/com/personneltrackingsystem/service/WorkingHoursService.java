@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkingHoursService {
+    
     List<DtoWorkingHours> getAllWorkingHours();
 
     Optional<DtoWorkingHours> getWorkingHoursById(Long id);

@@ -52,10 +52,12 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         redisCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
     }
 
+
     @Override
     public boolean ifPersonelPassedTurnstile(Long personelId, Long turnstileId){
         return turnstileRegistrationLogRepository.passedTurnstile(personelId, turnstileId);
     }
+
 
     @Override
     public OperationType getNextOperationType(Long personelId, Long turnstileId) {
@@ -69,6 +71,7 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
             return OperationType.OUT;
         }
     }
+
 
     @Override
     public List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date) {
@@ -89,6 +92,7 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         return dailyPersonnelList;
     }
 
+    
     @Override
     public List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(LocalDate date) {
         // first try to get from redis cache
@@ -108,7 +112,9 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         return dailyPersonnelList;
     }
 
-    private List<DtoDailyPersonnelEntry> getDailyPersonnelListFromDatabase(LocalDate date) {
+
+    @Override
+    public List<DtoDailyPersonnelEntry> getDailyPersonnelListFromDatabase(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         
         // get all turnstile logs according to date
@@ -138,7 +144,9 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         return dailyPersonnelList;
     }
 
-    private DtoDailyPersonnelEntry createDailyPersonnelEntry(Personel personel, List<TurnstileRegistrationLog> logs) {
+
+    @Override
+    public DtoDailyPersonnelEntry createDailyPersonnelEntry(Personel personel, List<TurnstileRegistrationLog> logs) {
         DtoDailyPersonnelEntry dailyEntry = new DtoDailyPersonnelEntry();
         
         dailyEntry.setPersonelId(personel.getPersonelId());
@@ -176,7 +184,9 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     }
 
     private DtoTurnstilePassage createTurnstilePassage(TurnstileRegistrationLog log) {
+
         DtoTurnstilePassage passage = new DtoTurnstilePassage();
+
         passage.setTurnstileId(log.getTurnstileId().getTurnstileId());
         passage.setTurnstileName(log.getTurnstileId().getTurnstileName());
         passage.setOperationTime(log.getOperationTime());

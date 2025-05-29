@@ -3,10 +3,12 @@ package com.personneltrackingsystem.service.Impl;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageRequest;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Turnstile;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.event.TurnstilePassageEvent;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ErrorMessage;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -153,25 +156,35 @@ public class TurnstileServiceImpl implements TurnstileService {
 
 
     @Override
-    public ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId){
+    public ResponseEntity<String> passTurnstile(Long turnstileId, DtoTurnstilePassageRequest request, String operationTimeStr){
         Turnstile turnstile = turnstileRepository.findById(turnstileId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString())));
 
         // get personel from cache (if not cached, it will be cached automatically)
-        Personel personel = personelService.getPersonelWithCache(personelId);
+        Personel personel = personelService.getPersonelWithCache(request.getPersonelId());
 
-        // same timestamp for both database record and Kafka event
-        LocalDateTime operationTime = LocalDateTime.now();
+        // Parse the operation time from the input string
+        LocalDateTime operationTime;
+        if (operationTimeStr != null && !operationTimeStr.isEmpty()) {
+            try {
+                operationTime = LocalDateTime.parse(operationTimeStr, 
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            } catch (Exception e) {
+                throw new ValidationException(MessageType.INVALID_DATE_FORMAT);
+            }
+        } else {
+            // Fallback to current time if no time string is provided
+            operationTime = LocalDateTime.now();
+        }
 
         DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
 
         dtoTurnstileRegistrationLogIU.setPersonelId((Long)personel.getPersonelId());
         dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
-
-        // next operation type based on the last operation for this personnel and turnstile
-        OperationType operationType = turnstileRegistrationLogService.getNextOperationType(personel.getPersonelId(), turnstile.getTurnstileId());
-        dtoTurnstileRegistrationLogIU.setOperationType(operationType);
+        
+        // Use the operation type directly from the request instead of querying the database
+        dtoTurnstileRegistrationLogIU.setOperationType(request.getOperationType());
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
 
@@ -179,7 +192,6 @@ public class TurnstileServiceImpl implements TurnstileService {
         hazelcastCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
         redisCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
 
-        // publish turnstile passage event to kafka
         TurnstilePassageEvent event = new TurnstilePassageEvent(
             personel.getPersonelId(),
             personel.getName(),
@@ -187,11 +199,40 @@ public class TurnstileServiceImpl implements TurnstileService {
             turnstile.getTurnstileId(),
             turnstile.getTurnstileName(),
             operationTime,
-            operationType
+            request.getOperationType()
         );
         
-        kafkaProducerService.sendTurnstilePassageEvent(event);
-
+        // only send late arrival notifications under specific conditions:
+        // 1. The operation must be an entry (IN)
+        // 2. The turnstile must be at a main entrance
+        // 3. The time must be after 9:15 AM (more than 15 minutes late)
+        Gate gate = turnstile.getGateId();
+        if (request.getOperationType() == OperationType.IN && gate != null && Boolean.TRUE.equals(gate.getMainEntrance())) {
+            
+            LocalTime entryTime = operationTime.toLocalTime();
+            LocalTime lateThreshold = LocalTime.of(9, 15); 
+            
+            if (entryTime.isAfter(lateThreshold)) {
+                Unit unit = gate.getUnitId();
+                if (unit != null && unit.getAdministratorPersonelId() != null) {
+         
+                    Personel adminPersonel = unit.getAdministratorPersonelId();
+                    
+                    // update event with admin's email and mark as late notification
+                    event.setRecipientEmail(adminPersonel.getEmail());
+                    event.setRecipientName(adminPersonel.getName());
+                    event.setIsAdminNotification(true);
+                    event.setIsLateArrival(true);
+                    
+                    // calculate minutes late
+                    long minutesLate = java.time.Duration.between(LocalTime.of(9, 0), entryTime).toMinutes();
+                    event.setMinutesLate(minutesLate);
+                    
+                    kafkaProducerService.sendTurnstilePassageEvent(event);
+                }
+            }
+        }
+        
         return ResponseEntity.ok("Turnstile passed successfully");
     }
 } 

@@ -24,9 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final AuthenticationManager authenticationManager;
+
     private final JwtServiceImpl jwtService;
+
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -50,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
     }
 
+
     @Override
     public TokenPair login(LoginRequest loginRequest) {
         // Authenticate the user
@@ -67,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
         return jwtService.generateTokenPair(authentication);
     }
 
+    
     @Override
     public TokenPair refreshToken(@Valid RefreshTokenRequest request) {
 

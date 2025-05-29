@@ -25,7 +25,4 @@ public interface FloorService {
 
     Floor checkIfFloorExists(Long floorId);
 
-
-    // ResponseEntity<String> passFloor(Long wantedToEnterFloor, Long personelId);
-
 }

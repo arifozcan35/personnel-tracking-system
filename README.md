@@ -32,7 +32,7 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 ## 📋 Features
 
 - 👨‍💼 Personnel management (Add, Update, Delete, List)
-- 🏢 Building, unit, floor, gate, turnstile management (Add, Update, Delete, List)
+- 🏢 Building, unit, floor, gate, turnstile management (Add, Update, Delete, List and logic procedures)
 - 🚪 Entry Authorisation management (Gate and turnstile access permissions of personnel)
 - ⏰ Monitoring working hours and detecting tardiness
 - 💰 Salary calculation (Salary deductions according to lateness)
@@ -45,28 +45,20 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 
 
 
-- *Personnel Management:*
-    - View personnel list
-    - Add new personnel (Unit selection is mandatory)
-    - Update personnel information
-    - Delete personnel
-    - Assign personnel as managers
+- *Personnel, Floor, Unit, Gate Management:*
+    - Viewing
+    - Adding
+    - Updating
+    - Deleting
 
 
-- *Unit Management:*
-    - View unit list
-    - Add new unit
-    - Update unit information
-    - Delete unit
-    - See the personnel belonging to the unit
-
-
-- *Gate Management:*
-    - View gate list
-    - Add new gate
-    - Update gate information
-    - Delete gate
-    - See the personnel belonging to the gate
+- *Turnstile Management:*
+    - Viewing
+    - Adding
+    - Updating
+    - Deleting
+    - Turnstile passage calculations and procedures
+    - List of personnel passing through the turnstile
 
 
 - *Role Mechanism:*
@@ -88,14 +80,14 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 
 
 - *Salary Calculation:*
-    - Manager salary: **40,000 TL**
-    - Regular personnel salary: **30,000 TL**
-    - **-200 TL** penalty for each invalid working day
+    - Manager salary: **60,000 TL**
+    - Regular personnel salary: **50,000 TL**
+    - **-300 TL** penalty for each invalid working day
 
 
 - *Mail Sending:*
-    - Sending e-mails to the staff at check-in and check-out times.
-    - The mail informs whether the working hour is valid and whether salary deductions have been made.
+    - Sending an e-mail to the admin of the relevant staff member according to the entry time.
+    - In the e-mail, information is given about whether the working hours of the relevant staff member are valid and whether salary deductions have been made.
 
 ---
 

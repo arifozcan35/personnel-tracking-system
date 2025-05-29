@@ -3,6 +3,7 @@ package com.personneltrackingsystem.controller;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,7 +52,11 @@ public interface TurnstileController {
     )
     @PostMapping("personelpass/{wantedToEnterTurnstile}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    ResponseEntity<String> passTurnstile(@PathVariable("wantedToEnterTurnstile") Long wantedToEnterTurnstile, @RequestBody Long personelId);
+    ResponseEntity<String> passTurnstile(
+        @PathVariable("wantedToEnterTurnstile") Long wantedToEnterTurnstile, 
+        @RequestBody DtoTurnstilePassageRequest request,
+        @RequestParam(required = false, defaultValue = "2025-05-29 09:17:35") String operationTimeStr
+    );
 
 
     @Operation(

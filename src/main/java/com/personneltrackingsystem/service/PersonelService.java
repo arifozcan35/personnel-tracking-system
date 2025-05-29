@@ -32,5 +32,4 @@ public interface PersonelService {
 
     Personel getPersonelWithCache(Long personelId);
 
-    // Map<String, Double> listSalaries();
 }

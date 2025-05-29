@@ -4,6 +4,7 @@ import com.personneltrackingsystem.controller.TurnstileController;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageRequest;
 import com.personneltrackingsystem.service.TurnstileService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +49,8 @@ public class TurnstileControllerImpl implements TurnstileController {
     }
 
     @Override
-    public ResponseEntity<String> passTurnstile(Long turnstileId, Long personelId) {
-        return turnstileService.passTurnstile(turnstileId, personelId);
+    public ResponseEntity<String> passTurnstile(Long turnstileId, DtoTurnstilePassageRequest request, String operationTimeStr) {
+        return turnstileService.passTurnstile(turnstileId, request, operationTimeStr);
     }
 
     @Override

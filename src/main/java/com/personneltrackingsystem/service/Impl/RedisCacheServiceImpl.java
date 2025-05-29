@@ -25,7 +25,9 @@ public class RedisCacheServiceImpl implements RedisCacheService {
     private final RedisTemplate<String, List<DtoDailyPersonnelEntry>> redisTemplate;
     
     private static final String DAILY_PERSONNEL_KEY_PREFIX = "daily_personnel:";
+    
     private static final Duration TTL = Duration.ofDays(1); // 24 hours TTL
+
 
     @Override
     public void cacheDailyPersonnelList(LocalDate date, List<DtoDailyPersonnelEntry> personnelList) {
@@ -38,6 +40,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
             log.error("Error caching daily personnel list in Redis for date: {}", date, e);
         }
     }
+
 
     @Override
     public Optional<List<DtoDailyPersonnelEntry>> getDailyPersonnelListFromCache(LocalDate date) {
@@ -58,6 +61,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
         }
     }
 
+
     @Override
     public void removeDailyPersonnelListFromCache(LocalDate date) {
         try {
@@ -70,6 +74,7 @@ public class RedisCacheServiceImpl implements RedisCacheService {
         }
     }
 
+    
     @Override
     public void clearAllDailyPersonnelCache() {
         try {

@@ -23,6 +23,7 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
     
     private static final long CACHE_TTL_HOURS = 1;
 
+
     @Override
     public void cachePersonel(Long personelId, Personel personel) {
         try {
@@ -33,6 +34,7 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
             log.error("Error caching personnel with ID: {}", personelId, e);
         }
     }
+
 
     @Override
     public Optional<Personel> getPersonelFromCache(Long personelId) {
@@ -52,6 +54,7 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
         }
     }
 
+
     @Override
     public void removePersonelFromCache(Long personelId) {
         try {
@@ -63,6 +66,7 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
         }
     }
 
+    
     @Override
     public boolean isPersonelCached(Long personelId) {
         try {
