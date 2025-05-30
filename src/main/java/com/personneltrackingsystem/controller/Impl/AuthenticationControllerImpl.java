@@ -1,11 +1,12 @@
-package com.personneltrackingsystem.controller.Impl;
+package com.personneltrackingsystem.controller.impl;
 
 import com.personneltrackingsystem.controller.AuthenticationController;
 import com.personneltrackingsystem.dto.LoginRequest;
 import com.personneltrackingsystem.dto.RefreshTokenRequest;
 import com.personneltrackingsystem.dto.RegisterRequest;
 import com.personneltrackingsystem.dto.TokenPair;
-import com.personneltrackingsystem.service.Impl.AuthServiceImpl;
+import com.personneltrackingsystem.service.impl.AuthServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

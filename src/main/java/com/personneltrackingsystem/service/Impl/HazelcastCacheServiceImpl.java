@@ -1,4 +1,4 @@
-package com.personneltrackingsystem.service.Impl;
+package com.personneltrackingsystem.service.impl;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;

@@ -1,4 +1,4 @@
-package com.personneltrackingsystem.service.Impl;
+package com.personneltrackingsystem.service.impl;
 
 import com.personneltrackingsystem.entity.Permission;
 import com.personneltrackingsystem.entity.Role;

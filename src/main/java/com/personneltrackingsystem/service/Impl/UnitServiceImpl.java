@@ -1,4 +1,4 @@
-package com.personneltrackingsystem.service.Impl;
+package com.personneltrackingsystem.service.impl;
 
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;

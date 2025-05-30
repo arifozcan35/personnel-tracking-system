@@ -1,4 +1,4 @@
-package com.personneltrackingsystem.controller.Impl;
+package com.personneltrackingsystem.controller.impl;
 
 import com.personneltrackingsystem.controller.BuildingController;
 import com.personneltrackingsystem.dto.DtoBuilding;
