@@ -12,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Configuration
@@ -41,10 +42,10 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
-
+    
     @Bean
-    public RedisTemplate<String, List<DtoDailyPersonnelEntry>> dailyPersonnelRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, List<DtoDailyPersonnelEntry>> template = new RedisTemplate<>();
+    public RedisTemplate<String, HashMap<String, List<DtoDailyPersonnelEntry>>> monthlyPersonnelRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, HashMap<String, List<DtoDailyPersonnelEntry>>> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         // Configure serializers
@@ -56,9 +57,9 @@ public class RedisConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         
-        // Configure JSON serialization for List<DtoDailyPersonnelEntry>
-        Jackson2JsonRedisSerializer<List> jsonRedisSerializer = 
-            new Jackson2JsonRedisSerializer<>(objectMapper, List.class);
+        // Configure JSON serialization for HashMap<String, List<DtoDailyPersonnelEntry>>
+        Jackson2JsonRedisSerializer<HashMap> jsonRedisSerializer = 
+            new Jackson2JsonRedisSerializer<>(objectMapper, HashMap.class);
         
         template.setValueSerializer(jsonRedisSerializer);
         template.setHashValueSerializer(jsonRedisSerializer);

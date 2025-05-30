@@ -11,7 +11,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,77 +21,75 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class RedisCacheServiceImpl implements RedisCacheService {
-
-    @Qualifier("dailyPersonnelRedisTemplate")
-    private final RedisTemplate<String, List<DtoDailyPersonnelEntry>> redisTemplate;
     
-    private static final String DAILY_PERSONNEL_KEY_PREFIX = "daily_personnel:";
+    @Qualifier("monthlyPersonnelRedisTemplate")
+    private final RedisTemplate<String, HashMap<String, List<DtoDailyPersonnelEntry>>> monthlyRedisTemplate;
     
-    private static final Duration TTL = Duration.ofDays(1); // 24 hours TTL
-
-
+    private static final String MONTHLY_PERSONNEL_KEY_PREFIX = "monthly_personnel:";
+    
+    private static final Duration MONTHLY_TTL = Duration.ofDays(7); // 7 days TTL
+    
+    // Aylık personel listesi metodları
+    
     @Override
-    public void cacheDailyPersonnelList(LocalDate date, List<DtoDailyPersonnelEntry> personnelList) {
+    public void cacheMonthlyPersonnelList(YearMonth yearMonth, HashMap<String, List<DtoDailyPersonnelEntry>> personnelListByDay) {
         try {
-            String cacheKey = generateCacheKey(date);
-            redisTemplate.opsForValue().set(cacheKey, personnelList, TTL);
+            String cacheKey = generateMonthlyKey(yearMonth);
+            monthlyRedisTemplate.opsForValue().set(cacheKey, personnelListByDay, MONTHLY_TTL);
             
-            log.info("Daily personnel list cached successfully in Redis for date: {}", date);
+            log.info("Monthly personnel list cached successfully in Redis for month: {}", yearMonth);
         } catch (Exception e) {
-            log.error("Error caching daily personnel list in Redis for date: {}", date, e);
+            log.error("Error caching monthly personnel list in Redis for month: {}", yearMonth, e);
         }
     }
 
-
     @Override
-    public Optional<List<DtoDailyPersonnelEntry>> getDailyPersonnelListFromCache(LocalDate date) {
+    public Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> getMonthlyPersonnelListFromCache(YearMonth yearMonth) {
         try {
-            String cacheKey = generateCacheKey(date);
-            List<DtoDailyPersonnelEntry> cachedList = redisTemplate.opsForValue().get(cacheKey);
+            String cacheKey = generateMonthlyKey(yearMonth);
+            HashMap<String, List<DtoDailyPersonnelEntry>> cachedMap = monthlyRedisTemplate.opsForValue().get(cacheKey);
             
-            if (cachedList != null) {
-                log.info("Daily personnel list retrieved from Redis cache for date: {}", date);
-                return Optional.of(cachedList);
+            if (cachedMap != null) {
+                log.info("Monthly personnel list retrieved from Redis cache for month: {}", yearMonth);
+                return Optional.of(cachedMap);
             } else {
-                log.info("Daily personnel list not found in Redis cache for date: {}", date);
+                log.info("Monthly personnel list not found in Redis cache for month: {}", yearMonth);
                 return Optional.empty();
             }
         } catch (Exception e) {
-            log.error("Error retrieving daily personnel list from Redis cache for date: {}", date, e);
+            log.error("Error retrieving monthly personnel list from Redis cache for month: {}", yearMonth, e);
             return Optional.empty();
         }
     }
 
-
     @Override
-    public void removeDailyPersonnelListFromCache(LocalDate date) {
+    public void removeMonthlyPersonnelListFromCache(YearMonth yearMonth) {
         try {
-            String cacheKey = generateCacheKey(date);
-            redisTemplate.delete(cacheKey);
+            String cacheKey = generateMonthlyKey(yearMonth);
+            monthlyRedisTemplate.delete(cacheKey);
             
-            log.info("Daily personnel list removed from Redis cache for date: {}", date);
+            log.info("Monthly personnel list removed from Redis cache for month: {}", yearMonth);
         } catch (Exception e) {
-            log.error("Error removing daily personnel list from Redis cache for date: {}", date, e);
+            log.error("Error removing monthly personnel list from Redis cache for month: {}", yearMonth, e);
         }
     }
 
-    
     @Override
-    public void clearAllDailyPersonnelCache() {
+    public void clearAllMonthlyPersonnelCache() {
         try {
-            Set<String> keys = redisTemplate.keys(DAILY_PERSONNEL_KEY_PREFIX + "*");
+            Set<String> keys = monthlyRedisTemplate.keys(MONTHLY_PERSONNEL_KEY_PREFIX + "*");
             if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-                log.info("All daily personnel cache cleared successfully from Redis. Cleared {} keys", keys.size());
+                monthlyRedisTemplate.delete(keys);
+                log.info("All monthly personnel cache cleared successfully from Redis. Cleared {} keys", keys.size());
             } else {
-                log.info("No daily personnel cache keys found in Redis to clear");
+                log.info("No monthly personnel cache keys found in Redis to clear");
             }
         } catch (Exception e) {
-            log.error("Error clearing all daily personnel cache from Redis", e);
+            log.error("Error clearing all monthly personnel cache from Redis", e);
         }
     }
-
-    private String generateCacheKey(LocalDate date) {
-        return DAILY_PERSONNEL_KEY_PREFIX + date.toString();
+    
+    private String generateMonthlyKey(YearMonth yearMonth) {
+        return MONTHLY_PERSONNEL_KEY_PREFIX + yearMonth.toString();
     }
 } 

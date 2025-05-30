@@ -20,7 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,10 +49,8 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     public void saveOneTurnstileRegistrationLog(DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU){
         TurnstileRegistrationLog turnstileRegistrationLog = turnstileRegistrationLogMapper.dtoTurnstileRegistrationLogIUToTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
         turnstileRegistrationLogRepository.save(turnstileRegistrationLog);
-
-        // invalidate today's cache when new log is added
-        hazelcastCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
-        redisCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
+        
+        // Cache invalidation işlemi TurnstileServiceImpl sınıfında ana kapı kontrolü yapılarak gerçekleştiriliyor
     }
 
 
@@ -70,78 +71,6 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
             // if the last operation was IN, the next should be OUT
             return OperationType.OUT;
         }
-    }
-
-
-    @Override
-    public List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date) {
-        // first try to get from hazelcast cache
-        Optional<List<DtoDailyPersonnelEntry>> cachedResult = hazelcastCacheService.getDailyPersonnelListFromCache(date);
-        if (cachedResult.isPresent()) {
-            log.info("returning daily personnel list from hazelcast cache for date: {}", date);
-            return cachedResult.get();
-        }
-
-        // if not in cache, get from database
-        log.info("Daily personnel list not found in cache, fetching from database for date: {}", date);
-        List<DtoDailyPersonnelEntry> dailyPersonnelList = getDailyPersonnelListFromDatabase(date);
-
-        // cache the result in hazelcast
-        hazelcastCacheService.cacheDailyPersonnelList(date, dailyPersonnelList);
-
-        return dailyPersonnelList;
-    }
-
-    
-    @Override
-    public List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(LocalDate date) {
-        // first try to get from redis cache
-        Optional<List<DtoDailyPersonnelEntry>> cachedResult = redisCacheService.getDailyPersonnelListFromCache(date);
-        if (cachedResult.isPresent()) {
-            log.info("returning daily personnel list from redis cache for date: {}", date);
-            return cachedResult.get();
-        }
-
-        // if not in cache, get from database
-        log.info("Daily personnel list not found in redis cache, fetching from database for date: {}", date);
-        List<DtoDailyPersonnelEntry> dailyPersonnelList = getDailyPersonnelListFromDatabase(date);
-
-        // cache the result in redis
-        redisCacheService.cacheDailyPersonnelList(date, dailyPersonnelList);
-
-        return dailyPersonnelList;
-    }
-
-
-    @Override
-    public List<DtoDailyPersonnelEntry> getDailyPersonnelListFromDatabase(LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        
-        // get all turnstile logs according to date
-        List<TurnstileRegistrationLog> allLogs = turnstileRegistrationLogRepository.findAllByDate(startOfDay);
-        
-        if (allLogs.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        Map<Long, List<TurnstileRegistrationLog>> logsByPersonnel = allLogs.stream()
-                .collect(Collectors.groupingBy(log -> log.getPersonelId().getPersonelId()));
-
-        List<DtoDailyPersonnelEntry> dailyPersonnelList = new ArrayList<>();
-
-        for (Map.Entry<Long, List<TurnstileRegistrationLog>> entry : logsByPersonnel.entrySet()) {
-            Long personelId = entry.getKey();
-            List<TurnstileRegistrationLog> personnelLogs = entry.getValue();
-
-            // get personel details with cache
-            Personel personel = personelService.getPersonelWithCache(personelId);
-
-            // create daily personel entry
-            DtoDailyPersonnelEntry dailyEntry = createDailyPersonnelEntry(personel, personnelLogs);
-            dailyPersonnelList.add(dailyEntry);
-        }
-
-        return dailyPersonnelList;
     }
 
 
@@ -184,7 +113,6 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     }
 
     private DtoTurnstilePassage createTurnstilePassage(TurnstileRegistrationLog log) {
-
         DtoTurnstilePassage passage = new DtoTurnstilePassage();
 
         passage.setTurnstileId(log.getTurnstileId().getTurnstileId());
@@ -193,5 +121,97 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         passage.setOperationType(log.getOperationType());
         return passage;
     }
+    
+    // Monthly personnel list methods
+    
+    @Override
+    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelList(YearMonth yearMonth) {
+        // First try to get from hazelcast cache
+        Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> cachedResult = 
+            hazelcastCacheService.getMonthlyPersonnelListFromCache(yearMonth);
+            
+        if (cachedResult.isPresent()) {
+            log.info("Returning monthly main entrance personnel list from cache for month: {}", yearMonth);
+            return cachedResult.get();
+        }
+        
+        // If not in cache, get from database
+        log.info("Monthly main entrance personnel list not found in cache, fetching from database for month: {}", yearMonth);
+        HashMap<String, List<DtoDailyPersonnelEntry>> monthlyData = getMonthlyMainEntrancePersonnelListFromDatabase(yearMonth);
+        
+        // Cache the result
+        hazelcastCacheService.cacheMonthlyPersonnelList(yearMonth, monthlyData);
+        
+        return monthlyData;
+    }
+    
+    @Override
+    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListFromDatabase(YearMonth yearMonth) {
+        // Get all turnstile logs for the specified month from main entrances
+        List<TurnstileRegistrationLog> allMonthLogs = turnstileRegistrationLogRepository.findAllMainEntranceLogsByMonth(
+            yearMonth.getYear(), yearMonth.getMonthValue());
+        
+        if (allMonthLogs.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        // Group logs by date
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        Map<String, List<TurnstileRegistrationLog>> logsByDate = allMonthLogs.stream()
+            .collect(Collectors.groupingBy(log -> log.getOperationTime().format(dateFormatter)));
+        
+        // Create result map
+        HashMap<String, List<DtoDailyPersonnelEntry>> result = new HashMap<>();
+        
+        // Process each date
+        for (Map.Entry<String, List<TurnstileRegistrationLog>> dateEntry : logsByDate.entrySet()) {
+            String dateStr = dateEntry.getKey();
+            List<TurnstileRegistrationLog> logsForDate = dateEntry.getValue();
+            
+            // Group logs by personnel for this date
+            Map<Long, List<TurnstileRegistrationLog>> logsByPersonnel = logsForDate.stream()
+                .collect(Collectors.groupingBy(log -> log.getPersonelId().getPersonelId()));
+            
+            List<DtoDailyPersonnelEntry> personnelEntries = new ArrayList<>();
+            
+            // Process each personnel's logs
+            for (Map.Entry<Long, List<TurnstileRegistrationLog>> personnelEntry : logsByPersonnel.entrySet()) {
+                Long personelId = personnelEntry.getKey();
+                List<TurnstileRegistrationLog> personnelLogs = personnelEntry.getValue();
+                
+                // Get personnel details
+                Personel personel = personelService.getPersonelWithCache(personelId);
+                
+                // Create entry for this personnel
+                DtoDailyPersonnelEntry dailyEntry = createDailyPersonnelEntry(personel, personnelLogs);
+                personnelEntries.add(dailyEntry);
+            }
+            
+            // Add to result map
+            result.put(dateStr, personnelEntries);
+        }
+        
+        return result;
+    }
 
+    @Override
+    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(YearMonth yearMonth) {
+        // First try to get from redis cache
+        Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> cachedResult = 
+            redisCacheService.getMonthlyPersonnelListFromCache(yearMonth);
+            
+        if (cachedResult.isPresent()) {
+            log.info("Returning monthly main entrance personnel list from redis cache for month: {}", yearMonth);
+            return cachedResult.get();
+        }
+        
+        // If not in cache, get from database
+        log.info("Monthly main entrance personnel list not found in redis cache, fetching from database for month: {}", yearMonth);
+        HashMap<String, List<DtoDailyPersonnelEntry>> monthlyData = getMonthlyMainEntrancePersonnelListFromDatabase(yearMonth);
+        
+        // Cache the result
+        redisCacheService.cacheMonthlyPersonnelList(yearMonth, monthlyData);
+        
+        return monthlyData;
+    }
 }

@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -52,18 +53,18 @@ public class TurnstileControllerImpl implements TurnstileController {
     public ResponseEntity<String> passTurnstile(Long turnstileId, DtoTurnstilePassageRequest request, String operationTimeStr) {
         return turnstileService.passTurnstile(turnstileId, request, operationTimeStr);
     }
-
+    
     @Override
-    public List<DtoDailyPersonnelEntry> getDailyPersonnelList(LocalDate date) {
-        // if no date entered, use today's date
-        LocalDate targetDate = (date != null) ? date : LocalDate.now();
-        return turnstileRegistrationLogService.getDailyPersonnelList(targetDate);
+    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithHazelcast(YearMonth yearMonth) {
+        // if no year-month entered, use current month
+        YearMonth targetMonth = (yearMonth != null) ? yearMonth : YearMonth.now();
+        return turnstileRegistrationLogService.getMonthlyMainEntrancePersonnelList(targetMonth);
     }
-
+    
     @Override
-    public List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(LocalDate date) {
-        // if no date entered, use today's date
-        LocalDate targetDate = (date != null) ? date : LocalDate.now();
-        return turnstileRegistrationLogService.getDailyPersonnelListWithRedis(targetDate);
+    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(YearMonth yearMonth) {
+        // if no year-month entered, use current month
+        YearMonth targetMonth = (yearMonth != null) ? yearMonth : YearMonth.now();
+        return turnstileRegistrationLogService.getMonthlyMainEntrancePersonnelListWithRedis(targetMonth);
     }
 } 

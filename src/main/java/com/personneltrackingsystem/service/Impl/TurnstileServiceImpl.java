@@ -34,8 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +59,7 @@ public class TurnstileServiceImpl implements TurnstileService {
 
     private final RedisCacheService redisCacheService;
 
+    private static final Logger log = LoggerFactory.getLogger(TurnstileServiceImpl.class);
 
     @Override
     public List<DtoTurnstile> getAllTurnstiles(){
@@ -188,9 +191,13 @@ public class TurnstileServiceImpl implements TurnstileService {
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
 
-        // invalidate today's daily personnel cache since new entry is added
-        hazelcastCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
-        redisCacheService.removeDailyPersonnelListFromCache(LocalDate.now());
+        // Sadece ana kapı turnikelerinden geçiş olduğunda önbelleği temizle
+        Gate gate = turnstile.getGateId();
+        if (gate != null && Boolean.TRUE.equals(gate.getMainEntrance())) {
+            hazelcastCacheService.removeMonthlyPersonnelListFromCache(YearMonth.from(operationTime));
+            redisCacheService.removeMonthlyPersonnelListFromCache(YearMonth.from(operationTime));
+            log.info("Cache invalidated for main entrance turnstile passage: {}", turnstile.getTurnstileName());
+        }
 
         TurnstilePassageEvent event = new TurnstilePassageEvent(
             personel.getPersonelId(),
@@ -206,7 +213,6 @@ public class TurnstileServiceImpl implements TurnstileService {
         // 1. The operation must be an entry (IN)
         // 2. The turnstile must be at a main entrance
         // 3. The time must be after 9:15 AM (more than 15 minutes late)
-        Gate gate = turnstile.getGateId();
         if (request.getOperationType() == OperationType.IN && gate != null && Boolean.TRUE.equals(gate.getMainEntrance())) {
             
             LocalTime entryTime = operationTime.toLocalTime();

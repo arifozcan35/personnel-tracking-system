@@ -2,17 +2,19 @@ package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 public interface RedisCacheService {
-
-    void cacheDailyPersonnelList(LocalDate date, List<DtoDailyPersonnelEntry> personnelList);
     
-    Optional<List<DtoDailyPersonnelEntry>> getDailyPersonnelListFromCache(LocalDate date);
+    // Aylık personel listesi metodları
+    void cacheMonthlyPersonnelList(YearMonth yearMonth, HashMap<String, List<DtoDailyPersonnelEntry>> personnelListByDay);
     
-    void removeDailyPersonnelListFromCache(LocalDate date);
+    Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> getMonthlyPersonnelListFromCache(YearMonth yearMonth);
     
-    void clearAllDailyPersonnelCache();
+    void removeMonthlyPersonnelListFromCache(YearMonth yearMonth);
+    
+    void clearAllMonthlyPersonnelCache();
 } 

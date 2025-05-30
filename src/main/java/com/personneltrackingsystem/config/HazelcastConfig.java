@@ -15,12 +15,12 @@ public class HazelcastConfig {
         Config config = new Config();
         config.setInstanceName("personnel-tracking-system");
         
-        // Configure the daily personnel list cache
-        MapConfig dailyPersonnelMapConfig = new MapConfig();
-        dailyPersonnelMapConfig.setName("dailyPersonnelList");
-        dailyPersonnelMapConfig.setTimeToLiveSeconds(86400); // 24 hours
-        dailyPersonnelMapConfig.setMaxIdleSeconds(3600); // 1 hour idle time
-        config.addMapConfig(dailyPersonnelMapConfig);
+        // Configure the monthly personnel list cache
+        MapConfig monthlyPersonnelMapConfig = new MapConfig();
+        monthlyPersonnelMapConfig.setName("monthlyPersonnelList");
+        monthlyPersonnelMapConfig.setTimeToLiveSeconds(604800); // 7 days
+        monthlyPersonnelMapConfig.setMaxIdleSeconds(86400); // 24 hours idle time
+        config.addMapConfig(monthlyPersonnelMapConfig);
         
         return Hazelcast.newHazelcastInstance(config);
     }

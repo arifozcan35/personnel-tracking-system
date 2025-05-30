@@ -14,7 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 
 @Tag(name = "Turnstile Controller", description = "Turnstile CRUD operations")
@@ -58,30 +59,29 @@ public interface TurnstileController {
         @RequestParam(required = false, defaultValue = "2025-05-29 09:17:35") String operationTimeStr
     );
 
-
     @Operation(
-            summary = "Get Daily Personnel List",
-            description = "Get the list of all personnel who passed through turnstiles on a specific date. Uses Hazelcast cache for performance."
+            summary = "Get Monthly Main Entrance Personnel List With Hazelcast",
+            description = "Get the list of all personnel who passed through main entrance turnstiles for a specific month. Data is organized by date. Uses Hazelcast cache for performance."
     )
-    @GetMapping("/daily-personnel")
+    @GetMapping("/monthly-personnel-list-hazelcast")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    List<DtoDailyPersonnelEntry> getDailyPersonnelList(
-            @Parameter(description = "Date in YYYY-MM-DD format", example = "2025-05-26")
+    HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithHazelcast(
+            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
             @RequestParam(required = false) 
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
-            LocalDate date
+            @DateTimeFormat(pattern = "yyyy-MM") 
+            YearMonth yearMonth
     );
-
+    
     @Operation(
-            summary = "Get Daily Personnel List with Redis",
-            description = "Get the list of all personnel who passed through turnstiles on a specific date. Uses Redis cache for performance."
+            summary = "Get Monthly Main Entrance Personnel List with Redis",
+            description = "Get the list of all personnel who passed through main entrance turnstiles for a specific month. Data is organized by date. Uses Redis cache for performance."
     )
-    @GetMapping("/daily-personnel-redis")
+    @GetMapping("/monthly-main-entrance-personnel-redis")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    List<DtoDailyPersonnelEntry> getDailyPersonnelListWithRedis(
-            @Parameter(description = "Date in YYYY-MM-DD format", example = "2025-05-26")
+    HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(
+            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
             @RequestParam(required = false) 
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
-            LocalDate date
+            @DateTimeFormat(pattern = "yyyy-MM") 
+            YearMonth yearMonth
     );
 } 
