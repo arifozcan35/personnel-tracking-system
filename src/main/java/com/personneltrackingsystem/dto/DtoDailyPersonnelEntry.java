@@ -10,10 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
 public class DtoDailyPersonnelEntry {
 
@@ -38,11 +37,7 @@ public class DtoDailyPersonnelEntry {
     @Schema(description = "List of all turnstile passages during the day")
     private List<DtoTurnstilePassage> passages;
 
-
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
+    @Data
     @NoArgsConstructor
     public static class DtoTurnstilePassage {
         

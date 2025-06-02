@@ -35,4 +35,9 @@ public interface TurnstileRegistrationLogRepository extends JpaRepository<Turnst
            "AND g.mainEntrance = true " +
            "ORDER BY t.personelId.personelId, t.operationTime ASC")
     List<TurnstileRegistrationLog> findAllMainEntranceLogsByMonth(@Param("year") int year, @Param("month") int month);
+    
+    @Query("SELECT t FROM TurnstileRegistrationLog t " +
+           "WHERE YEAR(t.operationTime) = :year AND MONTH(t.operationTime) = :month " +
+           "ORDER BY t.personelId.personelId, t.operationTime ASC")
+    List<TurnstileRegistrationLog> findAllLogsByMonth(@Param("year") int year, @Param("month") int month);
 }

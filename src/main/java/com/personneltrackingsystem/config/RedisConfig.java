@@ -11,9 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
+import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class RedisConfig {
@@ -58,6 +60,31 @@ public class RedisConfig {
         objectMapper.registerModule(new JavaTimeModule());
         
         // Configure JSON serialization for HashMap<String, List<DtoDailyPersonnelEntry>>
+        Jackson2JsonRedisSerializer<HashMap> jsonRedisSerializer = 
+            new Jackson2JsonRedisSerializer<>(objectMapper, HashMap.class);
+        
+        template.setValueSerializer(jsonRedisSerializer);
+        template.setHashValueSerializer(jsonRedisSerializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+    
+    @Bean
+    public RedisTemplate<String, HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> turnstileBasedMonthlyPersonnelRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Configure serializers
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        template.setKeySerializer(stringRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+
+        // Create ObjectMapper with JSR310 module for proper date/time serialization
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        
+        // Configure JSON serialization for HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>
         Jackson2JsonRedisSerializer<HashMap> jsonRedisSerializer = 
             new Jackson2JsonRedisSerializer<>(objectMapper, HashMap.class);
         

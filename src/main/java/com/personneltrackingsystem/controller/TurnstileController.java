@@ -3,7 +3,8 @@ package com.personneltrackingsystem.controller;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
-import com.personneltrackingsystem.dto.DtoTurnstilePassageRequest;
+import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Turnstile Controller", description = "Turnstile CRUD operations")
 @RequestMapping("/api/turnstile")
@@ -47,17 +49,16 @@ public interface TurnstileController {
     void deleteTurnstile(@PathVariable Long turnstileId);
 
 
+    
+
     @Operation(
             summary = "Entry Permit Check",
             description = "Checking whether the given personnel has the authority to enter through the turnstile they want to enter."
     )
-    @PostMapping("personelpass/{wantedToEnterTurnstile}")
+    @PostMapping("/personelpass")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    ResponseEntity<String> passTurnstile(
-        @PathVariable("wantedToEnterTurnstile") Long wantedToEnterTurnstile, 
-        @RequestBody DtoTurnstilePassageRequest request,
-        @RequestParam(required = false, defaultValue = "2025-05-29 09:17:35") String operationTimeStr
-    );
+    ResponseEntity<String> passTurnstile(@RequestBody DtoTurnstilePassageFullRequest request);
+
 
     @Operation(
             summary = "Get Monthly Main Entrance Personnel List With Hazelcast",
@@ -72,6 +73,7 @@ public interface TurnstileController {
             YearMonth yearMonth
     );
     
+
     @Operation(
             summary = "Get Monthly Main Entrance Personnel List with Redis",
             description = "Get the list of all personnel who passed through main entrance turnstiles for a specific month. Data is organized by date. Uses Redis cache for performance."
@@ -79,6 +81,34 @@ public interface TurnstileController {
     @GetMapping("/monthly-main-entrance-personnel-redis")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(
+            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
+            @RequestParam(required = false) 
+            @DateTimeFormat(pattern = "yyyy-MM") 
+            YearMonth yearMonth
+    );
+
+    
+    @Operation(
+            summary = "Get Turnstile-Based Monthly Personnel List With Hazelcast",
+            description = "Get the list of all personnel who passed through any turnstile for a specific month. Data is organized by date and then by turnstile. Uses Hazelcast cache for performance."
+    )
+    @GetMapping("/turnstile-based-monthly-personnel-list-hazelcast")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithHazelcast(
+            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
+            @RequestParam(required = false) 
+            @DateTimeFormat(pattern = "yyyy-MM") 
+            YearMonth yearMonth
+    );
+    
+
+    @Operation(
+            summary = "Get Turnstile-Based Monthly Personnel List With Redis",
+            description = "Get the list of all personnel who passed through any turnstile for a specific month. Data is organized by date and then by turnstile. Uses Redis cache for performance."
+    )
+    @GetMapping("/turnstile-based-monthly-personnel-list-redis")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithRedis(
             @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
             @RequestParam(required = false) 
             @DateTimeFormat(pattern = "yyyy-MM") 

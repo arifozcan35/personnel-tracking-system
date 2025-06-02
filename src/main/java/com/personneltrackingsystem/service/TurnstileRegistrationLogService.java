@@ -2,6 +2,7 @@ package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
+import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
@@ -9,6 +10,7 @@ import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface TurnstileRegistrationLogService {
 
@@ -27,4 +29,14 @@ public interface TurnstileRegistrationLogService {
     HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListFromDatabase(YearMonth yearMonth);
     
     HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(YearMonth yearMonth);
+    
+    // Turnike bazlı aylık personel listesi metodları
+    HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelList(YearMonth yearMonth);
+    
+    HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromDatabase(YearMonth yearMonth);
+    
+    HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListWithRedis(YearMonth yearMonth);
+    
+    // Validasyon metodları
+    YearMonth validateAndGetYearMonth(YearMonth yearMonth);
 }

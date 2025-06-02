@@ -3,7 +3,7 @@ package com.personneltrackingsystem.service.impl;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
-import com.personneltrackingsystem.dto.DtoTurnstilePassageRequest;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.Personel;
@@ -159,9 +159,13 @@ public class TurnstileServiceImpl implements TurnstileService {
 
 
     @Override
-    public ResponseEntity<String> passTurnstile(Long turnstileId, DtoTurnstilePassageRequest request, String operationTimeStr){
-        Turnstile turnstile = turnstileRepository.findById(turnstileId)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, turnstileId.toString())));
+    public ResponseEntity<String> passTurnstile(DtoTurnstilePassageFullRequest request) {
+        
+        Long wantedToEnterTurnstileId = request.getWantedToEnterTurnstileId();
+        String operationTimeStr = request.getOperationTimeStr();
+        
+        Turnstile turnstile = turnstileRepository.findById(wantedToEnterTurnstileId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, wantedToEnterTurnstileId.toString())));
 
         // get personel from cache (if not cached, it will be cached automatically)
         Personel personel = personelService.getPersonelWithCache(request.getPersonelId());
@@ -186,17 +190,26 @@ public class TurnstileServiceImpl implements TurnstileService {
         dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
         
-        // Use the operation type directly from the request instead of querying the database
+        // Use the operation type directly from the request
         dtoTurnstileRegistrationLogIU.setOperationType(request.getOperationType());
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
 
-        // Sadece ana kapı turnikelerinden geçiş olduğunda önbelleği temizle
+        // Clear cache at all passes because reporting is now done for all turnstiles
+        YearMonth currentMonth = YearMonth.from(operationTime);
+            
+        // Always invalidate turnstile-based cache for all turnstiles
+        hazelcastCacheService.removeTurnstileBasedMonthlyPersonnelListFromCache(currentMonth);
+        redisCacheService.removeTurnstileBasedMonthlyPersonnelListFromCache(currentMonth);
+        log.info("Turnstile-based cache invalidated for turnstile passage: {}", turnstile.getTurnstileName());
+
+        // Only clear the personnel cache when passing through the main gate turnstiles
         Gate gate = turnstile.getGateId();
         if (gate != null && Boolean.TRUE.equals(gate.getMainEntrance())) {
-            hazelcastCacheService.removeMonthlyPersonnelListFromCache(YearMonth.from(operationTime));
-            redisCacheService.removeMonthlyPersonnelListFromCache(YearMonth.from(operationTime));
-            log.info("Cache invalidated for main entrance turnstile passage: {}", turnstile.getTurnstileName());
+            // Clear traditional cache for main entrance turnstiles only
+            hazelcastCacheService.removeMonthlyPersonnelListFromCache(currentMonth);
+            redisCacheService.removeMonthlyPersonnelListFromCache(currentMonth);
+            log.info("Personnel-based cache invalidated for main entrance turnstile passage: {}", turnstile.getTurnstileName());
         }
 
         TurnstilePassageEvent event = new TurnstilePassageEvent(

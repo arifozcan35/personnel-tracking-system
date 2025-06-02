@@ -47,7 +47,7 @@ public enum MessageType {
     INVALID_TIME_RANGE("7001", "Check-in time must be before check-out time!"),
     PERSONNEL_NOT_AUTHORIZED("7002", "Personnel is not authorized for this gate!"),
     PERMISSION_NOT_ASSIGNED("7003", "Permission is not assigned to this role!"),
-    INVALID_DATE_FORMAT("7004", "Invalid date format. Expected format: yyyy-MM-dd HH:mm:ss"),
+    INVALID_DATE_FORMAT("7004", "Invalid date format. Expected format: yyyy-MM"),
     INVALID_EVENT_TYPE("7005", "Invalid event type!"),
     
     // General errors
