@@ -20,23 +20,23 @@ public interface TurnstileRegistrationLogService {
     
     OperationType getNextOperationType(Long personelId, Long turnstileId);
 
-    // Yardımcı metod, aylık listeleme için de kullanılıyor
+
+    // Helper method; used for monthly listing.
     DtoDailyPersonnelEntry createDailyPersonnelEntry(Personel personel, List<TurnstileRegistrationLog> logs);
     
-    // Aylık personel listesi metodları
+    
+    // Monthly personnel list methods
     HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelList(YearMonth yearMonth);
     
     HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListFromDatabase(YearMonth yearMonth);
     
-    HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(YearMonth yearMonth);
-    
-    // Turnike bazlı aylık personel listesi metodları
+
+    // Turnstile-based monthly personnel list methods
     HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelList(YearMonth yearMonth);
     
     HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromDatabase(YearMonth yearMonth);
     
-    HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListWithRedis(YearMonth yearMonth);
-    
-    // Validasyon metodları
+
+    // Validation methods
     YearMonth validateAndGetYearMonth(YearMonth yearMonth);
 }

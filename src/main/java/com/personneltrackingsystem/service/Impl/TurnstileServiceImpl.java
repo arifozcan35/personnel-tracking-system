@@ -21,8 +21,6 @@ import com.personneltrackingsystem.service.KafkaProducerService;
 import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
-import com.personneltrackingsystem.service.HazelcastCacheService;
-import com.personneltrackingsystem.service.RedisCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,8 +34,7 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 @Service
 @RequiredArgsConstructor
@@ -55,11 +52,6 @@ public class TurnstileServiceImpl implements TurnstileService {
     
     private final KafkaProducerService kafkaProducerService;
 
-    private final HazelcastCacheService hazelcastCacheService;
-
-    private final RedisCacheService redisCacheService;
-
-    private static final Logger log = LoggerFactory.getLogger(TurnstileServiceImpl.class);
 
     @Override
     public List<DtoTurnstile> getAllTurnstiles(){
@@ -158,6 +150,7 @@ public class TurnstileServiceImpl implements TurnstileService {
 
 
 
+    
     @Override
     public ResponseEntity<String> passTurnstile(DtoTurnstilePassageFullRequest request) {
         
@@ -195,22 +188,12 @@ public class TurnstileServiceImpl implements TurnstileService {
 
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
 
-        // Clear cache at all passes because reporting is now done for all turnstiles
+        // Cache clearing is now handled by @Scheduled task at the beginning of each day
+        // No need to invalidate cache on each turnstile passage
         YearMonth currentMonth = YearMonth.from(operationTime);
-            
-        // Always invalidate turnstile-based cache for all turnstiles
-        hazelcastCacheService.removeTurnstileBasedMonthlyPersonnelListFromCache(currentMonth);
-        redisCacheService.removeTurnstileBasedMonthlyPersonnelListFromCache(currentMonth);
-        log.info("Turnstile-based cache invalidated for turnstile passage: {}", turnstile.getTurnstileName());
-
-        // Only clear the personnel cache when passing through the main gate turnstiles
+        
+        // Get the gate for late arrival notification checks
         Gate gate = turnstile.getGateId();
-        if (gate != null && Boolean.TRUE.equals(gate.getMainEntrance())) {
-            // Clear traditional cache for main entrance turnstiles only
-            hazelcastCacheService.removeMonthlyPersonnelListFromCache(currentMonth);
-            redisCacheService.removeMonthlyPersonnelListFromCache(currentMonth);
-            log.info("Personnel-based cache invalidated for main entrance turnstile passage: {}", turnstile.getTurnstileName());
-        }
 
         TurnstilePassageEvent event = new TurnstilePassageEvent(
             personel.getPersonelId(),

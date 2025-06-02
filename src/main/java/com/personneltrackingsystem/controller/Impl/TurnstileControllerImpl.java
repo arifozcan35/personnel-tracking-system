@@ -88,8 +88,9 @@ public class TurnstileControllerImpl implements TurnstileController {
         // Use service's validation method
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
+        // Now using the regular cache method instead of Redis-specific one
         HashMap<String, List<DtoDailyPersonnelEntry>> result = 
-            turnstileRegistrationLogService.getMonthlyMainEntrancePersonnelListWithRedis(targetMonth);
+            turnstileRegistrationLogService.getMonthlyMainEntrancePersonnelList(targetMonth);
             
         HashMap<String, List<DtoDailyPersonnelEntry>> sortedResult = new LinkedHashMap<>();
         
@@ -130,8 +131,9 @@ public class TurnstileControllerImpl implements TurnstileController {
         // Use service's validation method
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
+        // Now using the regular cache method instead of Redis-specific one
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
-            turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelListWithRedis(targetMonth);
+            turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelList(targetMonth);
             
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> sortedResult = new LinkedHashMap<>();
         

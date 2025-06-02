@@ -27,7 +27,9 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
     private static final String MONTHLY_PERSONNEL_MAP_NAME = "monthlyPersonnelList";
     private static final String TURNSTILE_BASED_MONTHLY_PERSONNEL_MAP_NAME = "turnstileBasedMonthlyPersonnelList";
     
-    // Aylık personel listesi metodları
+
+
+    // Monthly personnel list methods
     
     @Override
     public void cacheMonthlyPersonnelList(YearMonth yearMonth, HashMap<String, List<DtoDailyPersonnelEntry>> personnelListByDay) {
@@ -44,6 +46,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
     
+
     @Override
     public Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> getMonthlyPersonnelListFromCache(YearMonth yearMonth) {
         try {
@@ -66,6 +69,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
     
+
     @Override
     public void removeMonthlyPersonnelListFromCache(YearMonth yearMonth) {
         try {
@@ -81,6 +85,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
     
+
     @Override
     public void clearAllMonthlyPersonnelCache() {
         try {
@@ -98,7 +103,9 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         return "monthly_personnel_" + yearMonth.toString();
     }
     
-    // Turnike bazlı aylık personel listesi metodları
+
+
+    // Turnstile-based monthly personnel list methods
     
     @Override
     public void cacheTurnstileBasedMonthlyPersonnelList(YearMonth yearMonth, 
@@ -116,6 +123,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
     
+
     @Override
     public Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> getTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth) {
         try {
@@ -138,6 +146,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
     
+
     @Override
     public void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth) {
         try {
@@ -152,6 +161,7 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
             log.error("Error removing turnstile-based monthly personnel list from cache for month: {}", yearMonth, e);
         }
     }
+    
     
     @Override
     public void clearAllTurnstileBasedMonthlyPersonnelCache() {

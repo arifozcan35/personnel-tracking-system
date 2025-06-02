@@ -13,8 +13,6 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 
 ## 🧑‍💻 Technologies Used
 - Java Spring Boot
-- Spring Data JPA
-- Spring Web
 - Spring Security
 - JWT Authentication
 - Java Mail Sender

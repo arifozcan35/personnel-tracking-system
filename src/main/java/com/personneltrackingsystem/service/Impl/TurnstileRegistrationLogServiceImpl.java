@@ -21,8 +21,6 @@ import com.personneltrackingsystem.service.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -33,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.scheduling.annotation.Scheduled;
-import jakarta.annotation.PostConstruct;
 
 @Slf4j
 @Service
@@ -50,18 +47,35 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
 
     private final RedisCacheService redisCacheService;
 
-    // Clear Redis cache when the application starts
-    @PostConstruct
-    public void initCaches() {
-        log.info("Initializing and clearing caches on startup");
-        clearAllCaches();
-    }
-    
-    // Clear all caches regularly
-    @Scheduled(cron = "0 0 * * * *") // Every hour
-    public void scheduledCacheClear() {
-        log.info("Running scheduled cache clearing");
-        clearAllCaches();
+    // Cache refresh task that only runs at the beginning of the day (midnight 00:00)
+    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
+    public void dailyCacheRefresh() {
+        log.info("Daily cache refresh process started - midnight");
+        YearMonth currentMonth = YearMonth.now();
+        
+        try {
+            // Clear all caches first
+            clearAllCaches();
+            
+            log.info("Refreshing cache for current month: {}", currentMonth);
+            
+            // Reload data for both cache mechanisms
+            // 1. Main entrance turnstile logs (main entrance only)
+            HashMap<String, List<DtoDailyPersonnelEntry>> monthlyData = 
+                getMonthlyMainEntrancePersonnelListFromDatabase(currentMonth);
+            hazelcastCacheService.cacheMonthlyPersonnelList(currentMonth, monthlyData);
+            redisCacheService.cacheMonthlyPersonnelList(currentMonth, monthlyData);
+            
+            // 2. All turnstile logs (all turnstiles)
+            HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> turnstileBasedData = 
+                getMonthlyTurnstileBasedPersonnelListFromDatabase(currentMonth);
+            hazelcastCacheService.cacheTurnstileBasedMonthlyPersonnelList(currentMonth, turnstileBasedData);
+            redisCacheService.cacheTurnstileBasedMonthlyPersonnelList(currentMonth, turnstileBasedData);
+            
+            log.info("Daily cache refresh process completed successfully");
+        } catch (Exception e) {
+            log.error("Error during daily cache refresh", e);
+        }
     }
     
     private void clearAllCaches() {
@@ -81,7 +95,7 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         TurnstileRegistrationLog turnstileRegistrationLog = turnstileRegistrationLogMapper.dtoTurnstileRegistrationLogIUToTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
         turnstileRegistrationLogRepository.save(turnstileRegistrationLog);
         
-        // Cache invalidation işlemi TurnstileServiceImpl sınıfında ana kapı kontrolü yapılarak gerçekleştiriliyor
+        // Cache refresh is automatically done daily at midnight
     }
 
 
@@ -162,12 +176,12 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
             hazelcastCacheService.getMonthlyPersonnelListFromCache(yearMonth);
             
         if (cachedResult.isPresent()) {
-            log.info("Returning monthly main entrance personnel list from cache for month: {}", yearMonth);
+            log.info("Main entrance monthly personnel list retrieved from cache: {}", yearMonth);
             return cachedResult.get();
         }
         
         // If not in cache, get from database
-        log.info("Monthly main entrance personnel list not found in cache, fetching from database for month: {}", yearMonth);
+        log.info("Main entrance monthly personnel list not found in cache, fetching from database: {}", yearMonth);
         HashMap<String, List<DtoDailyPersonnelEntry>> monthlyData = getMonthlyMainEntrancePersonnelListFromDatabase(yearMonth);
         
         // Cache the result
@@ -226,41 +240,18 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     }
 
     @Override
-    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(YearMonth yearMonth) {
-        // First try to get from redis cache
-        Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> cachedResult = 
-            redisCacheService.getMonthlyPersonnelListFromCache(yearMonth);
-            
-        if (cachedResult.isPresent()) {
-            log.info("Returning monthly main entrance personnel list from redis cache for month: {}", yearMonth);
-            return cachedResult.get();
-        }
-        
-        // If not in cache, get from database
-        log.info("Monthly main entrance personnel list not found in redis cache, fetching from database for month: {}", yearMonth);
-        HashMap<String, List<DtoDailyPersonnelEntry>> monthlyData = getMonthlyMainEntrancePersonnelListFromDatabase(yearMonth);
-        
-        // Cache the result
-        redisCacheService.cacheMonthlyPersonnelList(yearMonth, monthlyData);
-        
-        return monthlyData;
-    }
-    
-    // Turnstile-based monthly personnel list methods
-    
-    @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelList(YearMonth yearMonth) {
         // First try to get from hazelcast cache
         Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> cachedResult = 
             hazelcastCacheService.getTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
             
         if (cachedResult.isPresent()) {
-            log.info("Returning turnstile-based monthly personnel list from cache for month: {}", yearMonth);
+            log.info("Turnstile-based monthly personnel list retrieved from cache: {}", yearMonth);
             return cachedResult.get();
         }
         
         // If not in cache, get from database
-        log.info("Turnstile-based monthly personnel list not found in cache, fetching from database for month: {}", yearMonth);
+        log.info("Turnstile-based monthly personnel list not found in cache, fetching from database: {}", yearMonth);
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> monthlyData = 
             getMonthlyTurnstileBasedPersonnelListFromDatabase(yearMonth);
         
@@ -331,28 +322,6 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         entry.setOperationType(log.getOperationType());
         
         return entry;
-    }
-    
-    @Override
-    public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListWithRedis(YearMonth yearMonth) {
-        // Force-refresh the cache by clearing it first
-        redisCacheService.removeTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
-        log.info("Forced clearing Redis cache for turnstile-based monthly personnel list for month: {}", yearMonth);
-        
-        // First try to get from redis cache (will be empty due to clearing above)
-        Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> cachedResult = 
-            redisCacheService.getTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
-            
-        // Since we cleared the cache, we'll get the data from database
-        log.info("Getting fresh turnstile-based monthly personnel list from database for month: {}", yearMonth);
-        HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> monthlyData = 
-            getMonthlyTurnstileBasedPersonnelListFromDatabase(yearMonth);
-        
-        // Cache the result
-        redisCacheService.cacheTurnstileBasedMonthlyPersonnelList(yearMonth, monthlyData);
-        log.info("Fresh data cached for turnstile-based monthly personnel list in Redis for month: {}", yearMonth);
-        
-        return monthlyData;
     }
     
     @Override
