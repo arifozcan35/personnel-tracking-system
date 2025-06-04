@@ -67,7 +67,7 @@ public class TurnstileControllerImpl implements TurnstileController {
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
-            turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelList(targetMonth);
+            turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelListFromHazelcast(targetMonth);
             
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> sortedResult = new LinkedHashMap<>();
         
@@ -87,9 +87,8 @@ public class TurnstileControllerImpl implements TurnstileController {
         // Use service's validation method
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
-        // Now using Redis data only - daily records are transferred to monthly map at midnight
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
-            turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelList(targetMonth);
+            turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelListFromRedis(targetMonth);
             
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> sortedResult = new LinkedHashMap<>();
         

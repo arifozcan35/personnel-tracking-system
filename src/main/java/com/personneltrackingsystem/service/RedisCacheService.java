@@ -30,7 +30,4 @@ public interface RedisCacheService {
     
     void addDailyRecordsToMonthlyMap(LocalDate date, Map<String, List<DtoTurnstileBasedPersonnelEntry>> dailyRecords);
     
-    void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth);
-    
-    void clearAllTurnstileBasedMonthlyPersonnelCache();
 } 

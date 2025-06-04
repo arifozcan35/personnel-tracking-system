@@ -66,7 +66,7 @@ public interface TurnstileController {
     @GetMapping("/turnstile-based-monthly-personnel-list-hazelcast")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithHazelcast(
-            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
+            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-06")
             @RequestParam(required = false) 
             @DateTimeFormat(pattern = "yyyy-MM") 
             YearMonth yearMonth
@@ -80,11 +80,12 @@ public interface TurnstileController {
     @GetMapping("/turnstile-based-monthly-personnel-list-redis")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithRedis(
-            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
+            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-06")
             @RequestParam(required = false) 
             @DateTimeFormat(pattern = "yyyy-MM") 
             YearMonth yearMonth
     );
+
 
     @Operation(
             summary = "Get Daily Turnstile Passage Records",

@@ -3,6 +3,7 @@ package com.personneltrackingsystem.service;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 
 import java.time.YearMonth;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,4 +20,7 @@ public interface HazelcastCacheService {
     void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth);
     
     void clearAllTurnstileBasedMonthlyPersonnelCache();
+    
+    // New method to add daily records to monthly map
+    void addDailyRecordsToMonthlyMap(LocalDate date, Map<String, List<DtoTurnstileBasedPersonnelEntry>> dailyRecords);
 } 

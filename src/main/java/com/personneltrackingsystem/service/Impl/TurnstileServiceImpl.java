@@ -37,7 +37,6 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.LocalDate;
-import java.time.YearMonth;
 
 
 @Service
@@ -190,8 +189,8 @@ public class TurnstileServiceImpl implements TurnstileService {
 
         // Create turnstile registration log for database
         DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
-        dtoTurnstileRegistrationLogIU.setPersonelId((Long)personel.getPersonelId());
-        dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
+        dtoTurnstileRegistrationLogIU.setPersonelId(personel.getPersonelId());
+        dtoTurnstileRegistrationLogIU.setTurnstileId(turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
         dtoTurnstileRegistrationLogIU.setOperationType(request.getOperationType());
 
@@ -212,9 +211,6 @@ public class TurnstileServiceImpl implements TurnstileService {
         // Save to Redis daily map with record date
         redisCacheService.addToDailyTurnstilePassageRecord(turnstile.getTurnstileName(), redisTurnstileEntry, recordDate);
 
-        // Cache clearing is now handled by @Scheduled task at the beginning of each day
-        // No need to invalidate cache on each turnstile passage
-        YearMonth currentMonth = YearMonth.from(operationTime);
         
         // Get the gate for late arrival notification checks
         Gate gate = turnstile.getGateId();

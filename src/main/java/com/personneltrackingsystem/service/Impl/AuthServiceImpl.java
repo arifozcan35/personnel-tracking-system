@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void registerUser(RegisterRequest registerRequest) {
         // Check if user with the same username already exist
-        if(userRepository.existsByUsername(registerRequest.getUsername())) {
+        if(Boolean.TRUE.equals(userRepository.existsByUsername(registerRequest.getUsername()))) {
             throw new IllegalArgumentException("Username is already in use");
         }
 

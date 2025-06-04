@@ -4,15 +4,12 @@ import org.springframework.stereotype.Service;
 
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
-import com.personneltrackingsystem.entity.OperationType;
-import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.mapper.TurnstileRegistrationLogMapper;
 import com.personneltrackingsystem.repository.TurnstileRegistrationLogRepository;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
-import com.personneltrackingsystem.service.PersonelService;
 import com.personneltrackingsystem.service.HazelcastCacheService;
 import com.personneltrackingsystem.service.RedisCacheService;
 
@@ -20,14 +17,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.scheduling.annotation.Scheduled;
 
 @Slf4j
@@ -39,24 +34,41 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
 
     private final TurnstileRegistrationLogMapper turnstileRegistrationLogMapper;
 
-    private final PersonelService personelService;
-
     private final HazelcastCacheService hazelcastCacheService;
 
     private final RedisCacheService redisCacheService;
+
 
     // Cache refresh task that only runs at the beginning of the day (midnight 00:00)
     @Scheduled(cron = "0 0 0 * * *") // At midnight every day
     public void dailyCacheRefresh() {
         log.info("Daily cache refresh process started - midnight");
-        YearMonth currentMonth = YearMonth.now();
         
         try {
-            // First transfer daily records to monthly map
-            redisCacheService.transferDailyRecordsToMonthlyMap();
+            // Get all daily records before transferring
+            Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> allDailyRecords = 
+                redisCacheService.getAllDailyTurnstilePassageRecords();
+                
+            // If there are daily records to transfer
+            if (allDailyRecords != null && !allDailyRecords.isEmpty()) {
+                // Process each date's records separately before clearing
+                for (Map.Entry<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> dateEntry : allDailyRecords.entrySet()) {
+                    String dateStr = dateEntry.getKey();
+                    Map<String, List<DtoTurnstileBasedPersonnelEntry>> dailyRecords = dateEntry.getValue();
+                    
+                    // Parse the date
+                    LocalDate recordDate = LocalDate.parse(dateStr, 
+                        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    
+                    // Add to Hazelcast monthly map with original date
+                    hazelcastCacheService.addDailyRecordsToMonthlyMap(recordDate, dailyRecords);
+                    
+                    log.info("Transferred daily turnstile passage records for date: {} to Hazelcast monthly map", dateStr);
+                }
+            }
             
-            // Clear Hazelcast cache
-            hazelcastCacheService.clearAllTurnstileBasedMonthlyPersonnelCache();
+            // Transfer daily records to Redis monthly map
+            redisCacheService.transferDailyRecordsToMonthlyMap();
             
             log.info("Daily cache refresh process completed successfully");
         } catch (Exception e) {
@@ -64,14 +76,6 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         }
     }
     
-    private void clearAllCaches() {
-        try {
-            hazelcastCacheService.clearAllTurnstileBasedMonthlyPersonnelCache();
-            log.info("Hazelcast cache cleared successfully");
-        } catch (Exception e) {
-            log.error("Error clearing Hazelcast cache", e);
-        }
-    }
     
     @Override
     public void saveOneTurnstileRegistrationLog(DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU){
@@ -81,30 +85,10 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         // Cache refresh is automatically done daily at midnight
     }
 
-
-    @Override
-    public boolean ifPersonelPassedTurnstile(Long personelId, Long turnstileId){
-        return turnstileRegistrationLogRepository.passedTurnstile(personelId, turnstileId);
-    }
-
-
-    @Override
-    public OperationType getNextOperationType(Long personelId, Long turnstileId) {
-        java.util.List<String> operationTypes = turnstileRegistrationLogRepository.findOperationTypesByPersonelAndTurnstile(personelId, turnstileId);
-        
-        // if there are no previous records or the last operation was OUT, the next should be IN
-        if (operationTypes == null || operationTypes.isEmpty() || OperationType.OUT.getValue().equals(operationTypes.get(0))) {
-            return OperationType.IN;
-        } else {
-            // if the last operation was IN, the next should be OUT
-            return OperationType.OUT;
-        }
-    }
     
-    // Turnstile-based monthly personnel list methods
     @Override
-    public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelList(YearMonth yearMonth) {
-        // First try to get from hazelcast cache
+    public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromHazelcast(YearMonth yearMonth) {
+        // Get data exclusively from Hazelcast
         Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> cachedResult = 
             hazelcastCacheService.getTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
             
@@ -113,13 +97,19 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
             return cachedResult.get();
         }
         
-        // If not in Hazelcast cache, get from Redis
-        cachedResult = redisCacheService.getTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
+        // If not found in Hazelcast, return empty map
+        log.info("Turnstile-based monthly personnel list not found in Hazelcast for month: {}", yearMonth);
+        return new HashMap<>();
+    }
+    
+    @Override
+    public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromRedis(YearMonth yearMonth) {
+        // Get data exclusively from Redis
+        Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> cachedResult = 
+            redisCacheService.getTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
         
         if (cachedResult.isPresent()) {
             log.info("Turnstile-based monthly personnel list retrieved from Redis: {}", yearMonth);
-            // Also cache in Hazelcast for faster future access
-            hazelcastCacheService.cacheTurnstileBasedMonthlyPersonnelList(yearMonth, cachedResult.get());
             return cachedResult.get();
         }
         
@@ -128,72 +118,6 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         return new HashMap<>();
     }
     
-    @Override
-    public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromDatabase(YearMonth yearMonth) {
-        // This method is now deprecated as we're using only Redis-stored records
-        // But we'll keep it for backward compatibility
-        log.warn("Database fetch for monthly turnstile records is deprecated. Use Redis cache instead.");
-        
-        // Get all turnstile logs for the specified month from ALL turnstiles, not just main entrances
-        List<TurnstileRegistrationLog> allMonthLogs = turnstileRegistrationLogRepository.findAllLogsByMonth(
-            yearMonth.getYear(), yearMonth.getMonthValue());
-        
-        if (allMonthLogs.isEmpty()) {
-            return new HashMap<>();
-        }
-        
-        // Group logs by date
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        Map<String, List<TurnstileRegistrationLog>> logsByDate = allMonthLogs.stream()
-            .collect(Collectors.groupingBy(log -> log.getOperationTime().format(dateFormatter)));
-        
-        // Create result map: date -> (turnstile name -> list of personnel entries)
-        HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = new HashMap<>();
-        
-        // Process each date
-        for (Map.Entry<String, List<TurnstileRegistrationLog>> dateEntry : logsByDate.entrySet()) {
-            String dateStr = dateEntry.getKey();
-            List<TurnstileRegistrationLog> logsForDate = dateEntry.getValue();
-            
-            // Group logs by turnstile for this date
-            Map<String, List<TurnstileRegistrationLog>> logsByTurnstile = logsForDate.stream()
-                .collect(Collectors.groupingBy(log -> log.getTurnstileId().getTurnstileName()));
-            
-            Map<String, List<DtoTurnstileBasedPersonnelEntry>> turnstileEntries = new HashMap<>();
-            
-            // Process each turnstile's logs
-            for (Map.Entry<String, List<TurnstileRegistrationLog>> turnstileEntry : logsByTurnstile.entrySet()) {
-                String turnstileName = turnstileEntry.getKey();
-                List<TurnstileRegistrationLog> turnstileLogs = turnstileEntry.getValue();
-                
-                // Convert logs to personnel entries
-                List<DtoTurnstileBasedPersonnelEntry> personnelEntries = turnstileLogs.stream()
-                    .map(this::createTurnstileBasedPersonnelEntry)
-                    .collect(Collectors.toList());
-                
-                // Add to turnstile entries map
-                turnstileEntries.put(turnstileName, personnelEntries);
-            }
-            
-            // Add to result map
-            result.put(dateStr, turnstileEntries);
-        }
-        
-        return result;
-    }
-    
-    private DtoTurnstileBasedPersonnelEntry createTurnstileBasedPersonnelEntry(TurnstileRegistrationLog log) {
-        Personel personel = log.getPersonelId();
-        
-        DtoTurnstileBasedPersonnelEntry entry = new DtoTurnstileBasedPersonnelEntry();
-        entry.setPersonelId(personel.getPersonelId());
-        entry.setPersonelName(personel.getName());
-        entry.setPersonelEmail(personel.getEmail());
-        entry.setOperationTime(log.getOperationTime());
-        entry.setOperationType(log.getOperationType());
-        
-        return entry;
-    }
     
     @Override
     public YearMonth validateAndGetYearMonth(YearMonth yearMonth) {

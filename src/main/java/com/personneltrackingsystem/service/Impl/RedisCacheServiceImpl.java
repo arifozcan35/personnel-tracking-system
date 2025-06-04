@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -203,33 +202,6 @@ public class RedisCacheServiceImpl implements RedisCacheService {
         } catch (Exception e) {
             log.error("Error retrieving turnstile-based monthly personnel list from Redis cache for month: {}", yearMonth, e);
             return Optional.empty();
-        }
-    }
-
-    @Override
-    public void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth) {
-        try {
-            String cacheKey = generateTurnstileBasedMonthlyKey(yearMonth);
-            turnstileBasedMonthlyRedisTemplate.delete(cacheKey);
-            
-            log.info("Turnstile-based monthly personnel list removed from Redis cache for month: {}", yearMonth);
-        } catch (Exception e) {
-            log.error("Error removing turnstile-based monthly personnel list from Redis cache for month: {}", yearMonth, e);
-        }
-    }
-
-    @Override
-    public void clearAllTurnstileBasedMonthlyPersonnelCache() {
-        try {
-            Set<String> keys = turnstileBasedMonthlyRedisTemplate.keys(TURNSTILE_BASED_MONTHLY_PERSONNEL_KEY_PREFIX + "*");
-            if (keys != null && !keys.isEmpty()) {
-                turnstileBasedMonthlyRedisTemplate.delete(keys);
-                log.info("All turnstile-based monthly personnel cache cleared successfully from Redis. Cleared {} keys", keys.size());
-            } else {
-                log.info("No turnstile-based monthly personnel cache keys found in Redis to clear");
-            }
-        } catch (Exception e) {
-            log.error("Error clearing all turnstile-based monthly personnel cache from Redis", e);
         }
     }
     
