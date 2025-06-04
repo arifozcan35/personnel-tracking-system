@@ -94,4 +94,30 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
+    
+    @Bean
+    public RedisTemplate<String, Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> dailyTurnstilePassageRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Configure serializers
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        template.setKeySerializer(stringRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+
+        // Create ObjectMapper with JSR310 module for proper date/time serialization
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        
+        // Configure JSON serialization for Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>
+        // (date -> (turnstile name -> list of personnel entries))
+        Jackson2JsonRedisSerializer<Map> jsonRedisSerializer = 
+            new Jackson2JsonRedisSerializer<>(objectMapper, Map.class);
+        
+        template.setValueSerializer(jsonRedisSerializer);
+        template.setHashValueSerializer(jsonRedisSerializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
 } 

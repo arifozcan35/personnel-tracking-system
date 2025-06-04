@@ -2,7 +2,6 @@ package com.personneltrackingsystem.controller;
 
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
-import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
 
@@ -59,34 +58,6 @@ public interface TurnstileController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     ResponseEntity<String> passTurnstile(@RequestBody DtoTurnstilePassageFullRequest request);
 
-
-    @Operation(
-            summary = "Get Monthly Main Entrance Personnel List With Hazelcast",
-            description = "Get the list of all personnel who passed through main entrance turnstiles for a specific month. Data is organized by date. Uses Hazelcast cache for performance."
-    )
-    @GetMapping("/monthly-personnel-list-hazelcast")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithHazelcast(
-            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
-            @RequestParam(required = false) 
-            @DateTimeFormat(pattern = "yyyy-MM") 
-            YearMonth yearMonth
-    );
-    
-
-    @Operation(
-            summary = "Get Monthly Main Entrance Personnel List with Redis",
-            description = "Get the list of all personnel who passed through main entrance turnstiles for a specific month. Data is organized by date. Uses Redis cache for performance."
-    )
-    @GetMapping("/monthly-main-entrance-personnel-redis")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(
-            @Parameter(description = "Year and month in YYYY-MM format", example = "2025-05")
-            @RequestParam(required = false) 
-            @DateTimeFormat(pattern = "yyyy-MM") 
-            YearMonth yearMonth
-    );
-
     
     @Operation(
             summary = "Get Turnstile-Based Monthly Personnel List With Hazelcast",
@@ -104,7 +75,7 @@ public interface TurnstileController {
 
     @Operation(
             summary = "Get Turnstile-Based Monthly Personnel List With Redis",
-            description = "Get the list of all personnel who passed through any turnstile for a specific month. Data is organized by date and then by turnstile. Uses Redis cache for performance."
+            description = "Get the list of all personnel who passed through any turnstile for a specific month. Data is organized by date and then by turnstile. Uses only Redis data built from daily records transferred at midnight, not from the database."
     )
     @GetMapping("/turnstile-based-monthly-personnel-list-redis")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
@@ -114,4 +85,12 @@ public interface TurnstileController {
             @DateTimeFormat(pattern = "yyyy-MM") 
             YearMonth yearMonth
     );
+
+    @Operation(
+            summary = "Get Daily Turnstile Passage Records",
+            description = "Get the current day's turnstile passage records from Redis. Data is organized by turnstile name."
+    )
+    @GetMapping("/daily-turnstile-passage-records")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    Map<String, List<DtoTurnstileBasedPersonnelEntry>> getDailyTurnstilePassageRecords();
 } 

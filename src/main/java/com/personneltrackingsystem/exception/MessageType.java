@@ -48,6 +48,7 @@ public enum MessageType {
     PERSONNEL_NOT_AUTHORIZED("7002", "Personnel is not authorized for this gate!"),
     PERMISSION_NOT_ASSIGNED("7003", "Permission is not assigned to this role!"),
     INVALID_DATE_FORMAT("7004", "Invalid date format. Expected format: yyyy-MM"),
+    INVALID_TIME_FORMAT("7006", "Invalid time format. Expected format: HH:mm:ss"),
     INVALID_EVENT_TYPE("7005", "Invalid event type!"),
     
     // General errors

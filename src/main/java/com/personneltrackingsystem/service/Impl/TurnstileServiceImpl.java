@@ -4,6 +4,7 @@ import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
+import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.OperationType;
 import com.personneltrackingsystem.entity.Personel;
@@ -19,6 +20,7 @@ import com.personneltrackingsystem.repository.TurnstileRepository;
 import com.personneltrackingsystem.service.GateService;
 import com.personneltrackingsystem.service.KafkaProducerService;
 import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.RedisCacheService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import com.personneltrackingsystem.service.TurnstileService;
 
@@ -30,9 +32,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.LocalDate;
 import java.time.YearMonth;
 
 
@@ -51,6 +55,8 @@ public class TurnstileServiceImpl implements TurnstileService {
     private final TurnstileMapper turnstileMapper;
     
     private final KafkaProducerService kafkaProducerService;
+    
+    private final RedisCacheService redisCacheService;
 
 
     @Override
@@ -167,26 +173,44 @@ public class TurnstileServiceImpl implements TurnstileService {
         LocalDateTime operationTime;
         if (operationTimeStr != null && !operationTimeStr.isEmpty()) {
             try {
-                operationTime = LocalDateTime.parse(operationTimeStr, 
-                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                // User now provides only time portion (HH:mm:ss)
+                LocalTime timeFromUser = LocalTime.parse(operationTimeStr, 
+                    java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+                
+                // Combine current date with user-provided time
+                LocalDate currentDate = LocalDate.now();
+                operationTime = LocalDateTime.of(currentDate, timeFromUser);
             } catch (Exception e) {
-                throw new ValidationException(MessageType.INVALID_DATE_FORMAT);
+                throw new ValidationException(MessageType.INVALID_TIME_FORMAT);
             }
         } else {
             // Fallback to current time if no time string is provided
             operationTime = LocalDateTime.now();
         }
 
+        // Create turnstile registration log for database
         DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
-
         dtoTurnstileRegistrationLogIU.setPersonelId((Long)personel.getPersonelId());
         dtoTurnstileRegistrationLogIU.setTurnstileId((Long)turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
-        
-        // Use the operation type directly from the request
         dtoTurnstileRegistrationLogIU.setOperationType(request.getOperationType());
 
+        // Save to database
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
+        
+        // Create personnel entry for Redis
+        DtoTurnstileBasedPersonnelEntry redisTurnstileEntry = new DtoTurnstileBasedPersonnelEntry();
+        redisTurnstileEntry.setPersonelId(personel.getPersonelId());
+        redisTurnstileEntry.setPersonelName(personel.getName());
+        redisTurnstileEntry.setPersonelEmail(personel.getEmail());
+        redisTurnstileEntry.setOperationTime(operationTime);
+        redisTurnstileEntry.setOperationType(request.getOperationType());
+        
+        // Extract the date from operation time
+        LocalDate recordDate = operationTime.toLocalDate();
+        
+        // Save to Redis daily map with record date
+        redisCacheService.addToDailyTurnstilePassageRecord(turnstile.getTurnstileName(), redisTurnstileEntry, recordDate);
 
         // Cache clearing is now handled by @Scheduled task at the beginning of each day
         // No need to invalidate cache on each turnstile passage
@@ -236,5 +260,11 @@ public class TurnstileServiceImpl implements TurnstileService {
         }
         
         return ResponseEntity.ok("Turnstile passed successfully");
+    }
+
+    @Override
+    public Map<String, List<DtoTurnstileBasedPersonnelEntry>> getDailyTurnstilePassageRecords() {
+        LocalDate today = LocalDate.now();
+        return redisCacheService.getDailyTurnstilePassageRecordsByDate(today);
     }
 } 

@@ -1,9 +1,9 @@
 package com.personneltrackingsystem.service;
 
-import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 
 import java.time.YearMonth;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,20 +11,24 @@ import java.util.Optional;
 
 public interface RedisCacheService {
     
-    // Aylık personel listesi metodları
-    void cacheMonthlyPersonnelList(YearMonth yearMonth, HashMap<String, List<DtoDailyPersonnelEntry>> personnelListByDay);
+    // Daily turnstile passage records methods
+    void addToDailyTurnstilePassageRecord(String turnstileName, DtoTurnstileBasedPersonnelEntry entry, LocalDate recordDate);
     
-    Optional<HashMap<String, List<DtoDailyPersonnelEntry>>> getMonthlyPersonnelListFromCache(YearMonth yearMonth);
+    Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getAllDailyTurnstilePassageRecords();
     
-    void removeMonthlyPersonnelListFromCache(YearMonth yearMonth);
+    Map<String, List<DtoTurnstileBasedPersonnelEntry>> getDailyTurnstilePassageRecordsByDate(LocalDate date);
     
-    void clearAllMonthlyPersonnelCache();
+    void transferDailyRecordsToMonthlyMap();
     
-    // Turnike bazlı aylık personel listesi metodları
+    void clearDailyTurnstilePassageRecords();
+    
+    // Turnstile-based monthly personnel list methods
     void cacheTurnstileBasedMonthlyPersonnelList(YearMonth yearMonth, 
             HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> personnelListByTurnstile);
     
     Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> getTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth);
+    
+    void addDailyRecordsToMonthlyMap(LocalDate date, Map<String, List<DtoTurnstileBasedPersonnelEntry>> dailyRecords);
     
     void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth);
     

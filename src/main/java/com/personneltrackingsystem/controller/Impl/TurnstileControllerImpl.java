@@ -3,7 +3,6 @@ package com.personneltrackingsystem.controller.impl;
 import com.personneltrackingsystem.controller.TurnstileController;
 import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
-import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
 import com.personneltrackingsystem.service.TurnstileService;
@@ -62,49 +61,6 @@ public class TurnstileControllerImpl implements TurnstileController {
     }
     
     @Override
-    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithHazelcast(YearMonth yearMonth) {
-        
-        // Use service's validation method
-        YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
-        
-        HashMap<String, List<DtoDailyPersonnelEntry>> result = 
-            turnstileRegistrationLogService.getMonthlyMainEntrancePersonnelList(targetMonth);
-            
-        HashMap<String, List<DtoDailyPersonnelEntry>> sortedResult = new LinkedHashMap<>();
-        
-        List<String> sortedDates = new ArrayList<>(result.keySet());
-        sortedDates.sort(Comparator.reverseOrder()); // Reverse order for newest first
-        
-        for (String date : sortedDates) {
-            sortedResult.put(date, result.get(date));
-        }
-        
-        return sortedResult;
-    }
-    
-    @Override
-    public HashMap<String, List<DtoDailyPersonnelEntry>> getMonthlyMainEntrancePersonnelListWithRedis(YearMonth yearMonth) {
-        
-        // Use service's validation method
-        YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
-        
-        // Now using the regular cache method instead of Redis-specific one
-        HashMap<String, List<DtoDailyPersonnelEntry>> result = 
-            turnstileRegistrationLogService.getMonthlyMainEntrancePersonnelList(targetMonth);
-            
-        HashMap<String, List<DtoDailyPersonnelEntry>> sortedResult = new LinkedHashMap<>();
-        
-        List<String> sortedDates = new ArrayList<>(result.keySet());
-        sortedDates.sort(Comparator.reverseOrder()); // Reverse order for newest first
-        
-        for (String date : sortedDates) {
-            sortedResult.put(date, result.get(date));
-        }
-        
-        return sortedResult;
-    }
-    
-    @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithHazelcast(YearMonth yearMonth) {
         
         // Use service's validation method
@@ -131,7 +87,7 @@ public class TurnstileControllerImpl implements TurnstileController {
         // Use service's validation method
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
-        // Now using the regular cache method instead of Redis-specific one
+        // Now using Redis data only - daily records are transferred to monthly map at midnight
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
             turnstileRegistrationLogService.getMonthlyTurnstileBasedPersonnelList(targetMonth);
             
@@ -145,5 +101,10 @@ public class TurnstileControllerImpl implements TurnstileController {
         }
         
         return sortedResult;
+    }
+
+    @Override
+    public Map<String, List<DtoTurnstileBasedPersonnelEntry>> getDailyTurnstilePassageRecords() {
+        return turnstileService.getDailyTurnstilePassageRecords();
     }
 } 

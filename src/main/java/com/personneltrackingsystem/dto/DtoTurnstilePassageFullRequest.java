@@ -22,6 +22,6 @@ public class DtoTurnstilePassageFullRequest {
     @Schema(description = "Operation type (IN/OUT)", example = "IN", required = true)
     private OperationType operationType;
     
-    @Schema(description = "Operation time in format yyyy-MM-dd HH:mm:ss", example = "2025-05-29 09:17:35", required = false)
+    @Schema(description = "Operation time in format HH:mm:ss (current date will be automatically applied)", example = "09:17:35", required = false)
     private String operationTimeStr;
 } 
