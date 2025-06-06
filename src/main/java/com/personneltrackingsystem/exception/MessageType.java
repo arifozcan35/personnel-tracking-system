@@ -51,6 +51,10 @@ public enum MessageType {
     INVALID_TIME_FORMAT("7006", "Invalid time format. Expected format: HH:mm:ss"),
     INVALID_EVENT_TYPE("7005", "Invalid event type!"),
     
+    // Turnstile passage validation errors
+    TURNSTILE_EXIT_REQUIRES_PRIOR_ENTRY("7007", "Personnel must enter a turnstile before exiting!"),
+    TURNSTILE_ENTRY_REQUIRES_PRIOR_EXIT("7008", "Personnel must exit a turnstile before entering again!"),
+    
     // General errors
     GENERAL_EXCEPTION("9999" , "A general error has occurred!");
 

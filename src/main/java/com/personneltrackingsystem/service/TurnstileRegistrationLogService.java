@@ -2,6 +2,7 @@ package com.personneltrackingsystem.service;
 
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
+import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
 
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -19,4 +20,6 @@ public interface TurnstileRegistrationLogService {
     
     // Validation methods
     YearMonth validateAndGetYearMonth(YearMonth yearMonth);
+
+    void validateTurnstilePassage(DtoTurnstilePassageFullRequest request);
 }

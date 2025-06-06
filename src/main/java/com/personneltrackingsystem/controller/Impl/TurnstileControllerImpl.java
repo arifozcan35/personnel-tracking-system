@@ -5,12 +5,15 @@ import com.personneltrackingsystem.dto.DtoTurnstile;
 import com.personneltrackingsystem.dto.DtoTurnstileIU;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstilePassageFullRequest;
+import com.personneltrackingsystem.event.TurnstileRequestEvent;
+import com.personneltrackingsystem.service.KafkaProducerService;
 import com.personneltrackingsystem.service.TurnstileService;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.YearMonth;
@@ -29,6 +32,9 @@ public class TurnstileControllerImpl implements TurnstileController {
     private final TurnstileService turnstileService;
 
     private final TurnstileRegistrationLogService turnstileRegistrationLogService;
+    
+    private final KafkaProducerService kafkaProducerService;
+    
 
     @Override
     public List<DtoTurnstile> getAllTurnstiles() {
@@ -56,9 +62,27 @@ public class TurnstileControllerImpl implements TurnstileController {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> passTurnstile(DtoTurnstilePassageFullRequest request) {
-        return turnstileService.passTurnstile(request);
+        log.info("Turnstile passage request received: {}", request);
+        
+        // validation and update the cache
+        turnstileRegistrationLogService.validateTurnstilePassage(request);
+        
+        // Convert DTO to Event
+        TurnstileRequestEvent event = new TurnstileRequestEvent(
+            request.getWantedToEnterTurnstileId(),
+            request.getPersonelId(),
+            request.getOperationType(),
+            request.getOperationTimeStr()
+        );
+        
+        // Send event to Kafka
+        kafkaProducerService.sendTurnstileRequestEvent(event);
+        
+        return ResponseEntity.accepted().body("Turnstile passage request accepted and is being processed");
     }
+    
     
     @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithHazelcast(YearMonth yearMonth) {

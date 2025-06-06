@@ -212,11 +212,11 @@ public class PersonelServiceImpl implements PersonelService  {
             return cachedPersonel.get();
         }
 
-        // if not in cache, get from database and cache it
-        Personel personel = personelRepository.findById(personelId)
+        // if not in cache, get from database with all relationships initialized using the custom repository method
+        Personel personel = personelRepository.findByIdWithRelationships(personelId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString())));
         
-        // cache the personel data
+        // cache the personel data (relationships are already loaded)
         personelCacheService.cachePersonel(personelId, personel);
         
         return personel;

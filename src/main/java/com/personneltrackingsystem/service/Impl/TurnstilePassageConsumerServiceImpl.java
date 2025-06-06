@@ -9,6 +9,7 @@ import com.personneltrackingsystem.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,13 +25,23 @@ public class TurnstilePassageConsumerServiceImpl {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    @KafkaListener(topics = KafkaConfig.TURNSTILE_PASSAGE_TOPIC, groupId = "${spring.kafka.consumer.group-id}")
-    public void consumeTurnstilePassageEvent(TurnstilePassageEvent event) {
+    @KafkaListener(topics = KafkaConfig.TURNSTILE_PASSAGE_TOPIC, groupId = "${spring.kafka.consumer.group-id}-reset")
+    public void consumeTurnstilePassageEvent(TurnstilePassageEvent event, Acknowledgment acknowledgment) {
         log.info("Received turnstile passage event: {}", event);
         
-        EmailEvent emailEvent = createEmailEvent(event);
-        
-        kafkaProducerService.sendEmailEvent(emailEvent);
+        try {
+            EmailEvent emailEvent = createEmailEvent(event);
+            kafkaProducerService.sendEmailEvent(emailEvent);
+            
+            // Mesaj başarıyla işlendikten sonra onayla
+            acknowledgment.acknowledge();
+            log.info("Turnstile passage event processed successfully");
+        } catch (Exception e) {
+            log.error("Error processing turnstile passage event: {}", e.getMessage(), e);
+            // Mesajı manual olarak onayla (DLQ'ya göndermeyi engeller)
+            // Bu sayede aynı mesaj tekrar işlenmez
+            acknowledgment.acknowledge();
+        }
     }
     
     private EmailEvent createEmailEvent(TurnstilePassageEvent event) {

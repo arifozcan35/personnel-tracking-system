@@ -3,6 +3,7 @@ package com.personneltrackingsystem.service.impl;
 import com.personneltrackingsystem.config.KafkaConfig;
 import com.personneltrackingsystem.event.EmailEvent;
 import com.personneltrackingsystem.event.TurnstilePassageEvent;
+import com.personneltrackingsystem.event.TurnstileRequestEvent;
 import com.personneltrackingsystem.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,26 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
             });
         } catch (Exception e) {
             log.error("Error sending email event: {}", e.getMessage(), e);
+        }
+    }
+    
+    @Override
+    public void sendTurnstileRequestEvent(TurnstileRequestEvent event) {
+        log.info("Sending turnstile request event to Kafka: {}", event);
+        try {
+            CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(KafkaConfig.TURNSTILE_REQUEST_TOPIC, event);
+            future.whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.info("Turnstile request event sent successfully to topic: {}, partition: {}, offset: {}",
+                            result.getRecordMetadata().topic(),
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                } else {
+                    log.error("Failed to send turnstile request event: {}", ex.getMessage(), ex);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Error sending turnstile request event: {}", e.getMessage(), e);
         }
     }
 } 

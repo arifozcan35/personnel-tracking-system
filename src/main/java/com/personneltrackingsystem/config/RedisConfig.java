@@ -9,7 +9,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.dto.DtoPersonelCache;
 import com.personneltrackingsystem.dto.DtoDailyPersonnelEntry;
 import com.personneltrackingsystem.dto.DtoTurnstileBasedPersonnelEntry;
 
@@ -21,8 +23,8 @@ import java.util.Map;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, Personel> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Personel> template = new RedisTemplate<>();
+    public RedisTemplate<String, DtoPersonelCache> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, DtoPersonelCache> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         // Configure serializers
@@ -33,10 +35,11 @@ public class RedisConfig {
         // Create ObjectMapper with JSR310 module
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         
         // Configure JSON serialization for values using constructor approach
-        Jackson2JsonRedisSerializer<Personel> jsonRedisSerializer = 
-            new Jackson2JsonRedisSerializer<>(objectMapper, Personel.class);
+        Jackson2JsonRedisSerializer<DtoPersonelCache> jsonRedisSerializer = 
+            new Jackson2JsonRedisSerializer<>(objectMapper, DtoPersonelCache.class);
         
         template.setValueSerializer(jsonRedisSerializer);
         template.setHashValueSerializer(jsonRedisSerializer);
@@ -58,6 +61,7 @@ public class RedisConfig {
         // Create ObjectMapper with JSR310 module for proper date/time serialization
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         
         // Configure JSON serialization for HashMap<String, List<DtoDailyPersonnelEntry>>
         Jackson2JsonRedisSerializer<HashMap> jsonRedisSerializer = 
@@ -83,6 +87,7 @@ public class RedisConfig {
         // Create ObjectMapper with JSR310 module for proper date/time serialization
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         
         // Configure JSON serialization for HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>
         Jackson2JsonRedisSerializer<HashMap> jsonRedisSerializer = 
@@ -108,6 +113,7 @@ public class RedisConfig {
         // Create ObjectMapper with JSR310 module for proper date/time serialization
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         
         // Configure JSON serialization for Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>
         // (date -> (turnstile name -> list of personnel entries))
