@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- appender for console output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n%exception</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- appender for daily file output -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/personnel-tracking-system.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n%exception</pattern>
+        </encoder>
+        
+        <!-- daily rolling policy -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily archived file pattern -->
+            <fileNamePattern>logs/archived/personnel-tracking-system.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            
+            <!-- create new file when file size reaches 10MB -->
+            <maxFileSize>10MB</maxFileSize>
+            
+            <!-- keep at most 30 days of archived files -->
+            <maxHistory>30</maxHistory>
+            
+            <!-- total size of archived files -->
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- set log levels for different packages -->
+    <logger name="com.personneltrackingsystem" level="INFO" />
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    
+    <!-- root logger configuration -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration> 

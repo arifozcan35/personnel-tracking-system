@@ -10,13 +10,13 @@ public class ValidationException extends RuntimeException {
     }
 
     public ValidationException(MessageType messageType) {
-        super(messageType.getMessage());
-        this.message = messageType.getMessage();
+        super(messageType.getMessageKey());
+        this.message = messageType.getMessageKey();
     }
 
     public ValidationException(MessageType messageType, String additionalInfo) {
-        super(messageType.getMessage() + (additionalInfo != null ? " : " + additionalInfo : ""));
-        this.message = messageType.getMessage() + (additionalInfo != null ? " : " + additionalInfo : "");
+        super(messageType.getMessageKey() + (additionalInfo != null ? " : " + additionalInfo : ""));
+        this.message = messageType.getMessageKey() + (additionalInfo != null ? " : " + additionalInfo : "");
     }
 
     @Override

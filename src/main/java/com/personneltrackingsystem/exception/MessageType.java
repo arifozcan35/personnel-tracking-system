@@ -6,63 +6,63 @@ import lombok.Getter;
 public enum MessageType {
 
     // Entity existence errors
-    NO_RECORD_EXIST("1001","No record found!"),
-    BUILDING_NOT_FOUND("1002", "Building not found!"),
-    FLOOR_NOT_FOUND("1003", "Floor not found!"),
-    UNIT_NOT_FOUND("1004", "Unit not found!"),
-    GATE_NOT_FOUND("1005", "Gate not found!"),
-    TURNSTILE_NOT_FOUND("1006", "Turnstile not found!"),
-    PERSONNEL_NOT_FOUND("1007", "Personnel not found!"),
-    PERSONNEL_TYPE_NOT_FOUND("1008", "Personnel type not found!"),
-    WORKING_HOURS_NOT_FOUND("1009", "Working hours not found!"),
-    PERMISSION_NOT_FOUND("1010", "Permission not found!"),
-    ROLE_NOT_FOUND("1011", "Role not found!"),
+    NO_RECORD_EXIST("1001","no.record.found"),
+    BUILDING_NOT_FOUND("1002", "building.not.found"),
+    FLOOR_NOT_FOUND("1003", "floor.not.found"),
+    UNIT_NOT_FOUND("1004", "unit.not.found"),
+    GATE_NOT_FOUND("1005", "gate.not.found"),
+    TURNSTILE_NOT_FOUND("1006", "turnstile.not.found"),
+    PERSONNEL_NOT_FOUND("1007", "personnel.not.found"),
+    PERSONNEL_TYPE_NOT_FOUND("1008", "personnel.type.not.found"),
+    WORKING_HOURS_NOT_FOUND("1009", "working.hours.not.found"),
+    PERMISSION_NOT_FOUND("1010", "permission.not.found"),
+    ROLE_NOT_FOUND("1011", "role.not.found"),
 
     // Validation errors
-    REQUIRED_FIELD_AVAILABLE("5000", "Required field cannot be left blank!"),
-    BUILDING_NAME_REQUIRED("5001", "Building name is required!"),
-    FLOOR_NAME_REQUIRED("5002", "Floor name is required!"),
-    UNIT_NAME_REQUIRED("5003", "Unit name is required!"),
-    GATE_NAME_REQUIRED("5004", "Gate name is required!"),
-    TURNSTILE_NAME_REQUIRED("5005", "Turnstile name is required!"),
-    PERSONNEL_NAME_REQUIRED("5006", "Personnel name is required!"),
-    PERSONNEL_EMAIL_REQUIRED("5007", "Personnel email is required!"),
-    WORKING_HOURS_REQUIRED("5008", "Working hours are required!"),
-    PERMISSION_NAME_REQUIRED("5009", "Permission name is required!"),
-    PERMISSION_RESOURCE_REQUIRED("5010", "Permission resource is required!"),
-    PERMISSION_METHOD_REQUIRED("5011", "Permission method is required!"),
-    PERMISSION_PATH_REQUIRED("5012", "Permission path pattern is required!"),
+    REQUIRED_FIELD_AVAILABLE("5000", "required.field.available"),
+    BUILDING_NAME_REQUIRED("5001", "building.name.required"),
+    FLOOR_NAME_REQUIRED("5002", "floor.name.required"),
+    UNIT_NAME_REQUIRED("5003", "unit.name.required"),
+    GATE_NAME_REQUIRED("5004", "gate.name.required"),
+    TURNSTILE_NAME_REQUIRED("5005", "turnstile.name.required"),
+    PERSONNEL_NAME_REQUIRED("5006", "personnel.name.required"),
+    PERSONNEL_EMAIL_REQUIRED("5007", "personnel.email.required"),
+    WORKING_HOURS_REQUIRED("5008", "working.hours.required"),
+    PERMISSION_NAME_REQUIRED("5009", "permission.name.required"),
+    PERMISSION_RESOURCE_REQUIRED("5010", "permission.resource.required"),
+    PERMISSION_METHOD_REQUIRED("5011", "permission.method.required"),
+    PERMISSION_PATH_REQUIRED("5012", "permission.path.required"),
 
     // Uniqueness constraint errors
-    BUILDING_NAME_ALREADY_EXISTS("6001", "Building with this name already exists!"),
-    GATE_NAME_ALREADY_EXISTS("6002", "Gate with this name already exists!"),
-    TURNSTILE_NAME_ALREADY_EXISTS("6003", "Turnstile with this name already exists!"),
-    UNIT_NAME_ALREADY_EXISTS("6004", "Unit with this name already exists!"),
-    PERSONNEL_EMAIL_ALREADY_EXISTS("6005", "Personnel with this email already exists!"),
-    PERSONNEL_TYPE_NAME_ALREADY_EXISTS("6006", "Personnel type with this name already exists!"),
-    PERMISSION_NAME_ALREADY_EXISTS("6007", "Permission with this name already exists!"),
-    PERMISSION_ALREADY_ASSIGNED("6008", "Permission is already assigned to this role!"),
+    BUILDING_NAME_ALREADY_EXISTS("6001", "building.name.already.exists"),
+    GATE_NAME_ALREADY_EXISTS("6002", "gate.name.already.exists"),
+    TURNSTILE_NAME_ALREADY_EXISTS("6003", "turnstile.name.already.exists"),
+    UNIT_NAME_ALREADY_EXISTS("6004", "unit.name.already.exists"),
+    PERSONNEL_EMAIL_ALREADY_EXISTS("6005", "personnel.email.already.exists"),
+    PERSONNEL_TYPE_NAME_ALREADY_EXISTS("6006", "personnel.type.name.already.exists"),
+    PERMISSION_NAME_ALREADY_EXISTS("6007", "permission.name.already.exists"),
+    PERMISSION_ALREADY_ASSIGNED("6008", "permission.already.assigned"),
 
     // Business logic errors
-    INVALID_TIME_RANGE("7001", "Check-in time must be before check-out time!"),
-    PERSONNEL_NOT_AUTHORIZED("7002", "Personnel is not authorized for this gate!"),
-    PERMISSION_NOT_ASSIGNED("7003", "Permission is not assigned to this role!"),
-    INVALID_DATE_FORMAT("7004", "Invalid date format. Expected format: yyyy-MM"),
-    INVALID_TIME_FORMAT("7006", "Invalid time format. Expected format: HH:mm:ss"),
-    INVALID_EVENT_TYPE("7005", "Invalid event type!"),
+    INVALID_TIME_RANGE("7001", "invalid.time.range"),
+    PERSONNEL_NOT_AUTHORIZED("7002", "personnel.not.authorized"),
+    PERMISSION_NOT_ASSIGNED("7003", "permission.not.assigned"),
+    INVALID_DATE_FORMAT("7004", "invalid.date.format"),
+    INVALID_TIME_FORMAT("7006", "invalid.time.format"),
+    INVALID_EVENT_TYPE("7005", "invalid.event.type"),
     
     // Turnstile passage validation errors
-    TURNSTILE_EXIT_REQUIRES_PRIOR_ENTRY("7007", "Personnel must enter a turnstile before exiting!"),
-    TURNSTILE_ENTRY_REQUIRES_PRIOR_EXIT("7008", "Personnel must exit a turnstile before entering again!"),
+    TURNSTILE_EXIT_REQUIRES_PRIOR_ENTRY("7007", "turnstile.exit.requires.prior.entry"),
+    TURNSTILE_ENTRY_REQUIRES_PRIOR_EXIT("7008", "turnstile.entry.requires.prior.exit"),
     
     // General errors
-    GENERAL_EXCEPTION("9999" , "A general error has occurred!");
+    GENERAL_EXCEPTION("9999" , "general.exception");
 
     private String code;
-    private String message;
+    private String messageKey;
 
-    MessageType(String code, String message) {
+    MessageType(String code, String messageKey) {
         this.code = code;
-        this.message = message;
+        this.messageKey = messageKey;
     }
 }

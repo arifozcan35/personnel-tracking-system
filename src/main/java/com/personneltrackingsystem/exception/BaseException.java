@@ -14,12 +14,12 @@ public class BaseException extends RuntimeException{
     }
     
     public BaseException(MessageType messageType) {
-        super(messageType.getMessage());
+        super(messageType.getMessageKey());
         this.messageType = messageType;
     }
     
     public BaseException(MessageType messageType, String additionalInfo) {
-        super(messageType.getMessage() + (additionalInfo != null ? " : " + additionalInfo : ""));
+        super(messageType.getMessageKey() + (additionalInfo != null ? " : " + additionalInfo : ""));
         this.messageType = messageType;
     }
     

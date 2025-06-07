@@ -95,13 +95,10 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         TurnstileRegistrationLog turnstileRegistrationLog = turnstileRegistrationLogMapper.dtoTurnstileRegistrationLogIUToTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
         turnstileRegistrationLogRepository.save(turnstileRegistrationLog);
         
-        // also add to in-memory cache
-        String cacheKey = dtoTurnstileRegistrationLogIU.getPersonelId() + ":" + dtoTurnstileRegistrationLogIU.getTurnstileId();
-        latestOperationCache.put(cacheKey, dtoTurnstileRegistrationLogIU.getOperationType());
-        
-        log.info("Saved turnstile registration log and updated cache: {} - {}", cacheKey, dtoTurnstileRegistrationLogIU.getOperationType());
-        
-        // Cache refresh is automatically done daily at midnight
+        log.info("Saved turnstile registration log: Personel {} - Turnstile {} - Operation {}", 
+                dtoTurnstileRegistrationLogIU.getPersonelId(), 
+                dtoTurnstileRegistrationLogIU.getTurnstileId(),
+                dtoTurnstileRegistrationLogIU.getOperationType());
     }
 
     
@@ -163,42 +160,53 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         Long turnstileId = request.getWantedToEnterTurnstileId();
         OperationType operationType = request.getOperationType();
         
-        // first check the cache for the last operation
-        String cacheKey = personelId + ":" + turnstileId;
-        OperationType lastOperation = latestOperationCache.get(cacheKey);
+        // check last operation from database
+        OperationType lastOperation = null;
+        List<String> operationTypes = turnstileRegistrationLogRepository.findOperationTypesByPersonelAndTurnstile(personelId, turnstileId);
         
-        // if there is no record in the cache, check the database
-        if (lastOperation == null) {
-            List<String> operationTypes = turnstileRegistrationLogRepository.findOperationTypesByPersonelAndTurnstile(personelId, turnstileId);
-            
-            if (!operationTypes.isEmpty()) {
-                try {
-                    lastOperation = OperationType.valueOf(operationTypes.get(0));
-                    // add the last operation to the cache
-                    latestOperationCache.put(cacheKey, lastOperation);
-                } catch (IllegalArgumentException e) {
-                    log.error("Invalid operation type in database: {}", operationTypes.get(0));
-                }
+        if (!operationTypes.isEmpty()) {
+            try {
+                lastOperation = OperationType.valueOf(operationTypes.get(0));
+                log.info("Son işlem bulundu: {} (Personel: {}, Turnstile: {})", lastOperation, personelId, turnstileId);
+            } catch (IllegalArgumentException e) {
+                log.error("Veritabanında geçersiz işlem tipi: {}", operationTypes.get(0));
             }
+        } else {
+            log.info("Personel {} için turnstile {} üzerinde önceki işlem bulunamadı", personelId, turnstileId);
         }
         
-        log.info("Validating turnstile passage - Personnel: {}, Turnstile: {}, RequestedOp: {}, LastOp: {}", 
+        log.info("Turnike geçiş validasyonu - Personel: {}, Turnike: {}, İstenen İşlem: {}, Son İşlem: {}", 
                 personelId, turnstileId, operationType, lastOperation);
         
-        if (operationType == OperationType.OUT) {
-            // for exit, the personel must have entered the turnstile before
-            if (lastOperation == null || lastOperation != OperationType.IN) {
+
+        // validation rules:
+        // 1. If the last operation is null (no previous record), only IN operation is allowed
+        // 2. If the last operation is IN, only OUT operation is allowed
+        // 3. If the last operation is OUT, only IN operation is allowed
+        if (lastOperation == null) {
+            // first operation must be IN
+            if (operationType != OperationType.IN) {
+                log.warn("First operation must be IN but received: {} (Personel: {}, Turnstile: {})", 
+                        operationType, personelId, turnstileId);
                 throw new ValidationException(MessageType.TURNSTILE_EXIT_REQUIRES_PRIOR_ENTRY);
             }
-        } else if (operationType == OperationType.IN) {
-            // for entry, the personel must have exited the turnstile before or never entered the turnstile
-            if (lastOperation != null && lastOperation == OperationType.IN) {
+        } else if (lastOperation == OperationType.IN) {
+            // if the last operation is IN, only OUT operation is allowed
+            if (operationType != OperationType.OUT) {
+                log.warn("Only OUT operation is allowed when the last operation is IN (Personel: {}, Turnstile: {})", 
+                        personelId, turnstileId);
                 throw new ValidationException(MessageType.TURNSTILE_ENTRY_REQUIRES_PRIOR_EXIT);
+            }
+        } else if (lastOperation == OperationType.OUT) {
+            // if the last operation is OUT, only IN operation is allowed
+            if (operationType != OperationType.IN) {
+                log.warn("Only IN operation is allowed when the last operation is OUT (Personel: {}, Turnstile: {})", 
+                        personelId, turnstileId);
+                throw new ValidationException(MessageType.TURNSTILE_EXIT_REQUIRES_PRIOR_ENTRY);
             }
         }
         
-        // if the operation is valid, update the cache even if it is not saved to the database
-        // this ensures consistency for concurrent requests
-        latestOperationCache.put(cacheKey, operationType);
+        log.info("Operation validated successfully: {} (Personel: {}, Turnstile: {})", 
+                operationType, personelId, turnstileId);
     }
 }

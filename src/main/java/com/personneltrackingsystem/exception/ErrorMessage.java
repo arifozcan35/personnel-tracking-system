@@ -2,22 +2,32 @@ package com.personneltrackingsystem.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Component
 public class ErrorMessage {
+
+    private MessageResolver messageResolver;
 
     private MessageType messageType;
 
     private String ofStatic;
 
+    public ErrorMessage(MessageType messageType, String ofStatic) {
+        this.messageType = messageType;
+        this.ofStatic = ofStatic;
+    }
+
     public String prepareErrorMessage() {
         StringBuilder builder = new StringBuilder();
-        builder.append(messageType.getMessage());
+        String resolvedMessage = messageResolver.getMessage(messageType.getMessageKey());
+        builder.append(resolvedMessage);
         if(ofStatic!=null) {
             builder.append(" : " + ofStatic);
         }
