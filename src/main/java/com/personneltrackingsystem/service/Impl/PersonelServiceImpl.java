@@ -38,12 +38,6 @@ public class PersonelServiceImpl implements PersonelService  {
 
 
     @Override
-    public DtoPersonel personelMapper(Personel personel){
-        return personelMapper.personelToDtoPersonel(personel);
-    }
-
-
-    @Override
     public List<DtoPersonel> getAllPersonels() {
         List<Personel> personelList = personelRepository.findAll();
         return personelMapper.personelsToDtoPersonels(personelList);

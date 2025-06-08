@@ -13,17 +13,10 @@ public interface GateMapper {
 
     DtoGate gateToDtoGate(Gate gate);
 
-    List<DtoGate> gatesToDtoGates(List<Gate> gateList);
-
-    Gate dtoGateToGate(DtoGate dtoGate);
-
 
     List<DtoGate> gateListToDtoGateList(List<Gate> gateList);
 
     @Mapping(target = "unitId.unitId", source = "unitId")
     Gate dtoGateIUToGate(DtoGateIU dtoGateIU);
-
-    @Mapping(target = "unitId", source = "unitId.unitId")
-    DtoGateIU gateToDtoGateIU(Gate gate);
 
 }

@@ -28,8 +28,6 @@ public interface PersonelService {
 
     Personel checkIfPersonelExists(Long administratorPersonelId);
 
-    DtoPersonel personelMapper(Personel personel);
-
     Personel getPersonelWithCache(Long personelId);
 
 }

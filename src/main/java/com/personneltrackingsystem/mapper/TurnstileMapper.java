@@ -12,8 +12,6 @@ import com.personneltrackingsystem.entity.Turnstile;
 @Mapper(componentModel = "spring")
 public interface TurnstileMapper {
 
-    Turnstile dtoTurnstileToTurnstile(DtoTurnstile dtoTurnstile);
-
     List<DtoTurnstile> turnstileListToDtoTurnstileList(List<Turnstile> turnstileList);
 
     DtoTurnstile turnstileToDtoTurnstile(Turnstile turnstile);
@@ -21,6 +19,4 @@ public interface TurnstileMapper {
     @Mapping(target = "gateId.gateId", source = "gateId")
     Turnstile dtoTurnstileIUToTurnstile(DtoTurnstileIU dtoTurnstileIU);
 
-    @Mapping(target = "gateId", source = "gateId.gateId")
-    DtoTurnstileIU turnstileToDtoTurnstileIU(Turnstile turnstile);
 }

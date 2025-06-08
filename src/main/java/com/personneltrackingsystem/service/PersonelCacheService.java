@@ -12,5 +12,4 @@ public interface PersonelCacheService {
     
     void removePersonelFromCache(Long personelId);
     
-    boolean isPersonelCached(Long personelId);
 } 

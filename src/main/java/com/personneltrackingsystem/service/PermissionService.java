@@ -11,8 +11,6 @@ public interface PermissionService {
 
     Permission getPermissionById(Long id);
 
-    Permission getPermissionByName(String name);
-
     List<Permission> getAllPermissions();
 
     Permission updatePermission(Permission permission);

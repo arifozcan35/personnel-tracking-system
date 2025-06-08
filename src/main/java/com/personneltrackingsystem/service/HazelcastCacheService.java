@@ -17,9 +17,6 @@ public interface HazelcastCacheService {
     
     Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> getTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth);
     
-    void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth);
-    
-    void clearAllTurnstileBasedMonthlyPersonnelCache();
     
     // New method to add daily records to monthly map
     void addDailyRecordsToMonthlyMap(LocalDate date, Map<String, List<DtoTurnstileBasedPersonnelEntry>> dailyRecords);

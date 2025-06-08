@@ -73,16 +73,6 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
     }
 
     
-    @Override
-    public boolean isPersonelCached(Long personelId) {
-        try {
-            String key = CACHE_KEY_PREFIX + personelId;
-            return Boolean.TRUE.equals(redisTemplate.hasKey(key));
-        } catch (Exception e) {
-            log.error("Error checking if personnel is cached with ID: {}", personelId, e);
-            return false;
-        }
-    }
     
     // Helper method to convert Entity to DTO
     private DtoPersonelCache convertToDto(Personel personel) {

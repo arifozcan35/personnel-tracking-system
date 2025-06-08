@@ -38,13 +38,6 @@ public class PermissionServiceImpl implements PermissionService {
 
 
     @Override
-    public Permission getPermissionByName(String name) {
-        return permissionRepository.findByName(name)
-                .orElseThrow(() -> new BaseException(MessageType.PERMISSION_NOT_FOUND, name));
-    }
-
-
-    @Override
     public List<Permission> getAllPermissions() {
         return permissionRepository.findAll();
     }

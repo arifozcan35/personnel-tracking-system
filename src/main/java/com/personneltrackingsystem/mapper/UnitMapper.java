@@ -4,7 +4,6 @@ import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.entity.Personel;
-import com.personneltrackingsystem.entity.Floor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -48,18 +47,4 @@ public interface UnitMapper {
         return personel;
     }
     
-    @Named("floorToLong")
-    default Long floorToLong(Floor floor) {
-        return floor != null ? floor.getFloorId() : null;
-    }
-    
-    @Named("longToFloor")
-    default Floor longToFloor(Long floorId) {
-        if (floorId == null) {
-            return null;
-        }
-        Floor floor = new Floor();
-        floor.setFloorId(floorId);
-        return floor;
-    }
 }

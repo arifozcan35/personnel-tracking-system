@@ -20,7 +20,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
 
     @Override
     public ResponseEntity<?> registerUser(RegisterRequest request) {
-        // Save the new user to the database and return success response
+        // save the new user to the database and return success response
         authService.registerUser(request);
         return ResponseEntity.ok("User registered successfully");
     }

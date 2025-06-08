@@ -8,13 +8,11 @@ import com.personneltrackingsystem.dto.DtoUnitIU;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.entity.Unit;
-import com.personneltrackingsystem.entity.WorkingHours;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = {UnitMapper.class})
@@ -46,8 +44,7 @@ public interface PersonelMapper {
     @Mapping(target = "personelId", ignore = true)
     Personel dtoPersonelToPersonel(DtoPersonel dtoPersonel);
     
-    // Helper methods
-    WorkingHours DbWorktoWork(Optional<WorkingHours> dbWorkOpt);
+
 
     @Named("personelTypeEntityToLong")
     default Long personelTypeEntityToLong(PersonelType personelType) {

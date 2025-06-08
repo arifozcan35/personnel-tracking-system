@@ -69,35 +69,6 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         }
     }
     
-
-    @Override
-    public void removeTurnstileBasedMonthlyPersonnelListFromCache(YearMonth yearMonth) {
-        try {
-            IMap<String, HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> turnstileBasedMap = 
-                hazelcastInstance.getMap(TURNSTILE_BASED_MONTHLY_PERSONNEL_MAP_NAME);
-            
-            String cacheKey = generateTurnstileBasedMonthlyKey(yearMonth);
-            turnstileBasedMap.remove(cacheKey);
-            
-            log.info("Turnstile-based monthly personnel list removed from cache for month: {}", yearMonth);
-        } catch (Exception e) {
-            log.error("Error removing turnstile-based monthly personnel list from cache for month: {}", yearMonth, e);
-        }
-    }
-    
-    
-    @Override
-    public void clearAllTurnstileBasedMonthlyPersonnelCache() {
-        try {
-            IMap<String, HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> turnstileBasedMap = 
-                hazelcastInstance.getMap(TURNSTILE_BASED_MONTHLY_PERSONNEL_MAP_NAME);
-            
-            turnstileBasedMap.clear();
-            log.info("All turnstile-based monthly personnel cache cleared successfully");
-        } catch (Exception e) {
-            log.error("Error clearing all turnstile-based monthly personnel cache", e);
-        }
-    }
     
     @Override
     public void addDailyRecordsToMonthlyMap(LocalDate date, Map<String, List<DtoTurnstileBasedPersonnelEntry>> dailyRecords) {

@@ -9,7 +9,4 @@ import com.personneltrackingsystem.entity.Floor;
 @Repository
 public interface FloorRepository extends JpaRepository<Floor, Long> {
 
-    boolean existsByFloorName(String existingFloorName);
-
-    boolean existsByFloorId(Long existingFloorID);
 }

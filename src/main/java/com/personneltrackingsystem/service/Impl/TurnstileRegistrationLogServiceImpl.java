@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +61,7 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
                 redisCacheService.getAllDailyTurnstilePassageRecords();
                 
             // If there are daily records to transfer
-            if (allDailyRecords != null && !allDailyRecords.isEmpty()) {
+            if (ObjectUtils.isNotEmpty(allDailyRecords) && !allDailyRecords.isEmpty()) {
                 // Process each date's records separately before clearing
                 for (Map.Entry<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> dateEntry : allDailyRecords.entrySet()) {
                     String dateStr = dateEntry.getKey();
@@ -137,9 +139,9 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
     
     @Override
     public YearMonth validateAndGetYearMonth(YearMonth yearMonth) {
-        if (yearMonth != null) {
+        if (ObjectUtils.isNotEmpty(yearMonth)) {
             try {
-                // YearMonth is already parsed by Spring's @DateTimeFormat, 
+                // yearMonth is already parsed by Spring's @DateTimeFormat, 
                 // but we need to ensure it's valid
                 String yearMonthStr = yearMonth.toString();
                 YearMonth.parse(yearMonthStr);
@@ -167,15 +169,15 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         if (!operationTypes.isEmpty()) {
             try {
                 lastOperation = OperationType.valueOf(operationTypes.get(0));
-                log.info("Son işlem bulundu: {} (Personel: {}, Turnstile: {})", lastOperation, personelId, turnstileId);
+                log.info("Last operation found: {} (Personel: {}, Turnstile: {})", lastOperation, personelId, turnstileId);
             } catch (IllegalArgumentException e) {
-                log.error("Veritabanında geçersiz işlem tipi: {}", operationTypes.get(0));
+                log.error("Invalid operation type in database: {}", operationTypes.get(0));
             }
         } else {
-            log.info("Personel {} için turnstile {} üzerinde önceki işlem bulunamadı", personelId, turnstileId);
+            log.info("No previous operation found for personel {} on turnstile {}", personelId, turnstileId);
         }
         
-        log.info("Turnike geçiş validasyonu - Personel: {}, Turnike: {}, İstenen İşlem: {}, Son İşlem: {}", 
+        log.info("Turnstile passage validation - Personel: {}, Turnstile: {}, Requested Operation: {}, Last Operation: {}", 
                 personelId, turnstileId, operationType, lastOperation);
         
 
@@ -183,7 +185,7 @@ public class TurnstileRegistrationLogServiceImpl implements TurnstileRegistratio
         // 1. If the last operation is null (no previous record), only IN operation is allowed
         // 2. If the last operation is IN, only OUT operation is allowed
         // 3. If the last operation is OUT, only IN operation is allowed
-        if (lastOperation == null) {
+        if (ObjectUtils.isEmpty(lastOperation)) {
             // first operation must be IN
             if (operationType != OperationType.IN) {
                 log.warn("First operation must be IN but received: {} (Personel: {}, Turnstile: {})", 

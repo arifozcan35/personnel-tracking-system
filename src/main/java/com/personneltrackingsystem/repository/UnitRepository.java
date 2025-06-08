@@ -9,6 +9,4 @@ import org.springframework.stereotype.Repository;
 public interface UnitRepository extends JpaRepository<Unit, Long> {
 
     boolean existsByUnitName(String existingUnitName);
-
-    boolean existsByUnitId(Long existingUnitID);
 }

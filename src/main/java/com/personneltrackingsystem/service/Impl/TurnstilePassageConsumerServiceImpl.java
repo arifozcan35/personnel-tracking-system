@@ -33,13 +33,13 @@ public class TurnstilePassageConsumerServiceImpl {
             EmailEvent emailEvent = createEmailEvent(event);
             kafkaProducerService.sendEmailEvent(emailEvent);
             
-            // Mesaj başarıyla işlendikten sonra onayla
+            // after the message is processed, acknowledge
             acknowledgment.acknowledge();
             log.info("Turnstile passage event processed successfully");
         } catch (Exception e) {
             log.error("Error processing turnstile passage event: {}", e.getMessage(), e);
-            // Mesajı manual olarak onayla (DLQ'ya göndermeyi engeller)
-            // Bu sayede aynı mesaj tekrar işlenmez
+            // acknowledge manually (to prevent message from being sent to DLQ)
+            // this way the same message is not processed again
             acknowledgment.acknowledge();
         }
     }
@@ -65,8 +65,8 @@ public class TurnstilePassageConsumerServiceImpl {
             "- Minutes Late: %d minutes\n" +
             "- Entrance: %s\n\n\n" +
             "This is an automated message from the Personnel Tracking System.\n",
-            event.getRecipientName(), // Admin's name
-            event.getPersonelName(),  // Late personnel
+            event.getRecipientName(),
+            event.getPersonelName(),
             event.getPersonelName(),
             event.getPassageTime().format(formatter),
             event.getMinutesLate(),
@@ -74,8 +74,8 @@ public class TurnstilePassageConsumerServiceImpl {
         );
         
         return new EmailEvent(
-            event.getRecipientEmail(), // Admin's email
-            event.getRecipientName(),  // Admin's name
+            event.getRecipientEmail(),
+            event.getRecipientName(), 
             subject,
             message,
             LocalDateTime.now()

@@ -69,7 +69,7 @@ public class TurnstileControllerImpl implements TurnstileController {
         // validation and update the cache
         turnstileRegistrationLogService.validateTurnstilePassage(request);
         
-        // Convert DTO to Event
+        // convert DTO to Event
         TurnstileRequestEvent event = new TurnstileRequestEvent(
             request.getWantedToEnterTurnstileId(),
             request.getPersonelId(),
@@ -77,7 +77,7 @@ public class TurnstileControllerImpl implements TurnstileController {
             request.getOperationTimeStr()
         );
         
-        // Send event to Kafka
+        // send event to Kafka
         kafkaProducerService.sendTurnstileRequestEvent(event);
         
         return ResponseEntity.accepted().body("Turnstile passage request accepted and is being processed");
@@ -87,7 +87,7 @@ public class TurnstileControllerImpl implements TurnstileController {
     @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithHazelcast(YearMonth yearMonth) {
         
-        // Use service's validation method
+        // use service's validation method
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
@@ -96,7 +96,7 @@ public class TurnstileControllerImpl implements TurnstileController {
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> sortedResult = new LinkedHashMap<>();
         
         List<String> sortedDates = new ArrayList<>(result.keySet());
-        sortedDates.sort(Comparator.reverseOrder()); // Reverse order for newest first
+        sortedDates.sort(Comparator.reverseOrder());
         
         for (String date : sortedDates) {
             sortedResult.put(date, result.get(date));
@@ -108,7 +108,7 @@ public class TurnstileControllerImpl implements TurnstileController {
     @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithRedis(YearMonth yearMonth) {
         
-        // Use service's validation method
+        // use service's validation method
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
@@ -117,7 +117,7 @@ public class TurnstileControllerImpl implements TurnstileController {
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> sortedResult = new LinkedHashMap<>();
         
         List<String> sortedDates = new ArrayList<>(result.keySet());
-        sortedDates.sort(Comparator.reverseOrder()); // Reverse order for newest first
+        sortedDates.sort(Comparator.reverseOrder());
         
         for (String date : sortedDates) {
             sortedResult.put(date, result.get(date));
