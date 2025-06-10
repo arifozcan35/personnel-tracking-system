@@ -1,14 +1,16 @@
-/*
-package com.personneltrackingsystem.service.Impl;
+package com.personneltrackingsystem.service.impl;
 
 import com.personneltrackingsystem.dto.DtoUnit;
 import com.personneltrackingsystem.dto.DtoUnitIU;
+import com.personneltrackingsystem.entity.Floor;
 import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
+import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.UnitMapper;
 import com.personneltrackingsystem.repository.UnitRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.personneltrackingsystem.service.FloorService;
+import com.personneltrackingsystem.service.PersonelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,15 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +33,12 @@ public class UnitServiceImplTest {
 
     @Mock
     private UnitRepository unitRepository;
+
+    @Mock
+    private FloorService floorService;
+
+    @Mock
+    private PersonelService personelService;
 
     @Mock
     private UnitMapper unitMapper;
@@ -42,218 +49,237 @@ public class UnitServiceImplTest {
     private Unit unit;
     private DtoUnit dtoUnit;
     private DtoUnitIU dtoUnitIU;
-    private List<Unit> unitList;
-    private Set<Personel> personelSet;
+    private Floor floor;
+    private Personel personel;
 
     @BeforeEach
     void setUp() {
-        // Initialize test data
+        // Test verileri oluşturma
         unit = new Unit();
         unit.setUnitId(1L);
-        unit.setUnitName("Test Unit");
+        unit.setUnitName("Test Birim");
+
+        floor = new Floor();
+        floor.setFloorId(1L);
+
+        personel = new Personel();
+        personel.setPersonelId(1L);
+
+        unit.setFloorId(floor);
+        unit.setAdministratorPersonelId(personel);
 
         dtoUnit = new DtoUnit();
-        dtoUnit.setUnitId(1L);
-        dtoUnit.setBirimIsim("Test Unit");
+        dtoUnit.setBirimIsim("Test Birim");
+        dtoUnit.setAdministratorPersonelId(1L);
 
         dtoUnitIU = new DtoUnitIU();
-        dtoUnitIU.setBirimIsim("Test Unit IU");
-
-        unitList = new ArrayList<>();
-        unitList.add(unit);
-
-        personelSet = new HashSet<>();
-        Personel personel = new Personel();
-        personel.setPersonelId(1L);
-        personelSet.add(personel);
-        unit.setPersonels((List<Personel>) personelSet);
+        dtoUnitIU.setBirimIsim("Test Birim");
+        dtoUnitIU.setFloorId(1L);
+        dtoUnitIU.setAdministratorPersonelId(1L);
     }
 
     @Test
-    void findById_WhenUnitExists_ShouldReturnDtoUnitIU() {
-        // Arrange
+    void findById_WhenUnitExists_ReturnsDtoUnit() {
+        // Given
         when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
-        when(unitMapper.unitToDtoUnitIU(any(Unit.class))).thenReturn(dtoUnitIU);
-
-        // Act
-        Optional<DtoUnitIU> result = unitService.findById(1L);
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(dtoUnitIU, result.get());
-        verify(unitRepository).findById(1L);
-        verify(unitMapper).unitToDtoUnitIU(unit);
-    }
-
-    @Test
-    void findById_WhenUnitDoesNotExist_ShouldThrowEntityNotFoundException() {
-        // Arrange
-        when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> unitService.findById(1L));
-        verify(unitRepository).findById(1L);
-        verify(unitMapper, never()).unitToDtoUnitIU(any(Unit.class));
-    }
-
-    @Test
-    void getAllUnits_ShouldReturnAllUnits() {
-        // Arrange
-        when(unitRepository.findAll()).thenReturn(unitList);
         when(unitMapper.unitToDtoUnit(any(Unit.class))).thenReturn(dtoUnit);
 
-        // Act
+        // When
+        Optional<DtoUnit> result = unitService.findById(1L);
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals("Test Birim", result.get().getBirimIsim());
+        verify(unitRepository).findById(1L);
+        verify(unitMapper).unitToDtoUnit(unit);
+    }
+
+    @Test
+    void findById_WhenUnitDoesNotExist_ThrowsBaseException() {
+        // Given
+        when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // When/Then
+        assertThrows(BaseException.class, () -> unitService.findById(1L));
+        verify(unitRepository).findById(1L);
+        verify(unitMapper, never()).unitToDtoUnit(any(Unit.class));
+    }
+
+    @Test
+    void checkIfUnitExists_WhenUnitExists_ReturnsUnit() {
+        // Given
+        when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
+
+        // When
+        Unit result = unitService.checkIfUnitExists(1L);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1L, result.getUnitId());
+        verify(unitRepository).findById(1L);
+    }
+
+    @Test
+    void checkIfUnitExists_WhenUnitDoesNotExist_ThrowsBaseException() {
+        // Given
+        when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // When/Then
+        assertThrows(BaseException.class, () -> unitService.checkIfUnitExists(1L));
+        verify(unitRepository).findById(1L);
+    }
+
+    @Test
+    void getAllUnits_ReturnsAllUnits() {
+        // Given
+        List<Unit> units = Arrays.asList(unit);
+        List<DtoUnit> dtoUnits = Arrays.asList(dtoUnit);
+        
+        when(unitRepository.findAll()).thenReturn(units);
+        when(unitMapper.unitListToDtoUnitList(units)).thenReturn(dtoUnits);
+
+        // When
         List<DtoUnit> result = unitService.getAllUnits();
 
-        // Assert
+        // Then
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(dtoUnit, result.get(0));
+        assertEquals("Test Birim", result.get(0).getBirimIsim());
         verify(unitRepository).findAll();
-        verify(unitMapper).unitToDtoUnit(unit);
+        verify(unitMapper).unitListToDtoUnitList(units);
     }
 
     @Test
-    void getOneUnit_WhenUnitExists_ShouldReturnUnit() {
-        // Arrange
+    void getOneUnit_WhenUnitExists_ReturnsDtoUnit() {
+        // Given
         when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
         when(unitMapper.unitToDtoUnit(any(Unit.class))).thenReturn(dtoUnit);
 
-        // Act
+        // When
         DtoUnit result = unitService.getOneUnit(1L);
 
-        // Assert
+        // Then
         assertNotNull(result);
-        assertEquals(dtoUnit, result);
+        assertEquals("Test Birim", result.getBirimIsim());
         verify(unitRepository).findById(1L);
         verify(unitMapper).unitToDtoUnit(unit);
     }
 
     @Test
-    void getOneUnit_WhenUnitDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
+    void getOneUnit_WhenUnitDoesNotExist_ThrowsBaseException() {
+        // Given
         when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert
+        // When/Then
         assertThrows(BaseException.class, () -> unitService.getOneUnit(1L));
         verify(unitRepository).findById(1L);
         verify(unitMapper, never()).unitToDtoUnit(any(Unit.class));
     }
 
     @Test
-    void saveOneUnit_ShouldSaveAndReturnUnit() {
-        // Arrange
-        DtoUnit dtoUnit = new DtoUnit();
-        dtoUnit.setUnitId(1L);
-        dtoUnit.setBirimIsim("Test Unit");
+    void saveOneUnit_WhenUnitNameIsEmpty_ThrowsValidationException() {
+        // Given
+        dtoUnitIU.setBirimIsim(null);
 
-        Unit unit = new Unit();
-        unit.setUnitId(1L);
-        unit.setUnitName("Test Unit");
-
-        when(unitRepository.existsByUnitId(dtoUnit.getUnitId())).thenReturn(false);
-
-        when(unitRepository.existsByUnitName(dtoUnit.getBirimIsim())).thenReturn(false);
-
-        when(unitMapper.dtoUnitToUnit(dtoUnit)).thenReturn(unit);
-        when(unitRepository.save(unit)).thenReturn(unit);
-        when(unitMapper.unitToDtoUnit(unit)).thenReturn(dtoUnit);
-
-        // Act
-        DtoUnit result = unitService.saveOneUnit(dtoUnit);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(dtoUnit, result);
-        verify(unitRepository).existsByUnitId(dtoUnit.getUnitId());
-        verify(unitRepository).existsByUnitName(dtoUnit.getBirimIsim());
-        verify(unitMapper).dtoUnitToUnit(dtoUnit);
-        verify(unitRepository).save(unit);
-        verify(unitMapper).unitToDtoUnit(unit);
+        // When/Then
+        assertThrows(ValidationException.class, () -> unitService.saveOneUnit(dtoUnitIU));
+        verify(unitRepository, never()).save(any(Unit.class));
     }
 
     @Test
-    void updateOneUnit_WhenUnitExists_ShouldUpdateAndReturnUnit() {
-        // Arrange
-        when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
+    void saveOneUnit_WhenUnitNameAlreadyExists_ThrowsValidationException() {
+        // Given
+        when(unitRepository.existsByUnitName(anyString())).thenReturn(true);
+
+        // When/Then
+        assertThrows(ValidationException.class, () -> unitService.saveOneUnit(dtoUnitIU));
+        verify(unitRepository).existsByUnitName(dtoUnitIU.getBirimIsim());
+        verify(unitRepository, never()).save(any(Unit.class));
+    }
+
+    @Test
+    void saveOneUnit_WhenFloorIdIsNotEmpty_SetsFloor() {
+        // Given
+        when(unitRepository.existsByUnitName(anyString())).thenReturn(false);
+        when(floorService.checkIfFloorExists(anyLong())).thenReturn(floor);
+        when(personelService.checkIfPersonelExists(anyLong())).thenReturn(personel);
+        when(unitMapper.dtoUnitIUToUnit(any(DtoUnitIU.class))).thenReturn(unit);
         when(unitRepository.save(any(Unit.class))).thenReturn(unit);
         when(unitMapper.unitToDtoUnit(any(Unit.class))).thenReturn(dtoUnit);
 
-        // Act
-        DtoUnit result = unitService.updateOneUnit(1L, dtoUnitIU);
+        // When
+        DtoUnit result = unitService.saveOneUnit(dtoUnitIU);
 
-        // Assert
+        // Then
         assertNotNull(result);
-        assertEquals(dtoUnit, result);
-        verify(unitRepository).findById(1L);
+        verify(floorService).checkIfFloorExists(dtoUnitIU.getFloorId());
+        verify(personelService).checkIfPersonelExists(dtoUnitIU.getAdministratorPersonelId());
+        verify(unitMapper).dtoUnitIUToUnit(dtoUnitIU);
         verify(unitRepository).save(unit);
         verify(unitMapper).unitToDtoUnit(unit);
-        assertEquals(dtoUnitIU.getBirimIsim(), unit.getUnitName());
     }
 
     @Test
-    void updateOneUnit_WhenUnitDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
+    void updateOneUnit_WhenUnitDoesNotExist_ThrowsBaseException() {
+        // Given
         when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert
+        // When/Then
         assertThrows(BaseException.class, () -> unitService.updateOneUnit(1L, dtoUnitIU));
         verify(unitRepository).findById(1L);
         verify(unitRepository, never()).save(any(Unit.class));
-        verify(unitMapper, never()).unitToDtoUnit(any(Unit.class));
     }
 
     @Test
-    void deleteOneUnit_WhenUnitExists_ShouldDeleteUnit() {
-        // Arrange
-        when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
-        doNothing().when(unitRepository).detachPersonelFromUnit(any(Unit.class));
-        doNothing().when(unitRepository).delete(any(Unit.class));
+    void updateOneUnit_WhenUnitNameIsChanged_UpdatesName() {
+        // Given
+        Unit existingUnit = new Unit();
+        existingUnit.setUnitId(1L);
+        existingUnit.setUnitName("Eski Birim");
 
-        // Act
+        dtoUnitIU.setBirimIsim("Yeni Birim");
+
+        when(unitRepository.findById(anyLong())).thenReturn(Optional.of(existingUnit));
+        when(unitRepository.existsByUnitName(anyString())).thenReturn(false);
+        when(floorService.checkIfFloorExists(anyLong())).thenReturn(floor);
+        when(personelService.checkIfPersonelExists(anyLong())).thenReturn(personel);
+        when(unitRepository.save(any(Unit.class))).thenReturn(existingUnit);
+        when(unitMapper.unitToDtoUnit(any(Unit.class))).thenReturn(dtoUnit);
+
+        // When
+        DtoUnit result = unitService.updateOneUnit(1L, dtoUnitIU);
+
+        // Then
+        assertNotNull(result);
+        verify(unitRepository).findById(1L);
+        verify(unitRepository).existsByUnitName("Yeni Birim");
+        verify(floorService).checkIfFloorExists(dtoUnitIU.getFloorId());
+        verify(personelService).checkIfPersonelExists(dtoUnitIU.getAdministratorPersonelId());
+        verify(unitRepository).save(existingUnit);
+        assertEquals("Yeni Birim", existingUnit.getUnitName());
+    }
+
+    @Test
+    void deleteOneUnit_WhenUnitExists_DeletesUnit() {
+        // Given
+        when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
+
+        // When
         unitService.deleteOneUnit(1L);
 
-        // Assert
+        // Then
         verify(unitRepository).findById(1L);
-        verify(unitRepository).detachPersonelFromUnit(unit);
         verify(unitRepository).delete(unit);
     }
 
     @Test
-    void deleteOneUnit_WhenUnitDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
+    void deleteOneUnit_WhenUnitDoesNotExist_ThrowsBaseException() {
+        // Given
         when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert
+        // When/Then
         assertThrows(BaseException.class, () -> unitService.deleteOneUnit(1L));
         verify(unitRepository).findById(1L);
-        verify(unitRepository, never()).detachPersonelFromUnit(any(Unit.class));
         verify(unitRepository, never()).delete(any(Unit.class));
     }
-
-    @Test
-    void getPersonelsByUnitId_WhenUnitExists_ShouldReturnPersonels() {
-        // Arrange
-        when(unitRepository.findById(anyLong())).thenReturn(Optional.of(unit));
-
-        // Act
-        Set<Personel> result = unitService.getPersonelsByUnitId(1L);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(unitRepository).findById(1L);
-    }
-
-    @Test
-    void getPersonelsByUnitId_WhenUnitDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(unitRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(BaseException.class, () -> unitService.getPersonelsByUnitId(1L));
-        verify(unitRepository).findById(1L);
-    }
-}
-
- */
+} 

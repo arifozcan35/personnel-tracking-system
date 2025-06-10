@@ -1,39 +1,28 @@
-/*
-package com.personneltrackingsystem.service.Impl;
+package com.personneltrackingsystem.service.impl;
 
 import com.personneltrackingsystem.dto.*;
-import com.personneltrackingsystem.entity.Gate;
 import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.PersonelType;
 import com.personneltrackingsystem.entity.Unit;
-import com.personneltrackingsystem.entity.Work;
 import com.personneltrackingsystem.exception.BaseException;
-import com.personneltrackingsystem.exception.MessageResolver;
 import com.personneltrackingsystem.exception.ValidationException;
-import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.mapper.PersonelMapper;
-import com.personneltrackingsystem.mapper.UnitMapper;
-import com.personneltrackingsystem.mapper.WorkMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.GateService;
-import com.personneltrackingsystem.service.UnitService;
-import com.personneltrackingsystem.service.WorkService;
-import com.personneltrackingsystem.validator.PersonelValidator;
+import com.personneltrackingsystem.service.PersonelCacheService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,107 +32,90 @@ class PersonelServiceImplTest {
     private PersonelRepository personelRepository;
 
     @Mock
-    private WorkService workServiceImpl;
-
-    @Mock
-    private UnitService unitServiceImpl;
-
-    @Mock
-    private GateService gateServiceImpl;
-
-    @Mock
-    private MessageResolver messageResolver;
-
-    @Mock
     private PersonelMapper personelMapper;
 
     @Mock
-    private UnitMapper unitMapper;
-
-    @Mock
-    private GateMapper gateMapper;
-
-    @Mock
-    private WorkMapper workMapper;
-
-    @Mock
-    private PersonelValidator personelValidator;
+    private PersonelCacheService personelCacheService;
 
     @InjectMocks
     private PersonelServiceImpl personelService;
 
     private Personel personel;
     private DtoPersonel dtoPersonel;
+    private DtoPersonelAll dtoPersonelAll;
     private DtoPersonelIU dtoPersonelIU;
-    private Work work;
-    private Unit unit;
-    private Gate gate;
-    private DtoUnit dtoUnit;
-    private DtoGate dtoGate;
-    private DtoWork dtoWork;
-    private DtoUnitIU dtoUnitIU;
-    private DtoGateIU dtoGateIU;
-
-    private static final LocalTime WORK_START = LocalTime.of(9, 0);
-    private static final LocalTime WORK_FINISH = LocalTime.of(18, 0);
-    private static final Duration MAX_WORK_MISSING = Duration.ofMinutes(30);
-    private static final double PENALTY_AMOUNT = 1000.0;
+    private List<Personel> personelList;
+    private List<DtoPersonel> dtoPersonelList;
+    private List<Unit> unitList;
 
     @BeforeEach
     void setUp() {
-        // Setup basic test data
+        // Test verileri oluşturma
         personel = new Personel();
         personel.setPersonelId(1L);
-        personel.setName("Test Person");
-        personel.setEmail("test@example.com");
-        personel.setSalary(30000.0);
-        personel.setAdministrator(false);
+        personel.setName("Test Personel");
+        personel.setEmail("test@test.com");
 
+        PersonelType personelType = new PersonelType();
+        personelType.setPersonelTypeId(1L);
+        personelType.setPersonelTypeName("Test Tip");
+        personel.setPersonelTypeId(personelType);
+
+        Unit unit = new Unit();
+        unit.setUnitId(1L);
+        unit.setUnitName("Test Birim");
+
+        unitList = new ArrayList<>();
+        unitList.add(unit);
+        personel.setUnitId(unitList);
+
+        // DTO nesneleri
         dtoPersonel = new DtoPersonel();
-        dtoPersonel.setName("Test Person");
-        dtoPersonel.setEmail("test@example.com");
-        dtoPersonel.setSalary(30000.0);
+        dtoPersonel.setName("Test Personel");
+        dtoPersonel.setEmail("test@test.com");
+
+        dtoPersonelAll = new DtoPersonelAll();
 
         dtoPersonelIU = new DtoPersonelIU();
-        dtoPersonelIU.setName("Test Person");
-        dtoPersonelIU.setEmail("test@example.com");
-        dtoPersonelIU.setSalary(30000.0);
-        dtoPersonelIU.setAdministrator(false);
+        dtoPersonelIU.setName("Test Personel");
+        dtoPersonelIU.setEmail("test@test.com");
+        dtoPersonelIU.setPersonelTypeId(1L);
+        dtoPersonelIU.setUnitId(Collections.singletonList(1L));
 
-        work = new Work();
-        work.setWorkId(1L);
-        work.setCheckInTime(LocalTime.of(9, 0));
-        work.setCheckOutTime(LocalTime.of(18, 0));
-        work.setIsWorkValid(true);
-        personel.setWork(work);
+        personelList = new ArrayList<>();
+        personelList.add(personel);
 
-        unit = new Unit();
-        unit.setUnitId(1L);
-        unit.setUnitName("Test Unit");
-        personel.setUnit(unit);
-
-        gate = new Gate();
-        gate.setGateId(1L);
-        gate.setGateName("Test Gate");
-        personel.setGate(gate);
-
-        dtoUnitIU = new DtoUnitIU();
-        dtoUnitIU.setUnitId(1L);
-        dtoUnitIU.setBirimIsim("Test Unit");
-        dtoPersonelIU.setUnit(dtoUnit);
-
-        dtoGateIU = new DtoGateIU();
-        dtoGateIU.setGateId(1L);
-        dtoGateIU.setGateName("Test Gate");
-        dtoPersonelIU.setGate(dtoGate);
+        dtoPersonelList = new ArrayList<>();
+        dtoPersonelList.add(dtoPersonel);
     }
 
     @Test
-    void getAllPersonels_ShouldReturnAllPersonels() {
+    void checkIfPersonelExists_PersonelExists_ReturnsPersonel() {
         // Arrange
-        List<Personel> personelList = Collections.singletonList(personel);
-        List<DtoPersonel> dtoPersonelList = Collections.singletonList(dtoPersonel);
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.of(personel));
 
+        // Act
+        Personel result = personelService.checkIfPersonelExists(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(personel.getPersonelId(), result.getPersonelId());
+        verify(personelRepository).findById(1L);
+    }
+
+    @Test
+    void checkIfPersonelExists_PersonelNotExists_ThrowsBaseException() {
+        // Arrange
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BaseException.class, () -> personelService.checkIfPersonelExists(1L));
+        verify(personelRepository).findById(1L);
+    }
+
+    @Test
+    void getAllPersonels_ReturnsAllPersonels() {
+        // Arrange
         when(personelRepository.findAll()).thenReturn(personelList);
         when(personelMapper.personelsToDtoPersonels(personelList)).thenReturn(dtoPersonelList);
 
@@ -151,560 +123,237 @@ class PersonelServiceImplTest {
         List<DtoPersonel> result = personelService.getAllPersonels();
 
         // Assert
-        assertEquals(dtoPersonelList, result);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(dtoPersonel.getName(), result.get(0).getName());
         verify(personelRepository).findAll();
         verify(personelMapper).personelsToDtoPersonels(personelList);
     }
 
     @Test
-    void getAOnePersonel_WhenPersonelExists_ShouldReturnDtoPersonel() {
+    void getAOnePersonel_PersonelExists_ReturnsDtoPersonelAll() {
         // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(personelMapper.personelToDtoPersonel(personel)).thenReturn(dtoPersonel);
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.of(personel));
+        when(personelMapper.personelToDtoPersonelAll(any(Personel.class))).thenReturn(dtoPersonelAll);
 
         // Act
-        DtoPersonel result = personelService.getAOnePersonel(personelId);
+        DtoPersonelAll result = personelService.getAOnePersonel(1L);
 
         // Assert
-        assertEquals(dtoPersonel, result);
-        verify(personelRepository).findById(personelId);
+        assertNotNull(result);
+        verify(personelRepository).findById(1L);
+        verify(personelMapper).personelToDtoPersonelAll(personel);
+    }
+
+    @Test
+    void getAOnePersonel_PersonelNotExists_ThrowsBaseException() {
+        // Arrange
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BaseException.class, () -> personelService.getAOnePersonel(1L));
+        verify(personelRepository).findById(1L);
+    }
+
+    @Test
+    void saveOnePersonel_ValidPersonel_ReturnCreated() {
+        // Arrange
+        when(personelRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(personelMapper.dtoPersonelIUToPersonel(any(DtoPersonelIU.class))).thenReturn(personel);
+        when(personelRepository.save(any(Personel.class))).thenReturn(personel);
+
+        // Act
+        ResponseEntity<String> result = personelService.saveOnePersonel(dtoPersonelIU);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertTrue(result.getBody().contains("Personnel registered successfully"));
+        verify(personelRepository).findByEmail(dtoPersonelIU.getEmail());
+        verify(personelMapper).dtoPersonelIUToPersonel(dtoPersonelIU);
+        verify(personelRepository).save(any(Personel.class));
+    }
+
+    @Test
+    void saveOnePersonel_EmailAlreadyExists_ThrowsValidationException() {
+        // Arrange
+        when(personelRepository.findByEmail(anyString())).thenReturn(Optional.of(personel));
+
+        // Act & Assert
+        assertThrows(ValidationException.class, () -> personelService.saveOnePersonel(dtoPersonelIU));
+        verify(personelRepository).findByEmail(dtoPersonelIU.getEmail());
+        verify(personelRepository, never()).save(any(Personel.class));
+    }
+
+    @Test
+    void saveOnePersonel_MissingName_ThrowsValidationException() {
+        // Arrange
+        dtoPersonelIU.setName(null);
+
+        // Act & Assert
+        assertThrows(ValidationException.class, () -> personelService.saveOnePersonel(dtoPersonelIU));
+        verify(personelRepository, never()).save(any(Personel.class));
+    }
+
+    @Test
+    void saveOnePersonel_MissingEmail_ThrowsValidationException() {
+        // Arrange
+        dtoPersonelIU.setEmail(null);
+
+        // Act & Assert
+        assertThrows(ValidationException.class, () -> personelService.saveOnePersonel(dtoPersonelIU));
+        verify(personelRepository, never()).save(any(Personel.class));
+    }
+
+    @Test
+    void updateOnePersonel_ValidUpdate_ReturnsOk() {
+        // Arrange
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.of(personel));
+        when(personelRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(personelMapper.longToPersonelTypeEntity(anyLong())).thenReturn(personel.getPersonelTypeId());
+        when(personelMapper.longListToUnitEntityList(any())).thenReturn(personel.getUnitId());
+        when(personelRepository.save(any(Personel.class))).thenReturn(personel);
+
+        // Act
+        ResponseEntity<String> result = personelService.updateOnePersonel(1L, dtoPersonelIU);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertTrue(result.getBody().contains("Personnel updated successfully"));
+        verify(personelRepository).findById(1L);
+        verify(personelRepository).findByEmail(dtoPersonelIU.getEmail());
+        verify(personelRepository).save(personel);
+        verify(personelCacheService).removePersonelFromCache(1L);
+    }
+
+    @Test
+    void updateOnePersonel_PersonelNotExists_ThrowsBaseException() {
+        // Arrange
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BaseException.class, () -> personelService.updateOnePersonel(1L, dtoPersonelIU));
+        verify(personelRepository).findById(1L);
+        verify(personelRepository, never()).save(any(Personel.class));
+    }
+
+    @Test
+    void updateOnePersonel_EmailAlreadyExists_ThrowsValidationException() {
+        // Arrange
+        Personel otherPersonel = new Personel();
+        otherPersonel.setPersonelId(2L);
+        otherPersonel.setEmail("test@test.com");
+
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.of(personel));
+        when(personelRepository.findByEmail(anyString())).thenReturn(Optional.of(otherPersonel));
+
+        // Act & Assert
+        assertThrows(ValidationException.class, () -> personelService.updateOnePersonel(1L, dtoPersonelIU));
+        verify(personelRepository).findById(1L);
+        verify(personelRepository).findByEmail(dtoPersonelIU.getEmail());
+        verify(personelRepository, never()).save(any(Personel.class));
+    }
+
+    @Test
+    void deleteOnePersonel_PersonelExists_DeletesSuccessfully() {
+        // Arrange
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.of(personel));
+        doNothing().when(personelRepository).deleteById(anyLong());
+        doNothing().when(personelCacheService).removePersonelFromCache(anyLong());
+
+        // Act
+        personelService.deleteOnePersonel(1L);
+
+        // Assert
+        verify(personelRepository).findById(1L);
+        verify(personelRepository).deleteById(1L);
+        verify(personelCacheService).removePersonelFromCache(1L);
+    }
+
+    @Test
+    void deleteOnePersonel_PersonelNotExists_ThrowsBaseException() {
+        // Arrange
+        when(personelRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BaseException.class, () -> personelService.deleteOnePersonel(1L));
+        verify(personelRepository).findById(1L);
+        verify(personelRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void getPersonelsByUnitId_PersonelsExist_ReturnsSet() {
+        // Arrange
+        when(personelRepository.findAll()).thenReturn(personelList);
+        when(personelMapper.personelToDtoPersonel(any(Personel.class))).thenReturn(dtoPersonel);
+
+        // Act
+        Set<DtoPersonel> result = personelService.getPersonelsByUnitId(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(personelRepository).findAll();
         verify(personelMapper).personelToDtoPersonel(personel);
     }
 
     @Test
-    void getAOnePersonel_WhenPersonelDoesNotExist_ShouldThrowBaseException() {
+    void getPersonelsByUnitId_NoPersonelsForUnit_ThrowsBaseException() {
         // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> {
-            personelService.getAOnePersonel(personelId);
-        });
-        verify(personelRepository).findById(personelId);
-    }
-
-    @Test
-    void saveOnePersonel_ShouldSavePersonelAndReturnCreatedResponse() {
-        // Arrange
-        when(personelMapper.dtoPersonelIUToPersonel(dtoPersonelIU)).thenReturn(personel);
-        when(personelRepository.findByEmail(dtoPersonelIU.getEmail())).thenReturn(Optional.empty());
-        when(personelRepository.save(personel)).thenReturn(personel);
-
-        // Configure work hours
-        dtoPersonelIU.setWork(new DtoWork());
-        dtoPersonelIU.getWork().setCheckInTime(LocalTime.of(9, 0));
-        dtoPersonelIU.getWork().setCheckOutTime(LocalTime.of(18, 0));
-
-        // Act
-        ResponseEntity<String> response = personelService.saveOnePersonel(dtoPersonelIU);
-
-        // Assert
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertTrue(response.getBody().contains("Personnel registered successfully"));
-        verify(personelValidator).validatePersonelForSave(dtoPersonelIU);
-        verify(personelMapper).dtoPersonelIUToPersonel(dtoPersonelIU);
-        verify(personelRepository).save(personel);
-    }
-
-    @Test
-    void saveOnePersonel_EmailAlreadyExists_ShouldThrowValidationException() {
-        // Arrange
-        when(personelRepository.findByEmail(dtoPersonelIU.getEmail())).thenReturn(Optional.of(personel));
-
-        // Act & Assert
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            personelService.saveOnePersonel(dtoPersonelIU);
-        });
-        assertEquals("Personnel with this email already exists!", exception.getMessage());
-        verify(personelRepository).findByEmail(dtoPersonelIU.getEmail());
-    }
-
-    @Test
-    void saveOnePersonel_DataIntegrityViolation_ShouldReturnBadRequest() {
-        // Arrange
-        when(personelMapper.dtoPersonelIUToPersonel(dtoPersonelIU)).thenReturn(personel);
-        when(personelRepository.findByEmail(dtoPersonelIU.getEmail())).thenReturn(Optional.empty());
-        when(personelRepository.save(personel)).thenThrow(new DataIntegrityViolationException("Data integrity violation"));
-
-        // Act
-        ResponseEntity<String> response = personelService.saveOnePersonel(dtoPersonelIU);
-
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().contains("Could not save personnel due to a data integrity violation"));
-        verify(personelValidator).validatePersonelForSave(dtoPersonelIU);
-    }
-
-    @Test
-    void updateOnePersonel_WhenPersonelExists_ShouldUpdateAndReturnOkResponse() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(personelRepository.save(personel)).thenReturn(personel);
-
-        // For email update
-        when(personelRepository.findByEmail(dtoPersonelIU.getEmail())).thenReturn(Optional.empty());
-
-        // For unit update
-        when(unitServiceImpl.findById(dtoUnitIU.getUnitId())).thenReturn(Optional.of(dtoUnitIU));
-        when(unitMapper.dtoUnitIUToUnit(dtoUnitIU)).thenReturn(unit);
-
-        // For gate update
-        when(gateServiceImpl.findById(dtoGateIU.getGateId())).thenReturn(Optional.of(dtoGateIU));
-        when(gateMapper.dtoGateIUToGate(dtoGateIU)).thenReturn(gate);
-
-        // For work update
-        dtoPersonelIU.setWork(new DtoWork());
-        dtoPersonelIU.getWork().setCheckInTime(LocalTime.of(9, 0));
-        dtoPersonelIU.getWork().setCheckOutTime(LocalTime.of(18, 0));
-
-        // Act
-        ResponseEntity<String> response = personelService.updateOnePersonel(personelId, dtoPersonelIU);
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().contains("Personnel updated successfully"));
-    }
-
-    @Test
-    void updateOnePersonel_WhenPersonelDoesNotExist_ShouldReturnNotFound() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
-
-        // Act
-        ResponseEntity<String> response = personelService.updateOnePersonel(personelId, dtoPersonelIU);
-
-        // Assert
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("No personnel found!", response.getBody());
-    }
-
-    @Test
-    void updateOnePersonel_EmailAlreadyInUseByAnotherPersonel_ShouldThrowValidationException() {
-        // Arrange
-        Long personelId = 1L;
-        Personel otherPersonel = new Personel();
-        otherPersonel.setPersonelId(2L);
-        otherPersonel.setEmail("test@example.com");
-
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(personelRepository.findByEmail(dtoPersonelIU.getEmail())).thenReturn(Optional.of(otherPersonel));
-
-        // Act & Assert
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            personelService.updateOnePersonel(personelId, dtoPersonelIU);
-        });
-        assertEquals("Email is already in use by another personnel!", exception.getMessage());
-    }
-
-    @Test
-    void updateOnePersonel_UnitNotFound_ShouldReturnNotFound() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(unitServiceImpl.findById(dtoUnitIU.getUnitId())).thenReturn(Optional.empty());
-
-        // Act
-        ResponseEntity<String> response = personelService.updateOnePersonel(personelId, dtoPersonelIU);
-
-        // Assert
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("You have not selected a suitable unit!", response.getBody());
-    }
-
-    @Test
-    void updateOnePersonel_GateNotFound_ShouldReturnNotFound() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(unitServiceImpl.findById(dtoUnitIU.getUnitId())).thenReturn(Optional.of(dtoUnitIU));
-        when(unitMapper.dtoUnitIUToUnit(dtoUnitIU)).thenReturn(unit);
-        when(gateServiceImpl.findById(dtoGateIU.getGateId())).thenReturn(Optional.empty());
-
-        // Act
-        ResponseEntity<String> response = personelService.updateOnePersonel(personelId, dtoPersonelIU);
-
-        // Assert
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("The specified gate could not be found!", response.getBody());
-    }
-
-    @Test
-    void deleteOnePersonel_WhenPersonelExists_ShouldDeletePersonel() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-
-        // Act
-        personelService.deleteOnePersonel(personelId);
-
-        // Assert
-        verify(workServiceImpl).deleteById(personel.getWork().getWorkId());
-        verify(personelRepository).deleteById(personelId);
-    }
-
-    @Test
-    void deleteOnePersonel_WhenPersonelDoesNotExist_ShouldThrowException() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> {
-            personelService.deleteOnePersonel(personelId);
-        });
-        verify(personelRepository, never()).deleteById(any());
-    }
-
-    @Test
-    void workHoursCalculate_ValidWork_ShouldCalculateCorrectly() {
-        // Arrange
-        Long personelId = 1L;
-        Duration workTime = Duration.between(LocalTime.of(9, 0), LocalTime.of(18, 0));
-
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(personelValidator.calculateWorkTime(any(), any())).thenReturn(workTime);
-        when(personelValidator.isWorkValid(any(), any())).thenReturn(true);
-        when(personelRepository.save(personel)).thenReturn(personel);
-
-        // Act
-        DtoPersonel result = personelService.workHoursCalculate(personelId);
-
-        // Assert
-        assertEquals(dtoPersonel.getName(), result.getName());
-        assertEquals(dtoPersonel.getEmail(), result.getEmail());
-        assertEquals(dtoPersonel.getSalary(), result.getSalary());
-        assertTrue(personel.getWork().getIsWorkValid());
-        verify(personelRepository).save(personel);
-    }
-
-    @Test
-    void workHoursCalculate_InvalidWork_ShouldApplyPenalty() {
-        // Arrange
-        Long personelId = 1L;
-        Duration workTime = Duration.between(LocalTime.of(9, 0), LocalTime.of(16, 0)); // Short work day
-
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(personelValidator.calculateWorkTime(any(), any())).thenReturn(workTime);
-        when(personelValidator.isWorkValid(any(), any())).thenReturn(false);
-        when(personelValidator.calculatePenalty(workTime)).thenReturn(PENALTY_AMOUNT);
-        when(personelRepository.save(personel)).thenReturn(personel);
-
-        // Act
-        DtoPersonel result = personelService.workHoursCalculate(personelId);
-
-        // Assert
-        assertFalse(personel.getWork().getIsWorkValid());
-        assertEquals(personel.getSalary(), result.getSalary());
-        verify(personelRepository).save(personel);
-    }
-
-    @Test
-    void workHoursCalculate_PersonelNotFound_ShouldThrowException() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(BaseException.class, () -> {
-            personelService.workHoursCalculate(personelId);
-        });
-    }
-
-    @Test
-    void workHoursCalculate2_NonAdmin_InvalidWork_ShouldApplyPenalty() {
-        // Arrange
-        LocalTime checkIn = LocalTime.of(9, 0);
-        LocalTime checkOut = LocalTime.of(17, 0); // Short work day
-        Duration workTime = Duration.between(checkIn, checkOut);
-
-        personel.setAdministrator(false);
-        personel.getWork().setCheckInTime(checkIn);
-        personel.getWork().setCheckOutTime(checkOut);
-
-        when(personelValidator.calculateWorkTime(checkIn, checkOut)).thenReturn(workTime);
-        when(personelValidator.isWorkValid(checkIn, checkOut)).thenReturn(false);
-        when(personelValidator.calculatePenalty(workTime)).thenReturn(PENALTY_AMOUNT);
-
-        // Act
-        personelService.workHoursCalculate2(personel);
-
-        // Assert
-        assertFalse(personel.getWork().getIsWorkValid());
-        assertEquals(29000.0, personel.getSalary()); // 30000 - 1000 penalty
-    }
-
-    @Test
-    void workHoursCalculate2_Admin_InvalidWork_ShouldNotApplyPenalty() {
-        // Arrange
-        LocalTime checkIn = LocalTime.of(9, 0);
-        LocalTime checkOut = LocalTime.of(17, 0); // Short work day
-        Duration workTime = Duration.between(checkIn, checkOut);
-
-        personel.setAdministrator(true);
-        personel.setSalary(40000.0);
-        personel.getWork().setCheckInTime(checkIn);
-        personel.getWork().setCheckOutTime(checkOut);
-
-        when(personelValidator.calculateWorkTime(checkIn, checkOut)).thenReturn(workTime);
-        when(personelValidator.isWorkValid(checkIn, checkOut)).thenReturn(false);
-
-        // Act
-        personelService.workHoursCalculate2(personel);
-
-        // Assert
-        assertFalse(personel.getWork().getIsWorkValid());
-        assertEquals(40000.0, personel.getSalary()); // No penalty for admin
-    }
-
-    @Test
-    void getOneWorkofPersonel_ExistingWork_ShouldReturnWork() {
-        // Arrange
-        Long personelId = 1L;
-        Long workId = 1L;
-
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(workServiceImpl.findById(workId)).thenReturn(Optional.of(work));
-        when(personelMapper.DbWorktoWork(Optional.of(work))).thenReturn(work);
-
-        // Act
-        Work result = personelService.getOneWorkofPersonel(personelId);
-
-        // Assert
-        assertEquals(work, result);
-    }
-
-    @Test
-    void getOneWorkofPersonel_PersonelNotFound_ShouldThrowException() {
-        // Arrange
-        Long personelId = 1L;
-        when(personelRepository.findById(personelId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(BaseException.class, () -> {
-            personelService.getOneWorkofPersonel(personelId);
-        });
-    }
-
-    @Test
-    void getOneWorkofPersonel_WorkNotFound_ShouldThrowException() {
-        // Arrange
-        Long personelId = 1L;
-        Long workId = 1L;
-
-        when(personelRepository.findById(personelId)).thenReturn(Optional.of(personel));
-        when(workServiceImpl.findById(workId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(BaseException.class, () -> {
-            personelService.getOneWorkofPersonel(personelId);
-        });
-    }
-
-    @Test
-    void listSalaries_ShouldReturnSalaryMap() {
-        // Arrange
-        List<Personel> personelList = Collections.singletonList(personel);
-        Map<String, Double> salaryMap = new HashMap<>();
-        salaryMap.put("Test Person", 30000.0);
-
+        Unit unit = new Unit();
+        unit.setUnitId(2L); // Farklı birim ID'si
+        personel.setUnitId(Collections.singletonList(unit));
+        
         when(personelRepository.findAll()).thenReturn(personelList);
-        when(personelMapper.personelsToSalaryMap(personelList)).thenReturn(salaryMap);
-
-        // Act
-        Map<String, Double> result = personelService.listSalaries();
-
-        // Assert
-        assertEquals(salaryMap, result);
-        verify(personelRepository).findAll();
-        verify(personelMapper).personelsToSalaryMap(personelList);
-    }
-
-    // PersonelValidator tests
-    @Test
-    void personelValidator_validatePersonelForSave_ValidPersonel_ShouldNotThrowException() {
-        // Arrange
-        DtoPersonelIU validPersonel = new DtoPersonelIU();
-        validPersonel.setUnit(dtoUnit);
-        validPersonel.setGate(dtoGate);
-        validPersonel.setAdministrator(true);
-        validPersonel.setSalary(40000.0);
-
-        when(unitServiceImpl.findById(dtoUnitIU.getUnitId())).thenReturn(Optional.of(dtoUnitIU));
-        when(gateServiceImpl.findById(dtoGateIU.getGateId())).thenReturn(Optional.of(dtoGateIU));
-        doNothing().when(personelValidator).validatePersonelForSave(validPersonel);
-
-        // Act & Assert - No exception should be thrown
-        personelValidator.validatePersonelForSave(validPersonel);
-
-        // Verify the validator was called
-        verify(personelValidator).validatePersonelForSave(validPersonel);
-    }
-
-    @Test
-    void personelValidator_selectionPosition_AdminTrue_ShouldSetSalaryTo40000() {
-        // Mock the validator method
-        DtoPersonelIU pAdmin = new DtoPersonelIU();
-        doAnswer(invocation -> {
-            pAdmin.setSalary(40000.0);
-            return false;
-        }).when(personelValidator).selectionPosition(eq(pAdmin), eq(true));
-
-        // Call the method
-        personelValidator.selectionPosition(pAdmin, true);
-
-        // Assert
-        assertEquals(40000.0, pAdmin.getSalary());
-    }
-
-    @Test
-    void personelValidator_selectionPosition_AdminFalse_ShouldSetSalaryTo30000() {
-        // Mock the validator method
-        DtoPersonelIU pAdmin = new DtoPersonelIU();
-        doAnswer(invocation -> {
-            pAdmin.setSalary(30000.0);
-            return false;
-        }).when(personelValidator).selectionPosition(eq(pAdmin), eq(false));
-
-        // Call the method
-        personelValidator.selectionPosition(pAdmin, false);
-
-        // Assert
-        assertEquals(30000.0, pAdmin.getSalary());
-    }
-
-    @Test
-    void personelValidator_salaryAssignment_ValidSalary40000_ShouldSetAdminToTrue() {
-        // Mock the validator method
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-        doAnswer(invocation -> {
-            pSalary.setAdministrator(true);
-            pSalary.setSalary(40000.0);
-            return null;
-        }).when(personelValidator).salaryAssignment(eq(pSalary), eq(40000.0));
-
-        // Call the method
-        personelValidator.salaryAssignment(pSalary, 40000.0);
-
-        // Assert
-        assertTrue(pSalary.getAdministrator());
-        assertEquals(40000.0, pSalary.getSalary());
-    }
-
-    @Test
-    void personelValidator_salaryAssignment_ValidSalary30000_ShouldSetAdminToFalse() {
-        // Mock the validator method
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-        doAnswer(invocation -> {
-            pSalary.setAdministrator(false);
-            pSalary.setSalary(30000.0);
-            return null;
-        }).when(personelValidator).salaryAssignment(eq(pSalary), eq(30000.0));
-
-        // Call the method
-        personelValidator.salaryAssignment(pSalary, 30000.0);
-
-        // Assert
-        assertFalse(pSalary.getAdministrator());
-        assertEquals(30000.0, pSalary.getSalary());
-    }
-
-    @Test
-    void personelValidator_salaryAssignment_InvalidSalary_ShouldSetToNearestAndThrowException() {
-        // Mock the validator method
-        DtoPersonelIU pSalary = new DtoPersonelIU();
-        doAnswer(invocation -> {
-            pSalary.setAdministrator(false);
-            pSalary.setSalary(30000.0);
-            throw new ValidationException("The salary can be only 30000.0 or 40000.0!");
-        }).when(personelValidator).salaryAssignment(eq(pSalary), eq(32000.0));
 
         // Act & Assert
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            personelValidator.salaryAssignment(pSalary, 32000.0);
-        });
-
-        // Assert exception message contains expected text
-        assertTrue(exception.getMessage().contains("The salary can be only 30000.0 or 40000.0!"));
+        assertThrows(BaseException.class, () -> personelService.getPersonelsByUnitId(1L));
+        verify(personelRepository).findAll();
     }
 
     @Test
-    void personelValidator_calculateWorkTime_ShouldReturnCorrectDuration() {
+    void getPersonelWithCache_PersonelInCache_ReturnsFromCache() {
         // Arrange
-        LocalTime checkIn = LocalTime.of(9, 0);
-        LocalTime checkOut = LocalTime.of(18, 0);
-        Duration expected = Duration.between(checkIn, checkOut);
-
-        when(personelValidator.calculateWorkTime(checkIn, checkOut)).thenReturn(expected);
+        when(personelCacheService.getPersonelFromCache(anyLong())).thenReturn(Optional.of(personel));
 
         // Act
-        Duration result = personelValidator.calculateWorkTime(checkIn, checkOut);
+        Personel result = personelService.getPersonelWithCache(1L);
 
         // Assert
-        assertEquals(expected, result);
-        assertEquals(9, result.toHours());
+        assertNotNull(result);
+        assertEquals(personel.getPersonelId(), result.getPersonelId());
+        verify(personelCacheService).getPersonelFromCache(1L);
+        verify(personelRepository, never()).findByIdWithRelationships(anyLong());
+        verify(personelCacheService, never()).cachePersonel(anyLong(), any(Personel.class));
     }
 
     @Test
-    void personelValidator_isWorkValid_ValidWork_ShouldReturnTrue() {
+    void getPersonelWithCache_PersonelNotInCache_RetrievesFromDbAndCaches() {
         // Arrange
-        LocalTime checkIn = LocalTime.of(9, 0);
-        LocalTime checkOut = LocalTime.of(18, 0);
-
-        when(personelValidator.isWorkValid(checkIn, checkOut)).thenReturn(true);
+        when(personelCacheService.getPersonelFromCache(anyLong())).thenReturn(Optional.empty());
+        when(personelRepository.findByIdWithRelationships(anyLong())).thenReturn(Optional.of(personel));
+        doNothing().when(personelCacheService).cachePersonel(anyLong(), any(Personel.class));
 
         // Act
-        boolean result = personelValidator.isWorkValid(checkIn, checkOut);
+        Personel result = personelService.getPersonelWithCache(1L);
 
         // Assert
-        assertTrue(result);
+        assertNotNull(result);
+        assertEquals(personel.getPersonelId(), result.getPersonelId());
+        verify(personelCacheService).getPersonelFromCache(1L);
+        verify(personelRepository).findByIdWithRelationships(1L);
+        verify(personelCacheService).cachePersonel(eq(1L), any(Personel.class));
     }
 
     @Test
-    void personelValidator_isWorkValid_InvalidWork_ShouldReturnFalse() {
+    void getPersonelWithCache_PersonelNotInDbOrCache_ThrowsBaseException() {
         // Arrange
-        LocalTime checkIn = LocalTime.of(9, 0);
-        LocalTime checkOut = LocalTime.of(16, 0); // Only 7 hours
+        when(personelCacheService.getPersonelFromCache(anyLong())).thenReturn(Optional.empty());
+        when(personelRepository.findByIdWithRelationships(anyLong())).thenReturn(Optional.empty());
 
-        when(personelValidator.isWorkValid(checkIn, checkOut)).thenReturn(false);
-
-        // Act
-        boolean result = personelValidator.isWorkValid(checkIn, checkOut);
-
-        // Assert
-        assertFalse(result);
+        // Act & Assert
+        assertThrows(BaseException.class, () -> personelService.getPersonelWithCache(1L));
+        verify(personelCacheService).getPersonelFromCache(1L);
+        verify(personelRepository).findByIdWithRelationships(1L);
+        verify(personelCacheService, never()).cachePersonel(anyLong(), any(Personel.class));
     }
-
-    @Test
-    void personelValidator_calculatePenalty_ShortWork_ShouldReturnPenaltyAmount() {
-        // Arrange
-        Duration shortWorkPeriod = Duration.ofHours(7);
-
-        when(personelValidator.calculatePenalty(shortWorkPeriod)).thenReturn(PENALTY_AMOUNT);
-
-        // Act
-        double result = personelValidator.calculatePenalty(shortWorkPeriod);
-
-        // Assert
-        assertEquals(PENALTY_AMOUNT, result);
-    }
-
-    @Test
-    void personelValidator_calculatePenalty_ValidWork_ShouldReturnZero() {
-        // Arrange
-        Duration validWorkPeriod = Duration.ofHours(9);
-
-        when(personelValidator.calculatePenalty(validWorkPeriod)).thenReturn(0.0);
-
-        // Act
-        double result = personelValidator.calculatePenalty(validWorkPeriod);
-
-        // Assert
-        assertEquals(0.0, result);
-    }
-}
-
- */
+} 

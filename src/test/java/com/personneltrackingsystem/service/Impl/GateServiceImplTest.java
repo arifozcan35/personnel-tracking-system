@@ -1,36 +1,27 @@
-/*
-package com.personneltrackingsystem.service.Impl;
+package com.personneltrackingsystem.service.impl;
 
 import com.personneltrackingsystem.dto.DtoGate;
 import com.personneltrackingsystem.dto.DtoGateIU;
 import com.personneltrackingsystem.entity.Gate;
-import com.personneltrackingsystem.entity.Personel;
+import com.personneltrackingsystem.entity.Unit;
 import com.personneltrackingsystem.exception.BaseException;
-import com.personneltrackingsystem.exception.MessageResolver;
+import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.GateMapper;
 import com.personneltrackingsystem.repository.GateRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.personneltrackingsystem.service.UnitService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +31,7 @@ public class GateServiceImplTest {
     private GateRepository gateRepository;
 
     @Mock
-    private MessageResolver messageResolver;
+    private UnitService unitService;
 
     @Mock
     private GateMapper gateMapper;
@@ -51,284 +42,217 @@ public class GateServiceImplTest {
     private Gate gate;
     private DtoGate dtoGate;
     private DtoGateIU dtoGateIU;
-    private List<Gate> gateList;
-    private Set<Personel> personelSet;
-    private Personel personel;
+    private Unit unit;
+    private final Long gateId = 1L;
+    private final Long unitId = 1L;
+    private final String gateName = "Test Gate";
 
     @BeforeEach
     void setUp() {
-        // Initialize test data
+        unit = new Unit();
+        unit.setUnitId(unitId);
+        unit.setUnitName("Test Unit");
+
         gate = new Gate();
-        gate.setGateId(1L);
-        gate.setGateName("Test Gate");
+        gate.setGateId(gateId);
+        gate.setGateName(gateName);
+        gate.setMainEntrance(true);
+        gate.setUnitId(unit);
 
         dtoGate = new DtoGate();
-        dtoGate.setGateId(1L);
-        dtoGate.setGateName("Test Gate");
+        dtoGate.setGateName(gateName);
 
         dtoGateIU = new DtoGateIU();
-        dtoGateIU.setGateName("Updated Gate Name");
-
-        gateList = new ArrayList<>();
-        gateList.add(gate);
-
-        personelSet = new HashSet<>();
-        personel = new Personel();
-        personel.getGate().setGateId(1L);
-        Gate personelGate = new Gate();
-        personelGate.setGateId(1L);
-        personel.setGate(personelGate);
-        personelSet.add(personel);
-        gate.setPersonels((List<Personel>) personelSet);
+        dtoGateIU.setGateName(gateName);
+        dtoGateIU.setMainEntrance(true);
+        dtoGateIU.setUnitId(unitId);
     }
 
     @Test
-    void findById_WhenGateExists_ShouldReturnDtoGateIU() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
-        when(gateMapper.gateToDtoGateIU(any(Gate.class))).thenReturn(dtoGateIU);
+    void checkIfGateExists_whenGateExists_shouldReturnGate() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
 
-        // Act
-        Optional<DtoGateIU> result = gateService.findById(1L);
+        Gate result = gateService.checkIfGateExists(gateId);
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(dtoGateIU, result.get());
-        verify(gateRepository).findById(1L);
-        verify(gateMapper).gateToDtoGateIU(gate);
+        assertEquals(gateId, result.getGateId());
+        assertEquals(gateName, result.getGateName());
+        verify(gateRepository).findById(gateId);
     }
 
     @Test
-    void findById_WhenGateDoesNotExist_ShouldThrowEntityNotFoundException() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
+    void checkIfGateExists_whenGateDoesNotExist_shouldThrowException() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> gateService.findById(1L));
-        verify(gateRepository).findById(1L);
-        verify(gateMapper, never()).gateToDtoGateIU(any(Gate.class));
+        assertThrows(BaseException.class, () -> gateService.checkIfGateExists(gateId));
+        verify(gateRepository).findById(gateId);
     }
 
     @Test
-    void getAllGates_ShouldReturnAllGates() {
-        // Arrange
-        when(gateRepository.findAll()).thenReturn(gateList);
-        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
+    void getAllGates_shouldReturnAllGates() {
+        List<Gate> gates = Arrays.asList(gate);
+        List<DtoGate> dtoGates = Arrays.asList(dtoGate);
 
-        // Act
+        when(gateRepository.findAll()).thenReturn(gates);
+        when(gateMapper.gateListToDtoGateList(gates)).thenReturn(dtoGates);
+
         List<DtoGate> result = gateService.getAllGates();
 
-        // Assert
-        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(dtoGate, result.get(0));
+        assertEquals(gateName, result.get(0).getGateName());
         verify(gateRepository).findAll();
+        verify(gateMapper).gateListToDtoGateList(gates);
+    }
+
+    @Test
+    void getGateById_whenGateExists_shouldReturnGate() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
+        when(gateMapper.gateToDtoGate(gate)).thenReturn(dtoGate);
+
+        Optional<DtoGate> result = gateService.getGateById(gateId);
+
+        assertTrue(result.isPresent());
+        assertEquals(gateName, result.get().getGateName());
+        verify(gateRepository).findById(gateId);
         verify(gateMapper).gateToDtoGate(gate);
     }
 
     @Test
-    void getOneGate_WhenGateExists_ShouldReturnGate() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
-        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
+    void getGateById_whenGateDoesNotExist_shouldThrowException() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.empty());
 
-        // Act
-        DtoGate result = gateService.getOneGate(1L);
+        assertThrows(BaseException.class, () -> gateService.getGateById(gateId));
+        verify(gateRepository).findById(gateId);
+        verify(gateMapper, never()).gateToDtoGate(any());
+    }
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(dtoGate, result);
-        verify(gateRepository).findById(1L);
+    @Test
+    void getOneGate_whenGateExists_shouldReturnGate() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
+        when(gateMapper.gateToDtoGate(gate)).thenReturn(dtoGate);
+
+        DtoGate result = gateService.getOneGate(gateId);
+
+        assertEquals(gateName, result.getGateName());
+        verify(gateRepository).findById(gateId);
         verify(gateMapper).gateToDtoGate(gate);
     }
 
     @Test
-    void getOneGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Gate not found");
+    void getOneGate_whenGateDoesNotExist_shouldThrowException() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.getOneGate(1L));
-        verify(gateRepository).findById(1L);
-        verify(messageResolver).toString();
-        verify(gateMapper, never()).gateToDtoGate(any(Gate.class));
+        assertThrows(BaseException.class, () -> gateService.getOneGate(gateId));
+        verify(gateRepository).findById(gateId);
+        verify(gateMapper, never()).gateToDtoGate(any());
     }
 
     @Test
-    void saveOneGate_ShouldSaveAndReturnGate() {
-        // Arrange
-        DtoGate dtoGate = new DtoGate();
-        dtoGate.setGateId(1L);
-        dtoGate.setGateName("Test Gate");
-
-        Gate gate = new Gate();
-        gate.setGateId(1L);
-        gate.setGateName("Test Gate");
-
-        when(gateRepository.existsByGateId(dtoGate.getGateId())).thenReturn(false);
-
-        when(gateRepository.existsByGateName(dtoGate.getGateName())).thenReturn(false);
-
-        when(gateMapper.dtoGateToGate(dtoGate)).thenReturn(gate);
+    void saveOneGate_withValidData_shouldSaveGate() {
+        when(unitService.checkIfUnitExists(unitId)).thenReturn(unit);
+        when(gateRepository.existsByGateName(gateName)).thenReturn(false);
+        when(gateMapper.dtoGateIUToGate(dtoGateIU)).thenReturn(gate);
         when(gateRepository.save(gate)).thenReturn(gate);
         when(gateMapper.gateToDtoGate(gate)).thenReturn(dtoGate);
 
-        // Act
-        DtoGate result = gateService.saveOneGate(dtoGate);
+        DtoGate result = gateService.saveOneGate(dtoGateIU);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(dtoGate, result);
-        verify(gateRepository).existsByGateId(dtoGate.getGateId());
-        verify(gateRepository).existsByGateName(dtoGate.getGateName());
-        verify(gateMapper).dtoGateToGate(dtoGate);
+        assertEquals(gateName, result.getGateName());
+        verify(gateRepository).existsByGateName(gateName);
+        verify(unitService).checkIfUnitExists(unitId);
+        verify(gateMapper).dtoGateIUToGate(dtoGateIU);
         verify(gateRepository).save(gate);
         verify(gateMapper).gateToDtoGate(gate);
     }
 
     @Test
-    void updateOneGate_WhenGateExists_ShouldUpdateAndReturnGate() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
-        when(gateRepository.save(any(Gate.class))).thenReturn(gate);
-        when(gateMapper.gateToDtoGate(any(Gate.class))).thenReturn(dtoGate);
+    void saveOneGate_withEmptyGateName_shouldThrowException() {
+        dtoGateIU.setGateName(null);
 
-        // Act
-        DtoGate result = gateService.updateOneGate(1L, dtoGateIU);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(dtoGate, result);
-        verify(gateRepository).findById(1L);
-        verify(gateRepository).save(gate);
-        verify(gateMapper).gateToDtoGate(gate);
-        assertEquals(dtoGateIU.getGateName(), gate.getGateName());
+        assertThrows(ValidationException.class, () -> gateService.saveOneGate(dtoGateIU));
+        verify(gateRepository, never()).save(any());
     }
 
     @Test
-    void updateOneGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Gate not found");
+    void saveOneGate_withExistingGateName_shouldThrowException() {
+        when(gateRepository.existsByGateName(gateName)).thenReturn(true);
 
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.updateOneGate(1L, dtoGateIU));
-        verify(gateRepository).findById(1L);
-        verify(messageResolver).toString();
-        verify(gateRepository, never()).save(any(Gate.class));
-        verify(gateMapper, never()).gateToDtoGate(any(Gate.class));
+        assertThrows(ValidationException.class, () -> gateService.saveOneGate(dtoGateIU));
+        verify(gateRepository).existsByGateName(gateName);
+        verify(gateRepository, never()).save(any());
     }
 
     @Test
-    void deleteOneGate_WhenGateExists_ShouldDeleteGate() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
-        doNothing().when(gateRepository).updatePersonelGateReferences(anyLong@Con());
-        doNothing().when(gateRepository).delete(any(Gate.class));
+    void updateOneGate_withValidData_shouldUpdateGate() {
+        String newGateName = "Updated Gate";
+        DtoGateIU updatedGateIU = new DtoGateIU();
+        updatedGateIU.setGateName(newGateName);
+        updatedGateIU.setMainEntrance(false);
+        updatedGateIU.setUnitId(unitId);
 
-        // Act
-        gateService.deleteOneGate(1L);
+        Gate updatedGate = new Gate();
+        updatedGate.setGateId(gateId);
+        updatedGate.setGateName(newGateName);
+        updatedGate.setMainEntrance(false);
+        updatedGate.setUnitId(unit);
 
-        // Assert
-        verify(gateRepository).findById(1L);
-        verify(gateRepository).updatePersonelGateReferences(1L);
+        DtoGate updatedDtoGate = new DtoGate();
+        updatedDtoGate.setGateName(newGateName);
+
+        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
+        when(gateRepository.existsByGateName(newGateName)).thenReturn(false);
+        when(unitService.checkIfUnitExists(unitId)).thenReturn(unit);
+        when(gateRepository.save(any(Gate.class))).thenReturn(updatedGate);
+        when(gateMapper.gateToDtoGate(updatedGate)).thenReturn(updatedDtoGate);
+
+        DtoGate result = gateService.updateOneGate(gateId, updatedGateIU);
+
+        assertEquals(newGateName, result.getGateName());
+        verify(gateRepository).findById(gateId);
+        verify(unitService).checkIfUnitExists(unitId);
+        verify(gateRepository).save(any(Gate.class));
+        verify(gateMapper).gateToDtoGate(any(Gate.class));
+    }
+
+    @Test
+    void updateOneGate_withExistingGateName_shouldThrowException() {
+        String newGateName = "Existing Gate";
+        DtoGateIU updatedGateIU = new DtoGateIU();
+        updatedGateIU.setGateName(newGateName);
+
+        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
+        when(gateRepository.existsByGateName(newGateName)).thenReturn(true);
+
+        assertThrows(ValidationException.class, () -> gateService.updateOneGate(gateId, updatedGateIU));
+        verify(gateRepository).findById(gateId);
+        verify(gateRepository).existsByGateName(newGateName);
+        verify(gateRepository, never()).save(any());
+    }
+
+    @Test
+    void updateOneGate_whenGateDoesNotExist_shouldThrowException() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.empty());
+
+        assertThrows(BaseException.class, () -> gateService.updateOneGate(gateId, dtoGateIU));
+        verify(gateRepository).findById(gateId);
+        verify(gateRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteOneGate_whenGateExists_shouldDeleteGate() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
+
+        gateService.deleteOneGate(gateId);
+
+        verify(gateRepository).findById(gateId);
         verify(gateRepository).delete(gate);
     }
 
     @Test
-    void deleteOneGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Gate not found");
+    void deleteOneGate_whenGateDoesNotExist_shouldThrowException() {
+        when(gateRepository.findById(gateId)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.deleteOneGate(1L));
-        verify(gateRepository).findById(1L);
-        verify(messageResolver).toString();
-        verify(gateRepository, never()).updatePersonelGateReferences(anyLong());
-        verify(gateRepository, never()).delete(any(Gate.class));
+        assertThrows(BaseException.class, () -> gateService.deleteOneGate(gateId));
+        verify(gateRepository).findById(gateId);
+        verify(gateRepository, never()).delete(any());
     }
-
-    @Test
-    void getPersonelsByGateId_WhenGateExists_ShouldReturnPersonels() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
-
-        // Act
-        Set<Personel> result = gateService.getPersonelsByGateId(1L);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(gateRepository).findById(1L);
-    }
-
-    @Test
-    void getPersonelsByGateId_WhenGateDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(messageResolver.toString()).thenReturn("Gate not found");
-
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.getPersonelsByGateId(1L));
-        verify(gateRepository).findById(1L);
-        verify(messageResolver).toString();
-    }
-
-    @Test
-    void passGate_WhenPersonelAndGateExistAndPersonelAuthorized_ShouldReturnSuccess() {
-        // Arrange
-        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.of(personel));
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
-
-        // Act
-        ResponseEntity<String> result = gateService.passGate(1L, 1L);
-
-        // Assert
-        assertEquals(HttpStatus.CREATED, result.getStatusCode());
-        assertEquals("Personnel entered the gate!", result.getBody());
-        verify(gateRepository).findPrsnlById(1L);
-        verify(gateRepository).findById(1L);
-    }
-
-    @Test
-    void passGate_WhenPersonelDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.empty());
-
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.passGate(1L, 1L));
-        verify(gateRepository).findPrsnlById(1L);
-        verify(gateRepository, never()).findById(anyLong());
-    }
-
-    @Test
-    void passGate_WhenGateDoesNotExist_ShouldThrowBaseException() {
-        // Arrange
-        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.of(personel));
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.passGate(1L, 1L));
-        verify(gateRepository).findPrsnlById(1L);
-        verify(gateRepository).findById(1L);
-    }
-
-    @Test
-    void passGate_WhenPersonelNotAuthorized_ShouldThrowBaseException() {
-        // Arrange
-        Gate differentGate = new Gate();
-        differentGate.setGateId(2L);
-
-        when(gateRepository.findPrsnlById(anyLong())).thenReturn(Optional.of(personel));
-        when(gateRepository.findById(anyLong())).thenReturn(Optional.of(differentGate));
-
-        // Act & Assert
-        BaseException exception = assertThrows(BaseException.class, () -> gateService.passGate(2L, 1L));
-        verify(gateRepository).findPrsnlById(1L);
-        verify(gateRepository).findById(2L);
-    }
-}
-
- */
+} 

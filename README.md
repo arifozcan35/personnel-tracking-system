@@ -37,6 +37,7 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 - **SpringDoc OpenAPI** (Swagger Documentation)
 - **Liquibase** (Database Migration)
 - **Docker & Docker Compose** (Containerization)
+- **JUnit** (Testing)
 - **Maven** (Build Tool)
 
 ---
