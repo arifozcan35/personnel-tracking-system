@@ -18,4 +18,6 @@ public interface PersonelTypeService {
     DtoPersonelType updateOnePersonelType(Long id, DtoPersonelType newPersonelType);
     
     void deleteOnePersonelType(Long id);
+    
+    void initializeDefaultPersonelTypes();
 } 

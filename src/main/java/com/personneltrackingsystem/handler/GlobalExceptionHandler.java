@@ -51,6 +51,9 @@ public class GlobalExceptionHandler {
             case WORKING_HOURS_NOT_FOUND:
             case PERMISSION_NOT_FOUND:
             case ROLE_NOT_FOUND:
+            case SALARY_NOT_FOUND:
+            case PERSONEL_TYPE_OR_SALARY_NOT_FOUND:
+            
                 return HttpStatus.NOT_FOUND;
                 
             // All other errors are bad request

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 @Getter
@@ -26,9 +28,16 @@ public class ErrorMessage {
 
     public String prepareErrorMessage() {
         StringBuilder builder = new StringBuilder();
-        String resolvedMessage = messageResolver.getMessage(messageType.getMessageKey());
-        builder.append(resolvedMessage);
-        if(ofStatic!=null) {
+        
+        // If MessageResolver is null, use messageType's messageKey directly
+        if (ObjectUtils.isNotEmpty(messageResolver)) {
+            String resolvedMessage = messageResolver.getMessage(messageType.getMessageKey());
+            builder.append(resolvedMessage);
+        } else {
+            builder.append(messageType.getMessageKey());
+        }
+        
+        if(ObjectUtils.isNotEmpty(ofStatic)) {
             builder.append(" : " + ofStatic);
         }
         return builder.toString();

@@ -27,5 +27,7 @@ public class PersonelType {
     private Long personelTypeId;
 
     private String personelTypeName;  
-
+    
+    @Column(name = "base_salary")
+    private Double baseSalary;
 }

@@ -12,6 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DtoPersonelType {
 
+    private Long personelTypeId;
+
     @Schema(description = "The name of personel type", example = "Personnel")
     private String personelTypeName;  
+    
+    @Schema(description = "Base salary amount for this personnel type", example = "50000")
+    private Double baseSalary;
 }

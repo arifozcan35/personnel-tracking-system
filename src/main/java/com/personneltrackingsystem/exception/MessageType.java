@@ -17,6 +17,8 @@ public enum MessageType {
     WORKING_HOURS_NOT_FOUND("1009", "working.hours.not.found"),
     PERMISSION_NOT_FOUND("1010", "permission.not.found"),
     ROLE_NOT_FOUND("1011", "role.not.found"),
+    SALARY_NOT_FOUND("1012", "salary.not.found"),
+    PERSONEL_TYPE_OR_SALARY_NOT_FOUND("1013", "personel.type.or.salary.not.found"),
 
     // Validation errors
     REQUIRED_FIELD_AVAILABLE("5000", "required.field.available"),
@@ -32,6 +34,7 @@ public enum MessageType {
     PERMISSION_RESOURCE_REQUIRED("5010", "permission.resource.required"),
     PERMISSION_METHOD_REQUIRED("5011", "permission.method.required"),
     PERMISSION_PATH_REQUIRED("5012", "permission.path.required"),
+    MONTH_REQUIRED("5013", "month.required"),
 
     // Uniqueness constraint errors
     BUILDING_NAME_ALREADY_EXISTS("6001", "building.name.already.exists"),
