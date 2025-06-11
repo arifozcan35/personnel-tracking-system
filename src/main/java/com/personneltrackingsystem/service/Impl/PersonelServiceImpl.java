@@ -7,7 +7,7 @@ import com.personneltrackingsystem.exception.*;
 import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.service.PersonelService;
-import com.personneltrackingsystem.service.PersonelCacheService;
+import com.personneltrackingsystem.service.cache.PersonelCacheService;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;

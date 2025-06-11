@@ -8,7 +8,7 @@ import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.PersonelMapper;
 import com.personneltrackingsystem.repository.PersonelRepository;
-import com.personneltrackingsystem.service.PersonelCacheService;
+import com.personneltrackingsystem.service.cache.PersonelCacheService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

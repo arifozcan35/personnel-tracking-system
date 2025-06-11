@@ -37,7 +37,7 @@ This is a comprehensive Spring Boot web backend project designed to manage perso
 - **SpringDoc OpenAPI** (Swagger Documentation)
 - **Liquibase** (Database Migration)
 - **Docker & Docker Compose** (Containerization)
-- **JUnit** (Testing)
+- **JUnit 5** (Testing)
 - **Maven** (Build Tool)
 
 ---
@@ -175,6 +175,7 @@ java -jar kafdrop-4.1.0.jar --kafka.brokerConnect=localhost:9092
 #### Redis Installation
 ```bash
 # Windows - Download Redis from Microsoft Store or official website
+
 # macOS
 brew install redis
 ```

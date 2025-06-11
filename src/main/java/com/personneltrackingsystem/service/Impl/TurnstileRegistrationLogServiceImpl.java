@@ -12,8 +12,8 @@ import com.personneltrackingsystem.exception.MessageType;
 import com.personneltrackingsystem.mapper.TurnstileRegistrationLogMapper;
 import com.personneltrackingsystem.repository.TurnstileRegistrationLogRepository;
 import com.personneltrackingsystem.service.TurnstileRegistrationLogService;
-import com.personneltrackingsystem.service.HazelcastCacheService;
-import com.personneltrackingsystem.service.RedisCacheService;
+import com.personneltrackingsystem.service.cache.HazelcastCacheService;
+import com.personneltrackingsystem.service.cache.RedisCacheService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

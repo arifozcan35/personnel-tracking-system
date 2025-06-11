@@ -29,8 +29,8 @@ import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.mapper.TurnstileRegistrationLogMapper;
 import com.personneltrackingsystem.repository.TurnstileRegistrationLogRepository;
-import com.personneltrackingsystem.service.HazelcastCacheService;
-import com.personneltrackingsystem.service.RedisCacheService;
+import com.personneltrackingsystem.service.cache.HazelcastCacheService;
+import com.personneltrackingsystem.service.cache.RedisCacheService;
 
 @ExtendWith(MockitoExtension.class)
 public class TurnstileRegistrationLogServiceImplTest {
