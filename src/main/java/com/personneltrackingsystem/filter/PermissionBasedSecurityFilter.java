@@ -30,14 +30,12 @@ public class PermissionBasedSecurityFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
         String method = request.getMethod();
-        
-        // Skip filtering for authentication endpoints
+
         if (requestURI.startsWith("/api/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract the resource name from the request path
         String resourceName = extractResourceName(requestURI);
         
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -45,7 +43,6 @@ public class PermissionBasedSecurityFilter extends OncePerRequestFilter {
             User user = (User) authentication.getPrincipal();
             Role role = user.getRole();
 
-            // Check if user has the required permission
             if (!permissionService.hasPermission(role, resourceName, method, requestURI)) {
                 throw new AccessDeniedException("You don't have permission to access this resource");
             }
@@ -55,10 +52,8 @@ public class PermissionBasedSecurityFilter extends OncePerRequestFilter {
     }
 
     private String extractResourceName(String requestURI) {
-        // Remove leading slash and api prefix if present
         String path = requestURI.startsWith("/api/") ? requestURI.substring(5) : requestURI.substring(1);
-        
-        // Get the first segment of the path which typically represents the resource
+
         int slashIndex = path.indexOf('/');
         return slashIndex > 0 ? path.substring(0, slashIndex) : path;
     }

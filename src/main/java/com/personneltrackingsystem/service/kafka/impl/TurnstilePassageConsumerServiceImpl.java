@@ -34,21 +34,18 @@ public class TurnstilePassageConsumerServiceImpl implements TurnstilePassageCons
         try {
             EmailEvent emailEvent = createEmailEvent(event);
             kafkaProducerService.sendEmailEvent(emailEvent);
-            
-            // after the message is processed, acknowledge
+
             acknowledgment.acknowledge();
             log.info("Turnstile passage event processed successfully");
         } catch (Exception e) {
             log.error("Error processing turnstile passage event: {}", e.getMessage(), e);
-            // acknowledge manually (to prevent message from being sent to DLQ)
-            // this way the same message is not processed again
+            // acknowledge manually
             acknowledgment.acknowledge();
         }
     }
 
     @Override
     public EmailEvent createEmailEvent(TurnstilePassageEvent event) {
-        // for admin notifications about late arrivals
         if (Boolean.TRUE.equals(event.getIsAdminNotification()) && Boolean.TRUE.equals(event.getIsLateArrival())) {
             return createLateArrivalEmailEvent(event);
         }else{

@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {UnitMapper.class})
 public interface PersonelMapper {
 
-    // Entity to DTO mappings
     List<DtoPersonel> personelsToDtoPersonels(List<Personel> personelList);
 
     @Mapping(source = "name", target = "name")
@@ -29,7 +28,6 @@ public interface PersonelMapper {
     @Mapping(source = "unitId", target = "unitId", qualifiedByName = "unitEntityListToLongList")
     DtoPersonelIU personelToDtoPersonelIU(Personel personel);
 
-    // DTO to Entity mappings
     @Mapping(source = "personelTypeId", target = "personelTypeId", qualifiedByName = "longToPersonelTypeEntity")
     @Mapping(source = "unitId", target = "unitId", qualifiedByName = "longListToUnitEntityList")
     Personel dtoPersonelIUToPersonel(DtoPersonelIU dtoPersonelIU);

@@ -14,8 +14,7 @@ public class HazelcastConfig {
     public HazelcastInstance hazelcastInstance() {
         Config config = new Config();
         config.setInstanceName("personnel-tracking-system");
-        
-        // Configure the monthly personnel list cache
+
         MapConfig monthlyPersonnelMapConfig = new MapConfig();
         monthlyPersonnelMapConfig.setName("monthlyPersonnelList");
         monthlyPersonnelMapConfig.setTimeToLiveSeconds(604800); // 7 days

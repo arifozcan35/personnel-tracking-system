@@ -80,18 +80,15 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
         try {
             YearMonth yearMonth = YearMonth.from(date);
             String dateStr = date.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
-            
-            // Get current monthly map
+
             Optional<HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>>> optMonthlyMap = 
                 getTurnstileBasedMonthlyPersonnelListFromCache(yearMonth);
             
             HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> monthlyMap = 
                 optMonthlyMap.orElse(new HashMap<>());
-            
-            // Add daily records to monthly map for this date
+
             monthlyMap.put(dateStr, dailyRecords);
-            
-            // Save updated monthly map back to cache
+
             cacheTurnstileBasedMonthlyPersonnelList(yearMonth, monthlyMap);
             
             log.info("Daily records added to Hazelcast monthly map for date: {}", dateStr);
@@ -99,7 +96,8 @@ public class HazelcastCacheServiceImpl implements HazelcastCacheService {
             log.error("Error adding daily records to Hazelcast monthly map for date: {}", date, e);
         }
     }
-    
+
+
     private String generateTurnstileBasedMonthlyKey(YearMonth yearMonth) {
         return "turnstile_based_monthly_personnel_" + yearMonth.toString();
     }

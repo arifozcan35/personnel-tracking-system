@@ -82,7 +82,7 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        // Reliable producer settings
+
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
         configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
@@ -116,12 +116,12 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         
-        // Configure error handling with retry and DLQ
+        // DLQ
         DeadLetterPublishingRecoverer recoverer = 
                 new DeadLetterPublishingRecoverer(kafkaTemplate,
                         (record, exception) -> new TopicPartition(record.topic() + "-dlt", record.partition()));
         
-        // Retry 3 times with 1 second interval before sending to DLQ
+        // Retry 3 times
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(
                 recoverer, new FixedBackOff(1000, 3));
         

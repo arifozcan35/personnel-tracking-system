@@ -18,6 +18,5 @@ public interface SalaryRepository extends JpaRepository<Salary, Long> {
     Optional<Salary> findByPersonelIdAndSalaryMonth(Personel personel, YearMonth month);
     
     List<Salary> findBySalaryMonth(YearMonth month);
-    
-    List<Salary> findByIsPaid(Boolean isPaid);
+
 } 

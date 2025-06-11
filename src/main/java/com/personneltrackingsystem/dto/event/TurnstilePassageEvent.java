@@ -24,18 +24,15 @@ public class TurnstilePassageEvent implements Serializable {
 
     private LocalDateTime passageTime;
     
-    private OperationType operationType;  // IN or OUT
-    
-    // For admin notifications
-    private String recipientEmail; // The email address to send the notification to
-    private String recipientName;  // The name of the recipient (admin)
+    private OperationType operationType;
+
+    private String recipientEmail;
+    private String recipientName;
     private Boolean isAdminNotification = false;
-    
-    // For late arrival notifications
+
     private Boolean isLateArrival = false;
     private Long minutesLate = 0L;
 
-    // Constructor with original fields
     public TurnstilePassageEvent(Long personelId, String personelName, String personelEmail, 
                                 Long turnstileId, String turnstileName, LocalDateTime passageTime, 
                                 OperationType operationType) {
@@ -46,8 +43,7 @@ public class TurnstilePassageEvent implements Serializable {
         this.turnstileName = turnstileName;
         this.passageTime = passageTime;
         this.operationType = operationType;
-        
-        // By default, the recipient is the person who passed through
+
         this.recipientEmail = personelEmail;
         this.recipientName = personelName;
     }

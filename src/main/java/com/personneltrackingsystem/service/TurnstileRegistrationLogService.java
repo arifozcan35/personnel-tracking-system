@@ -13,12 +13,12 @@ public interface TurnstileRegistrationLogService {
 
     void saveOneTurnstileRegistrationLog(DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU);
 
-    // Turnstile-based monthly personnel list methods
+
     HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromHazelcast(YearMonth yearMonth);
     
     HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getMonthlyTurnstileBasedPersonnelListFromRedis(YearMonth yearMonth);
     
-    // Validation methods
+
     YearMonth validateAndGetYearMonth(YearMonth yearMonth);
 
     void validateTurnstilePassage(DtoTurnstilePassageFullRequest request);

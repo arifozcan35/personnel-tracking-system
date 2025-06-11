@@ -29,7 +29,6 @@ public class EmailConsumerServiceImpl implements EmailConsumerService {
             log.info("Email event processed successfully");
         } catch (Exception e) {
             log.error("Error processing email event: {}", e.getMessage(), e);
-            // acknowledge the message manually (to avoid sending to DLQ)
             acknowledgment.acknowledge();
         }
     }

@@ -10,8 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface RedisCacheService {
-    
-    // Daily turnstile passage records methods
+
     void addToDailyTurnstilePassageRecord(String turnstileName, DtoTurnstileBasedPersonnelEntry entry, LocalDate recordDate);
     
     Map<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getAllDailyTurnstilePassageRecords();
@@ -21,8 +20,8 @@ public interface RedisCacheService {
     void transferDailyRecordsToMonthlyMap();
     
     void clearDailyTurnstilePassageRecords();
-    
-    // Turnstile-based monthly personnel list methods
+
+
     void cacheTurnstileBasedMonthlyPersonnelList(YearMonth yearMonth, 
             HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> personnelListByTurnstile);
     

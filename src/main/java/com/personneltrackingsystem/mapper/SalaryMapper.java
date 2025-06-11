@@ -11,9 +11,7 @@ import com.personneltrackingsystem.entity.Salary;
 
 @Mapper(componentModel = "spring")
 public interface SalaryMapper {
-    
-    SalaryMapper INSTANCE = Mappers.getMapper(SalaryMapper.class);
-    
+
     @Mapping(source = "personelId.personelId", target = "personelId")
     @Mapping(source = "personelId.name", target = "personelName")
     @Mapping(source = "personelId.email", target = "personelEmail")

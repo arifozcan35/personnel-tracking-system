@@ -27,17 +27,14 @@ public class RedisConfig {
         RedisTemplate<String, DtoPersonelCache> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Configure serializers
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         template.setKeySerializer(stringRedisSerializer);
         template.setHashKeySerializer(stringRedisSerializer);
 
-        // Create ObjectMapper with JSR310 module
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        
-        // Configure JSON serialization for values using constructor approach
+
         Jackson2JsonRedisSerializer<DtoPersonelCache> jsonRedisSerializer = 
             new Jackson2JsonRedisSerializer<>(objectMapper, DtoPersonelCache.class);
         

@@ -24,24 +24,20 @@ public class TurnstileRequestConsumerServiceImpl implements TurnstileRequestCons
         log.info("Received turnstile request event: {}", event);
         
         try {
-            // convert event to DTO
             DtoTurnstilePassageFullRequest request = new DtoTurnstilePassageFullRequest(
                 event.getWantedToEnterTurnstileId(),
                 event.getPersonelId(),
                 event.getOperationType(),
                 event.getOperationTimeStr()
             );
-            
-            // process the request through the service
+
             turnstileService.passTurnstile(request);
-            
-            // acknowledge the message after successful processing
+
             acknowledgment.acknowledge();
             log.info("Turnstile request event processed successfully");
             
         } catch (Exception e) {
             log.error("Error processing turnstile request event: {}", e.getMessage(), e);
-            // acknowledge even if there is an error (to prevent message from being processed again)
             acknowledgment.acknowledge();
         }
     }

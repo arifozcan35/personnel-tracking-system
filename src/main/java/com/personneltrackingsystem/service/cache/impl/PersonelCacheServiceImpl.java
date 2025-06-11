@@ -74,7 +74,7 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
 
     
     
-    // Helper method to convert Entity to DTO
+    // Helper method
     private DtoPersonelCache convertToDto(Personel personel) {
         if (personel == null) return null;
         
@@ -104,14 +104,13 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
                 dto.setUnits(unitDtos);
             }
         } catch (Exception e) {
-            // Log the error but continue with the basic personnel data
             log.error("Error while converting Personel to DTO: {}", e.getMessage());
         }
         
         return dto;
     }
     
-    // Helper method to convert DTO to Entity
+    // Helper method
     private Personel convertToEntity(DtoPersonelCache dto) {
         if (dto == null) return null;
         
@@ -119,9 +118,6 @@ public class PersonelCacheServiceImpl implements PersonelCacheService {
         personel.setPersonelId(dto.getPersonelId());
         personel.setName(dto.getName());
         personel.setEmail(dto.getEmail());
-        
-        // Note: This creates a lightweight entity with just IDs
-        // The actual entity relationships would need to be properly loaded by the service layer
         
         return personel;
     }

@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             (HttpServletRequest request,
              HttpServletResponse response,
              FilterChain filterChain) throws ServletException, IOException {
-        // Intercept the request
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -42,7 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwt = getJwtFromRequest(request);
 
-        // check if the token is valid
         if(!jwtService.isValidToken(jwt)) {
             filterChain.doFilter(request, response);
             return;

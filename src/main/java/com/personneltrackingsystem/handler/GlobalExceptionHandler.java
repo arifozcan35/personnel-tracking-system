@@ -37,8 +37,7 @@ public class GlobalExceptionHandler {
         if (messageType == null) {
             return HttpStatus.BAD_REQUEST;
         }
-        
-        // Entity existence errors should return 404 NOT FOUND
+
         switch (messageType) {
             case NO_RECORD_EXIST:
             case BUILDING_NOT_FOUND:
@@ -55,8 +54,7 @@ public class GlobalExceptionHandler {
             case PERSONEL_TYPE_OR_SALARY_NOT_FOUND:
             
                 return HttpStatus.NOT_FOUND;
-                
-            // All other errors are bad request
+
             default:
                 return HttpStatus.BAD_REQUEST;
         }
