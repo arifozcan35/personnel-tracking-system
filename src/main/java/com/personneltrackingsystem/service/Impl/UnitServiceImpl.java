@@ -87,20 +87,17 @@ public class UnitServiceImpl implements UnitService {
             throw new ValidationException(MessageType.UNIT_NAME_ALREADY_EXISTS, unitName);
         }
 
-        // Find and set floor if floorId is provided
         if (ObjectUtils.isNotEmpty(unit.getFloorId())) {
             Floor floor = floorService.checkIfFloorExists(unit.getFloorId());
             unit.setFloorId(floor.getFloorId());
         }
 
         Unit pUnit = unitMapper.dtoUnitIUToUnit(unit);
-        
-        // Handle administratorPersonelId separately
+
         if (ObjectUtils.isNotEmpty(unit.getAdministratorPersonelId())) {
             Personel personel = personelService.checkIfPersonelExists(unit.getAdministratorPersonelId());
             pUnit.setAdministratorPersonelId(personel);
         } else {
-            // Explicitly set to null to ensure it's not required
             pUnit.setAdministratorPersonelId(null);
         }
 
@@ -117,7 +114,6 @@ public class UnitServiceImpl implements UnitService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.UNIT_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newUnit.getBirimIsim())) {
-            // Check uniqueness if the name is being changed
             if (!existingUnit.getUnitName().equals(newUnit.getBirimIsim()) && 
                 unitRepository.existsByUnitName(newUnit.getBirimIsim())) {
                 throw new ValidationException(MessageType.UNIT_NAME_ALREADY_EXISTS, newUnit.getBirimIsim());

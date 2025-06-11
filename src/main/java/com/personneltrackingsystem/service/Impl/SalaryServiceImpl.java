@@ -47,7 +47,7 @@ public class SalaryServiceImpl implements SalaryService {
     @Value("${app.salary.late-threshold-minutes:555}")
     private Integer lateThresholdMinutes; // 09:15 = 9*60+15 = 555 minutes
     
-    // The salary calculation process is automatically started at 00:05 on the 1st of each month
+
     @Scheduled(cron = "0 5 0 1 * *")
     public void scheduledSalaryCalculation() {
         YearMonth previousMonth = YearMonth.now().minusMonths(1);
@@ -58,21 +58,17 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     @Transactional(readOnly = true)
     public DtoSalary calculateSalaryForPersonel(Personel personel, YearMonth month) {
-        // Check if the personnel has a salary record for the month
         Optional<Salary> existingSalary = salaryRepository.findByPersonelIdAndSalaryMonth(personel, month);
         if (existingSalary.isPresent()) {
             return salaryMapper.salaryToDtoSalary(existingSalary.get());
         }
-        
-        // Check if the personnel type and base salary exist
+
         if (ObjectUtils.isEmpty(personel.getPersonelTypeId()) || ObjectUtils.isEmpty(personel.getPersonelTypeId().getBaseSalary())) {
             throw new BaseException(new ErrorMessage(MessageType.PERSONEL_TYPE_OR_SALARY_NOT_FOUND, personel.getPersonelId().toString()));
         }
-        
-        // Get the base salary
+
         Double baseSalary = personel.getPersonelTypeId().getBaseSalary();
-        
-        // Calculate the number of late days
+
         Integer lateDays = turnstileLogRepository.countLateDaysInMonth(
             personel.getPersonelId(), 
             OperationType.IN.name(), 
@@ -84,11 +80,9 @@ public class SalaryServiceImpl implements SalaryService {
         if (ObjectUtils.isEmpty(lateDays)) {
             lateDays = 0;
         }
-        
-        // Calculate the total penalty amount
+
         Double totalPenalty = lateDays * latePenaltyAmount;
-        
-        // Calculate the final salary
+
         Double finalSalary = baseSalary - totalPenalty;
         if (finalSalary < 0) {
             finalSalary = 0.0;
@@ -180,22 +174,18 @@ public class SalaryServiceImpl implements SalaryService {
         if (ObjectUtils.isEmpty(month)) {
             throw new BaseException(new ErrorMessage(MessageType.MONTH_REQUIRED, "Year and month information is required"));
         }
-        
-        // If a specific personnel is to be calculated
+
         if (ObjectUtils.isNotEmpty(request.getPersonelId())) {
             Personel personel = personelService.checkIfPersonelExists(request.getPersonelId());
-            
-            // If forced recalculation is to be performed or there is no existing record
+
             if (Boolean.TRUE.equals(request.getForceRecalculation()) || 
                 !salaryRepository.findByPersonelIdAndSalaryMonth(personel, month).isPresent()) {
                 
                 DtoSalary calculated = calculateSalaryForPersonel(personel, month);
-                
-                // If there is an existing record, delete it
+
                 salaryRepository.findByPersonelIdAndSalaryMonth(personel, month)
                     .ifPresent(salaryRepository::delete);
-                
-                // Save the new salary calculation
+
                 Salary salary = new Salary();
                 salary.setPersonelId(personel);
                 salary.setSalaryMonth(month);
@@ -209,21 +199,18 @@ public class SalaryServiceImpl implements SalaryService {
                 Salary savedSalary = salaryRepository.save(salary);
                 return List.of(salaryMapper.salaryToDtoSalary(savedSalary));
             } else {
-                // Get the existing record
                 Salary existingSalary = salaryRepository.findByPersonelIdAndSalaryMonth(personel, month)
                         .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.SALARY_NOT_FOUND, 
                                 personel.getPersonelId() + " - " + month.toString())));
                 return List.of(salaryMapper.salaryToDtoSalary(existingSalary));
             }
         } else {
-            // Calculate for all personnel
             if (Boolean.TRUE.equals(request.getForceRecalculation())) {
-                // First delete all salary records for the month
                 List<Salary> existingSalaries = salaryRepository.findBySalaryMonth(month);
+
                 salaryRepository.deleteAll(existingSalaries);
             }
-            
-            // Calculate for all personnel
+
             return calculateAllSalariesForMonth(month);
         }
     }

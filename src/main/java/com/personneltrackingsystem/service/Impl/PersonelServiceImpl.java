@@ -70,7 +70,6 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     @Transactional
     public ResponseEntity<String> saveOnePersonel(DtoPersonelIU newPersonel) {
-        // basic data validation
         if (ObjectUtils.isEmpty(newPersonel.getName())) {
             throw new ValidationException(MessageType.PERSONNEL_NAME_REQUIRED);
         }
@@ -81,18 +80,15 @@ public class PersonelServiceImpl implements PersonelService  {
 
         DtoPersonelIU personelToPut = newPersonel;
 
-        // check email uniqueness
         Optional<Personel> existingPersonnel = personelRepository.findByEmail(newPersonel.getEmail());
         if (existingPersonnel.isPresent()) {
             throw new ValidationException(MessageType.PERSONNEL_EMAIL_ALREADY_EXISTS, newPersonel.getEmail());
         }
 
-        // handle personel type if provided
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
             personelToPut.setPersonelTypeId(newPersonel.getPersonelTypeId());
         }
 
-        // handle units if provided
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
             personelToPut.setUnitId(newPersonel.getUnitId());
         }
@@ -120,12 +116,10 @@ public class PersonelServiceImpl implements PersonelService  {
 
         Personel foundPersonel = optPersonel.get();
 
-        // update name
         if (!ObjectUtils.isEmpty(newPersonel.getName())) {
             foundPersonel.setName(newPersonel.getName());
         }
 
-        // update email with uniqueness check
         if (!ObjectUtils.isEmpty(newPersonel.getEmail())) {
             Optional<Personel> existingEmail = personelRepository.findByEmail(newPersonel.getEmail());
             if (existingEmail.isPresent() && !existingEmail.get().getPersonelId().equals(id)) {
@@ -134,20 +128,17 @@ public class PersonelServiceImpl implements PersonelService  {
             foundPersonel.setEmail(newPersonel.getEmail());
         }
 
-        // update personnel type
         if (!ObjectUtils.isEmpty(newPersonel.getPersonelTypeId())) {
             foundPersonel.setPersonelTypeId(personelMapper.longToPersonelTypeEntity(newPersonel.getPersonelTypeId()));
         }
 
-        // update units
         if (!ObjectUtils.isEmpty(newPersonel.getUnitId())) {
             foundPersonel.setUnitId(personelMapper.longListToUnitEntityList(newPersonel.getUnitId()));
         }
 
         try {
             Personel updatedPersonnel = personelRepository.save(foundPersonel);
-            
-            // invalidate cache after update
+
             personelCacheService.removePersonelFromCache(id);
             
             return new ResponseEntity<>("Personnel updated successfully with ID: " + updatedPersonnel.getPersonelId(), HttpStatus.OK);
@@ -163,8 +154,7 @@ public class PersonelServiceImpl implements PersonelService  {
         Optional<Personel> optPersonel = personelRepository.findById(id);
         if (optPersonel.isPresent()) {
             personelRepository.deleteById(id);
-            
-            // invalidate cache after delete
+
             personelCacheService.removePersonelFromCache(id);
         } else {
             throw new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, id.toString()));
@@ -175,8 +165,7 @@ public class PersonelServiceImpl implements PersonelService  {
     @Override
     public Set<DtoPersonel> getPersonelsByUnitId(Long unitId) {
         Set<DtoPersonel> personels = new HashSet<>();
-        
-        // find all personel that belong to the specified unit
+
         List<Personel> personnelList = personelRepository.findAll();
         
         for (Personel personel : personnelList) {
@@ -200,17 +189,14 @@ public class PersonelServiceImpl implements PersonelService  {
     
     @Override
     public Personel getPersonelWithCache(Long personelId) {
-        // first try to get from cache
         Optional<Personel> cachedPersonel = personelCacheService.getPersonelFromCache(personelId);
         if (cachedPersonel.isPresent()) {
             return cachedPersonel.get();
         }
 
-        // if not in cache, get from database with all relationships initialized using the custom repository method
         Personel personel = personelRepository.findByIdWithRelationships(personelId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PERSONNEL_NOT_FOUND, personelId.toString())));
-        
-        // cache the personel data (relationships are already loaded)
+
         personelCacheService.cachePersonel(personelId, personel);
         
         return personel;

@@ -46,7 +46,6 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public Permission createPermission(Permission permission) {
-        // Validation
         if (ObjectUtils.isEmpty(permission.getName())) {
             throw new ValidationException(MessageType.PERMISSION_NAME_REQUIRED);
         }
@@ -63,7 +62,6 @@ public class PermissionServiceImpl implements PermissionService {
             throw new ValidationException(MessageType.PERMISSION_PATH_REQUIRED);
         }
 
-        // Check uniqueness
         if (permissionRepository.findByName(permission.getName()).isPresent()) {
             throw new ValidationException(MessageType.PERMISSION_NAME_ALREADY_EXISTS, permission.getName());
         }
@@ -75,10 +73,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public Permission updatePermission(Permission permission) {
-        // Check if permission exists
         Permission existingPermission = getPermissionById(permission.getId());
-        
-        // Validation for required fields
+
         if (ObjectUtils.isEmpty(permission.getName())) {
             throw new ValidationException(MessageType.PERMISSION_NAME_REQUIRED);
         }
@@ -95,7 +91,6 @@ public class PermissionServiceImpl implements PermissionService {
             throw new ValidationException(MessageType.PERMISSION_PATH_REQUIRED);
         }
 
-        // Check uniqueness if name is being changed
         if (!existingPermission.getName().equals(permission.getName()) && 
             permissionRepository.findByName(permission.getName()).isPresent()) {
             throw new ValidationException(MessageType.PERMISSION_NAME_ALREADY_EXISTS, permission.getName());

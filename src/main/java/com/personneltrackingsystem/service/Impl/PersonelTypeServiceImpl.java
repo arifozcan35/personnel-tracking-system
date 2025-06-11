@@ -119,7 +119,6 @@ public class PersonelTypeServiceImpl implements PersonelTypeService {
                 .orElseThrow(() -> new BaseException(MessageType.PERSONNEL_TYPE_NOT_FOUND, id.toString()));
 
         if (ObjectUtils.isNotEmpty(newPersonelType.getPersonelTypeName())) {
-            // Check uniqueness if the name is being changed
             if (!existingPersonelType.getPersonelTypeName().equals(newPersonelType.getPersonelTypeName()) && 
                 personelTypeRepository.existsByPersonelTypeName(newPersonelType.getPersonelTypeName())) {
                 throw new ValidationException(MessageType.PERSONNEL_TYPE_NAME_ALREADY_EXISTS, newPersonelType.getPersonelTypeName());

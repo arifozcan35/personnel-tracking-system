@@ -92,7 +92,6 @@ public class BuildingServiceImpl implements BuildingService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BUILDING_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newBuilding.getBuildingName())) {
-            // Check uniqueness if the name is being changed
             if (!existingBuilding.getBuildingName().equals(newBuilding.getBuildingName()) && 
                 buildingRepository.existsByBuildingName(newBuilding.getBuildingName())) {
                 throw new ValidationException(MessageType.BUILDING_NAME_ALREADY_EXISTS, newBuilding.getBuildingName());

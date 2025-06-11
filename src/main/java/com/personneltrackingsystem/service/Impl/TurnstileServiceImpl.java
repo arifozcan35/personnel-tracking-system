@@ -101,7 +101,6 @@ public class TurnstileServiceImpl implements TurnstileService {
             throw new ValidationException(MessageType.TURNSTILE_NAME_ALREADY_EXISTS, turnstileName);
         }
 
-        // find and set gate if gateId is provided
         if (ObjectUtils.isNotEmpty(turnstile.getGateId())) {
             Gate gate = gateService.checkIfGateExists(turnstile.getGateId());
             turnstile.setGateId(gate.getGateId());
@@ -122,7 +121,6 @@ public class TurnstileServiceImpl implements TurnstileService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newTurnstile.getTurnstileName())) {
-            // check uniqueness if the name is being changed
             if (!existingTurnstile.getTurnstileName().equals(newTurnstile.getTurnstileName()) && 
                 turnstileRepository.existsByTurnstileName(newTurnstile.getTurnstileName())) {
                 throw new ValidationException(MessageType.TURNSTILE_NAME_ALREADY_EXISTS, newTurnstile.getTurnstileName());
@@ -165,54 +163,43 @@ public class TurnstileServiceImpl implements TurnstileService {
         Turnstile turnstile = turnstileRepository.findById(wantedToEnterTurnstileId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.TURNSTILE_NOT_FOUND, wantedToEnterTurnstileId.toString())));
 
-        // get personel from cache (if not cached, it will be cached automatically)
         Personel personel = personelService.getPersonelWithCache(request.getPersonelId());
 
-        // parse the operation time from the input string
         LocalDateTime operationTime;
         if (operationTimeStr != null && !operationTimeStr.isEmpty()) {
             try {
-                // user now provides only time portion (HH:mm:ss)
                 LocalTime timeFromUser = LocalTime.parse(operationTimeStr, 
                     java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
-                
-                // combine current date with user-provided time
+
                 LocalDate currentDate = LocalDate.now();
                 operationTime = LocalDateTime.of(currentDate, timeFromUser);
             } catch (Exception e) {
                 throw new ValidationException(MessageType.INVALID_TIME_FORMAT);
             }
         } else {
-            // fallback to current time if no time string is provided
             operationTime = LocalDateTime.now();
         }
 
-        // create turnstile registration log for database
         DtoTurnstileRegistrationLogIU dtoTurnstileRegistrationLogIU = new DtoTurnstileRegistrationLogIU();
         dtoTurnstileRegistrationLogIU.setPersonelId(personel.getPersonelId());
         dtoTurnstileRegistrationLogIU.setTurnstileId(turnstile.getTurnstileId());
         dtoTurnstileRegistrationLogIU.setOperationTime(operationTime);
         dtoTurnstileRegistrationLogIU.setOperationType(request.getOperationType());
 
-        // save to database
         turnstileRegistrationLogService.saveOneTurnstileRegistrationLog(dtoTurnstileRegistrationLogIU);
-        
-        // create personnel entry for Redis
+
         DtoTurnstileBasedPersonnelEntry redisTurnstileEntry = new DtoTurnstileBasedPersonnelEntry();
         redisTurnstileEntry.setPersonelId(personel.getPersonelId());
         redisTurnstileEntry.setPersonelName(personel.getName());
         redisTurnstileEntry.setPersonelEmail(personel.getEmail());
         redisTurnstileEntry.setOperationTime(operationTime);
         redisTurnstileEntry.setOperationType(request.getOperationType());
-        
-        // extract the date from operation time
+
         LocalDate recordDate = operationTime.toLocalDate();
-        
-        // save to Redis daily map with record date
+
         redisCacheService.addToDailyTurnstilePassageRecord(turnstile.getTurnstileName(), redisTurnstileEntry, recordDate);
 
-        
-        // get the gate for late arrival notification checks
+
         Gate gate = turnstile.getGateId();
 
         TurnstilePassageEvent event = new TurnstilePassageEvent(
@@ -225,10 +212,7 @@ public class TurnstileServiceImpl implements TurnstileService {
             request.getOperationType()
         );
         
-        // only send late arrival notifications under specific conditions:
-        // 1. The operation must be an entry (IN)
-        // 2. The turnstile must be at a main entrance
-        // 3. The time must be after 9:15 AM (more than 15 minutes late)
+
         if (request.getOperationType() == OperationType.IN && ObjectUtils.isNotEmpty(gate) && Boolean.TRUE.equals(gate.getMainEntrance())) {
             
             LocalTime entryTime = operationTime.toLocalTime();
@@ -239,14 +223,12 @@ public class TurnstileServiceImpl implements TurnstileService {
                 if (unit != null && unit.getAdministratorPersonelId() != null) {
          
                     Personel adminPersonel = unit.getAdministratorPersonelId();
-                    
-                    // update event with admin's email and mark as late arrival
+
                     event.setRecipientEmail(adminPersonel.getEmail());
                     event.setRecipientName(adminPersonel.getName());
                     event.setIsAdminNotification(true);
                     event.setIsLateArrival(true);
-                    
-                    // calculate minutes late
+
                     long minutesLate = java.time.Duration.between(LocalTime.of(9, 0), entryTime).toMinutes();
                     event.setMinutesLate(minutesLate);
                     

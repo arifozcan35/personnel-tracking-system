@@ -38,15 +38,12 @@ public class JwtServiceImpl implements JwtService {
         return new TokenPair(accessToken, refreshToken);
     }
 
-
-    // Generate access token
     @Override
     public String generateAccessToken(Authentication authentication) {
         return generateToken(authentication, jwtExpirationMs, new HashMap<>());
     }
 
 
-    // Generate refresh token
     @Override
     public String generateRefreshToken(Authentication authentication) {
         Map<String, String> claims = new HashMap<>();
@@ -54,13 +51,12 @@ public class JwtServiceImpl implements JwtService {
         return generateToken(authentication, refreshExpirationMs, claims);
     }
 
-
     @Override
     public String generateToken(Authentication authentication, long expirationInMs, Map<String, String> claims) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
-        Date now = new Date(); // Time of token creation
-        Date expiryDate = new Date(now.getTime() + expirationInMs); // Time of token expiration
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationInMs);
 
         return Jwts.builder()
                 .header()
@@ -75,7 +71,6 @@ public class JwtServiceImpl implements JwtService {
     }
 
 
-    // Validate token
     @Override
     public boolean validateTokenForUser(String token, UserDetails userDetails) {
         final String username = extractUsernameFromToken(token);
@@ -83,12 +78,10 @@ public class JwtServiceImpl implements JwtService {
                 && username.equals(userDetails.getUsername());
     }
 
-
     @Override
     public boolean isValidToken(String token) {
         return extractAllClaims(token) != null;
     }
-
 
     @Override
     public String extractUsernameFromToken(String token) {
@@ -128,7 +121,6 @@ public class JwtServiceImpl implements JwtService {
 
         return claims;
     }
-
     
     @Override
     public SecretKey getSignInKey() {

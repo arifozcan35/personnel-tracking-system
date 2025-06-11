@@ -71,7 +71,6 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
             throw new ValidationException(MessageType.WORKING_HOURS_REQUIRED);
         }
 
-        // Business logic validation: check-in time should be before check-out time
         if (checkInTime.isAfter(checkOutTime)) {
             throw new ValidationException(MessageType.INVALID_TIME_RANGE);
         }
@@ -98,7 +97,6 @@ public class WorkingHoursServiceImpl implements WorkingHoursService {
             existingWorkingHours.setCheckOutTime(newWorkingHours.getCheckOutTime());
         }
 
-        // Business logic validation: check-in time should be before check-out time
         if (existingWorkingHours.getCheckInTime().isAfter(existingWorkingHours.getCheckOutTime())) {
             throw new ValidationException(MessageType.INVALID_TIME_RANGE);
         }

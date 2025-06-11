@@ -108,7 +108,6 @@ public class GateServiceImpl implements GateService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.GATE_NOT_FOUND, id.toString())));
 
         if (ObjectUtils.isNotEmpty(newGate.getGateName())) {
-            // Check uniqueness if the name is being changed
             if (!existingGate.getGateName().equals(newGate.getGateName()) && 
                 gateRepository.existsByGateName(newGate.getGateName())) {
                 throw new ValidationException(MessageType.GATE_NAME_ALREADY_EXISTS, newGate.getGateName());

@@ -65,19 +65,16 @@ public class TurnstileControllerImpl implements TurnstileController {
     @Transactional
     public ResponseEntity<String> passTurnstile(DtoTurnstilePassageFullRequest request) {
         log.info("Turnstile passage request received: {}", request);
-        
-        // validation and update the cache
+
         turnstileRegistrationLogService.validateTurnstilePassage(request);
-        
-        // convert DTO to Event
+
         TurnstileRequestEvent event = new TurnstileRequestEvent(
             request.getWantedToEnterTurnstileId(),
             request.getPersonelId(),
             request.getOperationType(),
             request.getOperationTimeStr()
         );
-        
-        // send event to Kafka
+
         kafkaProducerService.sendTurnstileRequestEvent(event);
         
         return ResponseEntity.accepted().body("Turnstile passage request accepted and is being processed");
@@ -86,8 +83,7 @@ public class TurnstileControllerImpl implements TurnstileController {
     
     @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithHazelcast(YearMonth yearMonth) {
-        
-        // use service's validation method
+
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 
@@ -107,8 +103,7 @@ public class TurnstileControllerImpl implements TurnstileController {
     
     @Override
     public HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> getTurnstileBasedMonthlyPersonnelListWithRedis(YearMonth yearMonth) {
-        
-        // use service's validation method
+
         YearMonth targetMonth = turnstileRegistrationLogService.validateAndGetYearMonth(yearMonth);
         
         HashMap<String, Map<String, List<DtoTurnstileBasedPersonnelEntry>>> result = 

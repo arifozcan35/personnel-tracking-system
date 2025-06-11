@@ -14,13 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class AuthenticationControllerImpl implements AuthenticationController {
-
     private final AuthServiceImpl authService;
-
-
     @Override
     public ResponseEntity<?> registerUser(RegisterRequest request) {
-        // save the new user to the database and return success response
         authService.registerUser(request);
         return ResponseEntity.ok("User registered successfully");
     }

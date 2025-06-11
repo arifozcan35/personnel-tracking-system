@@ -19,7 +19,6 @@ public class PermissionControllerImpl implements PermissionController {
 
     private final PermissionService permissionService;
 
-
     @Override
     public ResponseEntity<Permission> getPermissionById(Long id) {
         return ResponseEntity.ok(permissionService.getPermissionById(id));

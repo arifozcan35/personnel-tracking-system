@@ -36,12 +36,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void registerUser(RegisterRequest registerRequest) {
-        // Check if user with the same username already exist
         if(Boolean.TRUE.equals(userRepository.existsByUsername(registerRequest.getUsername()))) {
             throw new IllegalArgumentException("Username is already in use");
         }
 
-        // Create new user
         User user = User
                 .builder()
                 .name(registerRequest.getName())
@@ -57,7 +55,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public TokenPair login(LoginRequest loginRequest) {
-        // Authenticate the user
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -68,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
         
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Generate Token Pair
+        // Token Pair
         return jwtService.generateTokenPair(authentication);
     }
 
@@ -77,7 +74,6 @@ public class AuthServiceImpl implements AuthService {
     public TokenPair refreshToken(@Valid RefreshTokenRequest request) {
 
         String refreshToken = request.getRefreshToken();
-        // check if it is valid refresh token
         if(!jwtService.isRefreshToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
         }

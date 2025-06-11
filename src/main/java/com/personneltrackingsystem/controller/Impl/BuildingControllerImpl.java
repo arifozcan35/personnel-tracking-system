@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class BuildingControllerImpl implements BuildingController {
-
     private final BuildingService buildingService;
 
     @Override
