@@ -11,11 +11,12 @@ import com.personneltrackingsystem.entity.Unit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {UnitMapper.class})
+@Mapper(componentModel = "spring", uses = {UnitMapper.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PersonelMapper {
 
     List<DtoPersonel> personelsToDtoPersonels(List<Personel> personelList);

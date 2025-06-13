@@ -5,12 +5,13 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import com.personneltrackingsystem.dto.DtoFloor;
 import com.personneltrackingsystem.entity.Building;
 import com.personneltrackingsystem.entity.Floor;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface FloorMapper {
 
     Floor dtoFloorToFloor(DtoFloor dtoFloor);

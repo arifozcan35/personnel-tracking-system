@@ -3,6 +3,7 @@ package com.personneltrackingsystem.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import com.personneltrackingsystem.dto.DtoWorkingHours;
 import com.personneltrackingsystem.entity.PersonelType;
@@ -10,7 +11,7 @@ import com.personneltrackingsystem.entity.WorkingHours;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface WorkingHoursMapper {
     
     @Mapping(target = "personelTypeId", source = "personelTypeId", qualifiedByName = "longToPersonelType")

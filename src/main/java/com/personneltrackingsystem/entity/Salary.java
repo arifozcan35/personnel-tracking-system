@@ -2,8 +2,12 @@ package com.personneltrackingsystem.entity;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+
+import com.personneltrackingsystem.dto.converter.YearMonthStringConverter;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,6 +40,7 @@ public class Salary {
     private Personel personelId;
     
     @Column(name = "salary_month")
+    @Convert(converter = YearMonthStringConverter.class)
     private YearMonth salaryMonth;
     
     @Column(name = "base_amount")

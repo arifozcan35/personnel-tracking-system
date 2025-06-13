@@ -3,6 +3,7 @@ package com.personneltrackingsystem.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLog;
 import com.personneltrackingsystem.dto.DtoTurnstileRegistrationLogIU;
@@ -10,7 +11,7 @@ import com.personneltrackingsystem.entity.Personel;
 import com.personneltrackingsystem.entity.Turnstile;
 import com.personneltrackingsystem.entity.TurnstileRegistrationLog;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TurnstileRegistrationLogMapper {
 
     DtoTurnstileRegistrationLog turnstileRegistrationLogToDtoTurnstileRegistrationLog(TurnstileRegistrationLog turnstileRegistrationLog);
