@@ -41,7 +41,6 @@ public class PermissionServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Test verilerini hazırla
         permission = Permission.builder()
                 .id(1L)
                 .name("test-permission")
@@ -51,7 +50,6 @@ public class PermissionServiceImplTest {
                 .description("Test Permission")
                 .build();
 
-        // Role bir enum olduğu için builder kullanımı yerine direkt enum değeri atanır
         role = Role.ROLE_ADMIN;
 
         rolePermission = RolePermission.builder()
@@ -63,13 +61,13 @@ public class PermissionServiceImplTest {
 
     @Test
     void getPermissionById_ExistingId_ReturnsPermission() {
-        // Hazırlık
+        // arrange
         when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
 
-        // İşlem
+        // act
         Permission result = permissionService.getPermissionById(1L);
 
-        // Doğrulama
+        // assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("test-permission", result.getName());
@@ -78,27 +76,27 @@ public class PermissionServiceImplTest {
 
     @Test
     void getPermissionById_NonExistingId_ThrowsException() {
-        // Hazırlık
+        // arrange
         when(permissionRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(BaseException.class, () -> permissionService.getPermissionById(999L));
         verify(permissionRepository).findById(999L);
     }
 
     @Test
     void getAllPermissions_ReturnsAllPermissions() {
-        // Hazırlık
+        // arrange
         List<Permission> permissions = Arrays.asList(
                 permission,
                 Permission.builder().id(2L).name("another-permission").resource("resource").method("POST").pathPattern("/api/another/**").build()
         );
         when(permissionRepository.findAll()).thenReturn(permissions);
 
-        // İşlem
+        // act
         List<Permission> result = permissionService.getAllPermissions();
 
-        // Doğrulama
+        // assert
         assertNotNull(result);
         assertEquals(2, result.size());
         verify(permissionRepository).findAll();
@@ -106,7 +104,7 @@ public class PermissionServiceImplTest {
 
     @Test
     void createPermission_ValidPermission_ReturnsCreatedPermission() {
-        // Hazırlık
+        // arrange
         Permission newPermission = Permission.builder()
                 .name("new-permission")
                 .resource("new-resource")
@@ -125,10 +123,10 @@ public class PermissionServiceImplTest {
                     .build()
         );
 
-        // İşlem
+        // act
         Permission result = permissionService.createPermission(newPermission);
 
-        // Doğrulama
+        // assert
         assertNotNull(result);
         assertEquals(2L, result.getId());
         assertEquals("new-permission", result.getName());
@@ -138,7 +136,7 @@ public class PermissionServiceImplTest {
 
     @Test
     void createPermission_DuplicateName_ThrowsException() {
-        // Hazırlık
+        // arrange
         Permission newPermission = Permission.builder()
                 .name("test-permission")
                 .resource("new-resource")
@@ -148,7 +146,7 @@ public class PermissionServiceImplTest {
         
         when(permissionRepository.findByName("test-permission")).thenReturn(Optional.of(permission));
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(ValidationException.class, () -> permissionService.createPermission(newPermission));
         verify(permissionRepository).findByName("test-permission");
         verify(permissionRepository, never()).save(any(Permission.class));
@@ -156,19 +154,19 @@ public class PermissionServiceImplTest {
 
     @Test
     void createPermission_MissingRequiredFields_ThrowsException() {
-        // Hazırlık
+        // arrange
         Permission invalidPermission = Permission.builder()
                 .name("") // Boş isim
                 .build();
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(ValidationException.class, () -> permissionService.createPermission(invalidPermission));
         verify(permissionRepository, never()).save(any(Permission.class));
     }
 
     @Test
     void updatePermission_ValidPermission_ReturnsUpdatedPermission() {
-        // Hazırlık
+        // arrange
         Permission updatedPermission = Permission.builder()
                 .id(1L)
                 .name("updated-permission")
@@ -182,10 +180,10 @@ public class PermissionServiceImplTest {
         when(permissionRepository.findByName("updated-permission")).thenReturn(Optional.empty());
         when(permissionRepository.save(any(Permission.class))).thenReturn(updatedPermission);
 
-        // İşlem
+        // act
         Permission result = permissionService.updatePermission(updatedPermission);
 
-        // Doğrulama
+        // assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("updated-permission", result.getName());
@@ -197,7 +195,7 @@ public class PermissionServiceImplTest {
 
     @Test
     void updatePermission_NonExistingId_ThrowsException() {
-        // Hazırlık
+        // arrange
         Permission nonExistingPermission = Permission.builder()
                 .id(999L)
                 .name("non-existing")
@@ -208,7 +206,7 @@ public class PermissionServiceImplTest {
         
         when(permissionRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(BaseException.class, () -> permissionService.updatePermission(nonExistingPermission));
         verify(permissionRepository).findById(999L);
         verify(permissionRepository, never()).save(any(Permission.class));
@@ -216,24 +214,24 @@ public class PermissionServiceImplTest {
 
     @Test
     void deletePermission_ExistingId_DeletesPermission() {
-        // Hazırlık
+        // arrange
         when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
         doNothing().when(permissionRepository).deleteById(1L);
 
-        // İşlem
+        // act
         permissionService.deletePermission(1L);
 
-        // Doğrulama
+        // assert
         verify(permissionRepository).findById(1L);
         verify(permissionRepository).deleteById(1L);
     }
 
     @Test
     void deletePermission_NonExistingId_ThrowsException() {
-        // Hazırlık
+        // arrange
         when(permissionRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(BaseException.class, () -> permissionService.deletePermission(999L));
         verify(permissionRepository).findById(999L);
         verify(permissionRepository, never()).deleteById(anyLong());
@@ -241,42 +239,42 @@ public class PermissionServiceImplTest {
 
     @Test
     void hasPermission_MatchingPermission_ReturnsTrue() {
-        // Hazırlık
+        // arrange
         List<RolePermission> rolePermissions = Collections.singletonList(rolePermission);
         when(rolePermissionRepository.findByRole(role)).thenReturn(rolePermissions);
 
-        // İşlem
+        // act
         boolean result = permissionService.hasPermission(role, "test-resource", "GET", "/api/test/123");
 
-        // Doğrulama
+        // assert
         assertTrue(result);
         verify(rolePermissionRepository).findByRole(role);
     }
 
     @Test
     void hasPermission_NonMatchingPermission_ReturnsFalse() {
-        // Hazırlık
+        // arrange
         List<RolePermission> rolePermissions = Collections.singletonList(rolePermission);
         when(rolePermissionRepository.findByRole(role)).thenReturn(rolePermissions);
 
-        // İşlem
+        // act
         boolean result = permissionService.hasPermission(role, "different-resource", "POST", "/api/different/123");
 
-        // Doğrulama
+        // assert
         assertFalse(result);
         verify(rolePermissionRepository).findByRole(role);
     }
 
     @Test
     void getPermissionsByRole_ReturnsRolePermissions() {
-        // Hazırlık
+        // arrange
         List<RolePermission> rolePermissions = Collections.singletonList(rolePermission);
         when(rolePermissionRepository.findByRole(role)).thenReturn(rolePermissions);
 
-        // İşlem
+        // act
         List<Permission> result = permissionService.getPermissionsByRole(role);
 
-        // Doğrulama
+        // assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());
@@ -285,15 +283,15 @@ public class PermissionServiceImplTest {
 
     @Test
     void assignPermissionToRole_NewAssignment_Succeeds() {
-        // Hazırlık
+        // arrange
         when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
         when(rolePermissionRepository.findByRole(role)).thenReturn(Collections.emptyList());
         when(rolePermissionRepository.save(any(RolePermission.class))).thenReturn(rolePermission);
 
-        // İşlem
+        // act
         permissionService.assignPermissionToRole(role, 1L);
 
-        // Doğrulama
+        // assert
         verify(permissionRepository).findById(1L);
         verify(rolePermissionRepository).findByRole(role);
         verify(rolePermissionRepository).save(any(RolePermission.class));
@@ -301,11 +299,11 @@ public class PermissionServiceImplTest {
 
     @Test
     void assignPermissionToRole_AlreadyAssigned_ThrowsException() {
-        // Hazırlık
+        // arrange
         when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
         when(rolePermissionRepository.findByRole(role)).thenReturn(Collections.singletonList(rolePermission));
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(ValidationException.class, () -> permissionService.assignPermissionToRole(role, 1L));
         verify(permissionRepository).findById(1L);
         verify(rolePermissionRepository).findByRole(role);
@@ -314,25 +312,25 @@ public class PermissionServiceImplTest {
 
     @Test
     void removePermissionFromRole_AssignedPermission_Removes() {
-        // Hazırlık
+        // arrange
         List<RolePermission> rolePermissions = Collections.singletonList(rolePermission);
         when(rolePermissionRepository.findByRole(role)).thenReturn(rolePermissions);
         doNothing().when(rolePermissionRepository).delete(any(RolePermission.class));
 
-        // İşlem
+        // act
         permissionService.removePermissionFromRole(role, 1L);
 
-        // Doğrulama
+        // assert
         verify(rolePermissionRepository).findByRole(role);
         verify(rolePermissionRepository).delete(any(RolePermission.class));
     }
 
     @Test
     void removePermissionFromRole_UnassignedPermission_ThrowsException() {
-        // Hazırlık
+        // arrange
         when(rolePermissionRepository.findByRole(role)).thenReturn(Collections.emptyList());
 
-        // İşlem & Doğrulama
+        // act & assert
         assertThrows(ValidationException.class, () -> permissionService.removePermissionFromRole(role, 1L));
         verify(rolePermissionRepository).findByRole(role);
         verify(rolePermissionRepository, never()).delete(any(RolePermission.class));

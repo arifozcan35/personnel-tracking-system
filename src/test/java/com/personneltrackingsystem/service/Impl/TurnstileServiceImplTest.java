@@ -63,7 +63,6 @@ public class TurnstileServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Turnstile test verileri
         turnstile = new Turnstile();
         turnstile.setTurnstileId(1L);
         turnstile.setTurnstileName("Test Turnstile");
@@ -74,19 +73,16 @@ public class TurnstileServiceImplTest {
         dtoTurnstileIU = new DtoTurnstileIU();
         dtoTurnstileIU.setTurnstileName("Test Turnstile");
 
-        // Personel test verileri
         personel = new Personel();
         personel.setPersonelId(1L);
         personel.setName("Test Personel");
         personel.setEmail("test@example.com");
 
-        // Gate test verileri
         gate = new Gate();
         gate.setGateId(1L);
         gate.setGateName("Test Gate");
         gate.setMainEntrance(true);
 
-        // Unit test verileri
         unit = new Unit();
         unit.setUnitId(1L);
         unit.setUnitName("Test Unit");

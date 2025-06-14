@@ -40,7 +40,6 @@ public class PersonelTypeServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Test verileri oluştur
         personelType = new PersonelType();
         personelType.setPersonelTypeId(1L);
         personelType.setPersonelTypeName("Test Tip");

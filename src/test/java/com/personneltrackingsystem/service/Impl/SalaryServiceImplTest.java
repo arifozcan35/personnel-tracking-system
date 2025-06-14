@@ -70,7 +70,6 @@ public class SalaryServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Test değerlerini ayarla
         testMonth = YearMonth.of(2025, 6);
         
         testPersonelType = new PersonelType();
@@ -109,7 +108,6 @@ public class SalaryServiceImplTest {
         testDtoSalary.setCalculationDate(LocalDate.now());
         testDtoSalary.setIsPaid(false);
         
-        // ReflectionTestUtils ile özel değerleri ayarla
         ReflectionTestUtils.setField(salaryService, "latePenaltyAmount", 300.0);
         ReflectionTestUtils.setField(salaryService, "lateThresholdMinutes", 555);
     }

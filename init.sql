@@ -79,6 +79,21 @@ CREATE SEQUENCE IF NOT EXISTS dbpersonel.userSeq
     NO MAXVALUE
     CACHE 1;
 
+CREATE SEQUENCE IF NOT EXISTS dbpersonel.permissionSeq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE SEQUENCE IF NOT EXISTS dbpersonel.rolePermissionSeq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
 -- create personel type table
 CREATE TABLE IF NOT EXISTS dbpersonel.personel_type (
     personel_type_id BIGINT DEFAULT nextval('dbpersonel.personelTypeSeq'::regclass) NOT NULL PRIMARY KEY,
@@ -193,86 +208,86 @@ CREATE TABLE IF NOT EXISTS dbpersonel.user (
 );
 
 -- insert example records - PersonelType
-INSERT INTO dbpersonel.personel_type (personel_type_name, base_salary) VALUES 
-('Staff', 50000),
-('Manager', 70000),
-('Security', 30000)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.personel_type (personel_type_id, personel_type_name, base_salary) VALUES 
+(1, 'Staff', 50000),
+(2, 'Manager', 70000),
+(3, 'Security', 30000)
+ON CONFLICT (personel_type_id) DO NOTHING;
 
 -- insert example records - Building
-INSERT INTO dbpersonel.building (building_name) VALUES 
-('Main Building'),
-('Additional Service Building 1'),
-('Additional Service Building 2')
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.building (building_id, building_name) VALUES 
+(1, 'Main Building'),
+(2, 'Additional Service Building 1'),
+(3, 'Additional Service Building 2')
+ON CONFLICT (building_id) DO NOTHING;
 
 -- insert example records - Floor
-INSERT INTO dbpersonel.floor (floor_name, fk_building_id) VALUES 
-('Ground Floor', 1),
-('1st Floor', 1),
-('2nd Floor', 1),
-('3rd Floor', 1),
-('4th Floor', 1),
-('5th Floor', 1),
-('6th Floor', 1),
-('7th Floor', 1),
-('8th Floor', 1),
-('9th Floor', 1),
-('10th Floor', 1),
-('11th Floor', 1),
-('12th Floor', 1),
-('13th Floor', 1),
-('14th Floor', 1),
-('15th Floor', 1),
-('16th Floor', 1),
-('17th Floor', 1),
-('18th Floor', 1),
-('19th Floor', 1),
-('20th Floor', 1),
-('21st Floor', 1),
-('Ground Floor', 2),
-('1st Floor', 2),
-('2nd Floor', 2),
-('3rd Floor', 2),
-('4th Floor', 2),
-('5th Floor', 2),
-('6th Floor', 2),
-('7th Floor', 2),
-('8th Floor', 2),
-('9th Floor', 2),
-('Ground Floor', 3),
-('1st Floor', 3),
-('2nd Floor', 3),
-('3rd Floor', 3),
-('4th Floor', 3),
-('5th Floor', 3),
-('6th Floor', 3),
-('7th Floor', 3),
-('8th Floor', 3),
-('9th Floor', 3),
-('10th Floor', 3),
-('11th Floor', 3),
-('12th Floor', 3),
-('13th Floor', 3)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.floor (floor_id, floor_name, fk_building_id) VALUES 
+(1, 'Ground Floor', 1),
+(2, '1st Floor', 1),
+(3, '2nd Floor', 1),
+(4, '3rd Floor', 1),
+(5, '4th Floor', 1),
+(6, '5th Floor', 1),
+(7, '6th Floor', 1),
+(8, '7th Floor', 1),
+(9, '8th Floor', 1),
+(10, '9th Floor', 1),
+(11, '10th Floor', 1),
+(12, '11th Floor', 1),
+(13, '12th Floor', 1),
+(14, '13th Floor', 1),
+(15, '14th Floor', 1),
+(16, '15th Floor', 1),
+(17, '16th Floor', 1),
+(18, '17th Floor', 1),
+(19, '18th Floor', 1),
+(20, '19th Floor', 1),
+(21, '20th Floor', 1),
+(22, '21st Floor', 1),
+(23, 'Ground Floor', 2),
+(24, '1st Floor', 2),
+(25, '2nd Floor', 2),
+(26, '3rd Floor', 2),
+(27, '4th Floor', 2),
+(28, '5th Floor', 2),
+(29, '6th Floor', 2),
+(30, '7th Floor', 2),
+(31, '8th Floor', 2),
+(32, '9th Floor', 2),
+(33, 'Ground Floor', 3),
+(34, '1st Floor', 3),
+(35, '2nd Floor', 3),
+(36, '3rd Floor', 3),
+(37, '4th Floor', 3),
+(38, '5th Floor', 3),
+(39, '6th Floor', 3),
+(40, '7th Floor', 3),
+(41, '8th Floor', 3),
+(42, '9th Floor', 3),
+(43, '10th Floor', 3),
+(44, '11th Floor', 3),
+(45, '12th Floor', 3),
+(46, '13th Floor', 3)
+ON CONFLICT (floor_id) DO NOTHING;
 
 -- insert example records - Personel
-INSERT INTO dbpersonel.personel (name, email, fk_personel_type_id) VALUES 
-('Arif Özcan', 'zcanarif@gmail(.com', 1),
-('Ahmet Arslan', 'ahmetarslan764@gmail.com', 1),
-('Ahmet Yılmaz', 'ahmet.yilmaz@company.com', 1),
-('Mehmet Demir', 'mehmet.demir@company.com', 1),
-('Ayşe Kaya', 'ayse.kaya@company.com', 2),
-('Ali Can', 'ali.can@company.com', 3)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.personel (personel_id, name, email, fk_personel_type_id) VALUES 
+(1, 'Arif Özcan', 'zcanarif@gmail.com', 1),
+(2, 'Ahmet Arslan', 'ahmetarslan764@gmail.com', 1),
+(3, 'Ahmet Yılmaz', 'ahmet.yilmaz@company.com', 1),
+(4, 'Mehmet Demir', 'mehmet.demir@company.com', 1),
+(5, 'Ayşe Kaya', 'ayse.kaya@company.com', 2),
+(6, 'Ali Can', 'ali.can@company.com', 3)
+ON CONFLICT (personel_id) DO NOTHING;
 
 -- insert example records - Unit
-INSERT INTO dbpersonel.unit (unit_name, fk_floor_id, fk_administrator_personel_id) VALUES 
-('Accounting', 1, 1),
-('Human Resources', 1, 2),
-('Software Development', 3, 3),
-('Security', 5, 4)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.unit (unit_id, unit_name, fk_floor_id, fk_administrator_personel_id) VALUES 
+(1, 'Accounting', 1, 1),
+(2, 'Human Resources', 1, 2),
+(3, 'Software Development', 3, 3),
+(4, 'Security', 5, 4)
+ON CONFLICT (unit_id) DO NOTHING;
 
 -- insert example records - personel_unit (many-to-many)
 INSERT INTO dbpersonel.personel_unit (personel_id, unit_id) VALUES 
@@ -284,38 +299,38 @@ INSERT INTO dbpersonel.personel_unit (personel_id, unit_id) VALUES
 ON CONFLICT DO NOTHING;
 
 -- insert example records - Gate
-INSERT INTO dbpersonel.gate (gate_name, main_entrance, fk_unit_id) VALUES 
-('Gate Main Entrance', true, 4),
-('Gate 1', false, 4),
-('Gate 2', false, 3),
-('Gate 3', false, 2),
-('Gate 4', false, 1),
-('Gate 5', false, 1),
-('Gate 6', false, 3),
-('Gate 7', false, 1),
-('Gate 8', false, 2),
-('Gate 9', false, 1),
-('Gate 10', false, 4),
-('Gate 11', false, 1)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.gate (gate_id, gate_name, main_entrance, fk_unit_id) VALUES 
+(1, 'Gate Main Entrance', true, 4),
+(2, 'Gate 1', false, 4),
+(3, 'Gate 2', false, 3),
+(4, 'Gate 3', false, 2),
+(5, 'Gate 4', false, 1),
+(6, 'Gate 5', false, 1),
+(7, 'Gate 6', false, 3),
+(8, 'Gate 7', false, 1),
+(9, 'Gate 8', false, 2),
+(10, 'Gate 9', false, 1),
+(11, 'Gate 10', false, 4),
+(12, 'Gate 11', false, 1)
+ON CONFLICT (gate_id) DO NOTHING;
 
 -- insert example records - Turnstile
-INSERT INTO dbpersonel.turnstile (turnstile_name, fk_gate_id) VALUES 
-('Turnstile 1', 1),
-('Turnstile 2', 2),
-('Turnstile 3', 3),
-('Turnstile 4', 4),
-('Turnstile 5', 5),
-('Turnstile 6', 6),
-('Turnstile 7', 7),
-('Turnstile 8', 8),
-('Turnstile 9', 9),
-('Turnstile 10', 10)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.turnstile (turnstile_id, turnstile_name, fk_gate_id) VALUES 
+(1, 'Turnstile 1', 1),
+(2, 'Turnstile 2', 2),
+(3, 'Turnstile 3', 3),
+(4, 'Turnstile 4', 4),
+(5, 'Turnstile 5', 5),
+(6, 'Turnstile 6', 6),
+(7, 'Turnstile 7', 7),
+(8, 'Turnstile 8', 8),
+(9, 'Turnstile 9', 9),
+(10, 'Turnstile 10', 10)
+ON CONFLICT (turnstile_id) DO NOTHING;
 
 -- insert example records - Working Hours
-INSERT INTO dbpersonel.working_hours (check_in_time, check_out_time, fk_personel_type_id) VALUES 
-('09:00:00', '18:00:00', 1),
-('09:00:00', '18:00:00', 2),
-('09:00:00', '18:00:00', 3)
-ON CONFLICT DO NOTHING;
+INSERT INTO dbpersonel.working_hours (working_hours_id, check_in_time, check_out_time, fk_personel_type_id) VALUES 
+(1, '09:00:00', '18:00:00', 1),
+(2, '09:00:00', '18:00:00', 2),
+(3, '09:00:00', '18:00:00', 3)
+ON CONFLICT (working_hours_id) DO NOTHING;

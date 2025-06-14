@@ -54,7 +54,6 @@ public class UnitServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Test verileri oluşturma
         unit = new Unit();
         unit.setUnitId(1L);
         unit.setUnitName("Test Birim");

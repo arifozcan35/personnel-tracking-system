@@ -50,7 +50,6 @@ class PersonelServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Test verileri oluşturma
         personel = new Personel();
         personel.setPersonelId(1L);
         personel.setName("Test Personel");
@@ -69,7 +68,6 @@ class PersonelServiceImplTest {
         unitList.add(unit);
         personel.setUnitId(unitList);
 
-        // DTO nesneleri
         dtoPersonel = new DtoPersonel();
         dtoPersonel.setName("Test Personel");
         dtoPersonel.setEmail("test@test.com");

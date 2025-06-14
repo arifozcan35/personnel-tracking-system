@@ -41,7 +41,6 @@ class WorkingHoursServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Test verileri hazırlanıyor
         personelType = new PersonelType();
         personelType.setPersonelTypeId(1L);
 
