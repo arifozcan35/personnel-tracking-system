@@ -1,0 +1,616 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - PersonelType
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_type
+            columns:
+              - column:
+                  name: personel_type_id
+                  value: 1
+              - column:
+                  name: personel_type_name
+                  value: Staff
+              - column:
+                  name: base_salary
+                  valueNumeric: 50000
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_type
+            columns:
+              - column:
+                  name: personel_type_id
+                  value: 2
+              - column:
+                  name: personel_type_name
+                  value: Manager
+              - column:
+                  name: base_salary
+                  valueNumeric: 70000
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_type
+            columns:
+              - column:
+                  name: personel_type_id
+                  value: 3
+              - column:
+                  name: personel_type_name
+                  value: Security
+              - column:
+                  name: base_salary
+                  valueNumeric: 30000
+
+  - changeSet:
+      id: 2
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Building
+        - insert:
+            schemaName: dbpersonel
+            tableName: building
+            columns:
+              - column:
+                  name: building_id
+                  value: 1
+              - column:
+                  name: building_name
+                  value: Main Building
+        - insert:
+            schemaName: dbpersonel
+            tableName: building
+            columns:
+              - column:
+                  name: building_id
+                  value: 2
+              - column:
+                  name: building_name
+                  value: Additional Service Building 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: building
+            columns:
+              - column:
+                  name: building_id
+                  value: 3
+              - column:
+                  name: building_name
+                  value: Additional Service Building 2
+
+  - changeSet:
+      id: 3
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Floor
+        - loadData:
+            schemaName: dbpersonel
+            tableName: floor
+            file: db/changelog/data/floor-data.csv
+            separator: ','
+            columns:
+              - column:
+                  name: floor_id
+                  type: NUMERIC
+              - column:
+                  name: floor_name
+                  type: STRING
+              - column:
+                  name: fk_building_id
+                  type: NUMERIC
+
+  - changeSet:
+      id: 4
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Personel
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  value: 1
+              - column:
+                  name: name
+                  value: Arif Özcan
+              - column:
+                  name: email
+                  value: zcanarif@gmail.com
+              - column:
+                  name: fk_personel_type_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  value: 2
+              - column:
+                  name: name
+                  value: Ahmet Arslan
+              - column:
+                  name: email
+                  value: ahmetarslan764@gmail.com
+              - column:
+                  name: fk_personel_type_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  value: 3
+              - column:
+                  name: name
+                  value: Mustafa Aşçı
+              - column:
+                  name: email
+                  value: mustafa.asci@gelirler.gov.tr
+              - column:
+                  name: fk_personel_type_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  value: 4
+              - column:
+                  name: name
+                  value: İlker Dursun
+              - column:
+                  name: email
+                  value: ilker.dursun@gelirler.gov.tr
+              - column:
+                  name: fk_personel_type_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  value: 5
+              - column:
+                  name: name
+                  value: Ahmet Selçuk Özçelik
+              - column:
+                  name: email
+                  value: aozcelik@gelirler.gov.tr
+              - column:
+                  name: fk_personel_type_id
+                  value: 2
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  value: 6
+              - column:
+                  name: name
+                  value: Talha Ünal
+              - column:
+                  name: email
+                  value: talha.unal@gelirler.gov.tr
+              - column:
+                  name: fk_personel_type_id
+                  value: 3
+
+  - changeSet:
+      id: 5
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Unit
+        - insert:
+            schemaName: dbpersonel
+            tableName: unit
+            columns:
+              - column:
+                  name: unit_id
+                  value: 1
+              - column:
+                  name: unit_name
+                  value: Accounting
+              - column:
+                  name: fk_floor_id
+                  value: 1
+              - column:
+                  name: fk_administrator_personel_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: unit
+            columns:
+              - column:
+                  name: unit_id
+                  value: 2
+              - column:
+                  name: unit_name
+                  value: Human Resources
+              - column:
+                  name: fk_floor_id
+                  value: 1
+              - column:
+                  name: fk_administrator_personel_id
+                  value: 2
+        - insert:
+            schemaName: dbpersonel
+            tableName: unit
+            columns:
+              - column:
+                  name: unit_id
+                  value: 3
+              - column:
+                  name: unit_name
+                  value: Software Development
+              - column:
+                  name: fk_floor_id
+                  value: 3
+              - column:
+                  name: fk_administrator_personel_id
+                  value: 3
+        - insert:
+            schemaName: dbpersonel
+            tableName: unit
+            columns:
+              - column:
+                  name: unit_id
+                  value: 4
+              - column:
+                  name: unit_name
+                  value: Security
+              - column:
+                  name: fk_floor_id
+                  value: 5
+              - column:
+                  name: fk_administrator_personel_id
+                  value: 4
+
+  - changeSet:
+      id: 6
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - personel_unit
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_unit
+            columns:
+              - column:
+                  name: personel_id
+                  value: 1
+              - column:
+                  name: unit_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_unit
+            columns:
+              - column:
+                  name: personel_id
+                  value: 2
+              - column:
+                  name: unit_id
+                  value: 2
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_unit
+            columns:
+              - column:
+                  name: personel_id
+                  value: 3
+              - column:
+                  name: unit_id
+                  value: 3
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_unit
+            columns:
+              - column:
+                  name: personel_id
+                  value: 4
+              - column:
+                  name: unit_id
+                  value: 4
+        - insert:
+            schemaName: dbpersonel
+            tableName: personel_unit
+            columns:
+              - column:
+                  name: personel_id
+                  value: 1
+              - column:
+                  name: unit_id
+                  value: 2
+
+  - changeSet:
+      id: 7
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Gate
+        - loadData:
+            schemaName: dbpersonel
+            tableName: gate
+            file: db/changelog/data/gate-data.csv
+            separator: ','
+            columns:
+              - column:
+                  name: gate_id
+                  type: NUMERIC
+              - column:
+                  name: gate_name
+                  type: STRING
+              - column:
+                  name: main_entrance
+                  type: BOOLEAN
+              - column:
+                  name: fk_unit_id
+                  type: NUMERIC
+
+  - changeSet:
+      id: 8
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Turnstile
+        - loadData:
+            schemaName: dbpersonel
+            tableName: turnstile
+            file: db/changelog/data/turnstile-data.csv
+            separator: ','
+            columns:
+              - column:
+                  name: turnstile_id
+                  type: NUMERIC
+              - column:
+                  name: turnstile_name
+                  type: STRING
+              - column:
+                  name: fk_gate_id
+                  type: NUMERIC
+
+  - changeSet:
+      id: 9
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Working Hours
+        - insert:
+            schemaName: dbpersonel
+            tableName: working_hours
+            columns:
+              - column:
+                  name: working_hours_id
+                  value: 1
+              - column:
+                  name: check_in_time
+                  value: '09:00:00'
+              - column:
+                  name: check_out_time
+                  value: '18:00:00'
+              - column:
+                  name: fk_personel_type_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: working_hours
+            columns:
+              - column:
+                  name: working_hours_id
+                  value: 2
+              - column:
+                  name: check_in_time
+                  value: '09:00:00'
+              - column:
+                  name: check_out_time
+                  value: '18:00:00'
+              - column:
+                  name: fk_personel_type_id
+                  value: 2
+        - insert:
+            schemaName: dbpersonel
+            tableName: working_hours
+            columns:
+              - column:
+                  name: working_hours_id
+                  value: 3
+              - column:
+                  name: check_in_time
+                  value: '09:00:00'
+              - column:
+                  name: check_out_time
+                  value: '18:00:00'
+              - column:
+                  name: fk_personel_type_id
+                  value: 3
+
+  - changeSet:
+      id: 10
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - Permission
+        - insert:
+            schemaName: dbpersonel
+            tableName: permission
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: name
+                  value: VIEW_PERSONEL_LIST
+              - column:
+                  name: resource
+                  value: personel
+              - column:
+                  name: method
+                  value: GET
+              - column:
+                  name: path_pattern
+                  value: /api/personel
+              - column:
+                  name: description
+                  value: Personel listesini görüntüleme izni
+        - insert:
+            schemaName: dbpersonel
+            tableName: permission
+            columns:
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: name
+                  value: ADD_PERSONEL
+              - column:
+                  name: resource
+                  value: personel
+              - column:
+                  name: method
+                  value: POST
+              - column:
+                  name: path_pattern
+                  value: /api/personel
+              - column:
+                  name: description
+                  value: Yeni personel ekleme izni
+        - insert:
+            schemaName: dbpersonel
+            tableName: permission
+            columns:
+              - column:
+                  name: id
+                  value: 3
+              - column:
+                  name: name
+                  value: EDIT_PERSONEL
+              - column:
+                  name: resource
+                  value: personel
+              - column:
+                  name: method
+                  value: PUT
+              - column:
+                  name: path_pattern
+                  value: /api/personel/{id}
+              - column:
+                  name: description
+                  value: Personel bilgilerini düzenleme izni
+        - insert:
+            schemaName: dbpersonel
+            tableName: permission
+            columns:
+              - column:
+                  name: id
+                  value: 4
+              - column:
+                  name: name
+                  value: DELETE_PERSONEL
+              - column:
+                  name: resource
+                  value: personel
+              - column:
+                  name: method
+                  value: DELETE
+              - column:
+                  name: path_pattern
+                  value: /api/personel/{id}
+              - column:
+                  name: description
+                  value: Personel silme izni
+        - insert:
+            schemaName: dbpersonel
+            tableName: permission
+            columns:
+              - column:
+                  name: id
+                  value: 5
+              - column:
+                  name: name
+                  value: VIEW_SALARY
+              - column:
+                  name: resource
+                  value: salary
+              - column:
+                  name: method
+                  value: GET
+              - column:
+                  name: path_pattern
+                  value: /api/salary/{personelId}
+              - column:
+                  name: description
+                  value: Maaş bilgilerini görüntüleme izni
+
+  - changeSet:
+      id: 11
+      author: liquibase
+      changes:
+        # Örnek kayıtlar - RolePermission
+        - insert:
+            schemaName: dbpersonel
+            tableName: role_permission
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: role
+                  value: ADMIN
+              - column:
+                  name: permission_id
+                  value: 1
+        - insert:
+            schemaName: dbpersonel
+            tableName: role_permission
+            columns:
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: role
+                  value: ADMIN
+              - column:
+                  name: permission_id
+                  value: 2
+        - insert:
+            schemaName: dbpersonel
+            tableName: role_permission
+            columns:
+              - column:
+                  name: id
+                  value: 3
+              - column:
+                  name: role
+                  value: ADMIN
+              - column:
+                  name: permission_id
+                  value: 3
+        - insert:
+            schemaName: dbpersonel
+            tableName: role_permission
+            columns:
+              - column:
+                  name: id
+                  value: 4
+              - column:
+                  name: role
+                  value: ADMIN
+              - column:
+                  name: permission_id
+                  value: 4
+        - insert:
+            schemaName: dbpersonel
+            tableName: role_permission
+            columns:
+              - column:
+                  name: id
+                  value: 5
+              - column:
+                  name: role
+                  value: MANAGER
+              - column:
+                  name: permission_id
+                  value: 5 

@@ -1,0 +1,11 @@
+turnstile_id,turnstile_name,fk_gate_id
+1,Turnstile 1,1
+2,Turnstile 2,2
+3,Turnstile 3,3
+4,Turnstile 4,4
+5,Turnstile 5,5
+6,Turnstile 6,6
+7,Turnstile 7,7
+8,Turnstile 8,8
+9,Turnstile 9,9
+10,Turnstile 10,10 

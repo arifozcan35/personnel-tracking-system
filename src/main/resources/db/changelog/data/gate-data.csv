@@ -1,0 +1,13 @@
+gate_id,gate_name,main_entrance,fk_unit_id
+1,Gate Main Entrance,true,4
+2,Gate 1,false,4
+3,Gate 2,false,3
+4,Gate 3,false,2
+5,Gate 4,false,1
+6,Gate 5,false,1
+7,Gate 6,false,3
+8,Gate 7,false,1
+9,Gate 8,false,2
+10,Gate 9,false,1
+11,Gate 10,false,4
+12,Gate 11,false,1 

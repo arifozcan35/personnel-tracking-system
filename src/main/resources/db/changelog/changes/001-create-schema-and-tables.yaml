@@ -1,0 +1,618 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: liquibase
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS dbpersonel;
+
+  - changeSet:
+      id: 2
+      author: liquibase
+      changes:
+        # Şema içinde tanımlı sekanslar (entity'lerde tanımlı)
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.personelTypeSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+        
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.buildingSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.floorSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.unitSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.personelSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.gateSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.turnstileSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.turnstileRegistrationLogSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.workingHoursSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.salarySeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.userSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.permissionSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.rolePermissionSeq START WITH 1 INCREMENT BY 1 CACHE 1;
+        
+        # Hibernate'in aradığı şema olmayan sekanslar
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS user_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS personel_type_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS building_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS floor_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS unit_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS personel_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS gate_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS turnstile_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS turnstile_registration_log_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS working_hours_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS salary_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS permission_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+            
+        - sql:
+            sql: CREATE SEQUENCE IF NOT EXISTS role_permission_seq START WITH 1 INCREMENT BY 1 CACHE 1;
+
+  - changeSet:
+      id: 3
+      author: liquibase
+      changes:
+        # Create personel_type table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: personel_type
+            columns:
+              - column:
+                  name: personel_type_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.personelTypeSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: personel_type_name
+                  type: VARCHAR(255)
+              - column:
+                  name: base_salary
+                  type: DOUBLE PRECISION
+
+  - changeSet:
+      id: 4
+      author: liquibase
+      changes:
+        # Create building table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: building
+            columns:
+              - column:
+                  name: building_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.buildingSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: building_name
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 5
+      author: liquibase
+      changes:
+        # Create floor table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: floor
+            columns:
+              - column:
+                  name: floor_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.floorSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: floor_name
+                  type: VARCHAR(255)
+              - column:
+                  name: fk_building_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_floor_building
+                    references: dbpersonel.building(building_id)
+                    
+  - changeSet:
+      id: 6
+      author: liquibase
+      changes:
+        # Create personel table (önce unit'siz oluştur, döngüsel bağımlılığı önlemek için)
+        - createTable:
+            schemaName: dbpersonel
+            tableName: personel
+            columns:
+              - column:
+                  name: personel_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.personelSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fk_personel_type_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_personel_personel_type
+                    references: dbpersonel.personel_type(personel_type_id)
+
+  - changeSet:
+      id: 7
+      author: liquibase
+      changes:
+        # Create unit table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: unit
+            columns:
+              - column:
+                  name: unit_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.unitSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: unit_name
+                  type: VARCHAR(255)
+              - column:
+                  name: fk_floor_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_unit_floor
+                    references: dbpersonel.floor(floor_id)
+              - column:
+                  name: fk_administrator_personel_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_unit_administrator
+                    references: dbpersonel.personel(personel_id)
+                    nullable: true
+
+  - changeSet:
+      id: 8
+      author: liquibase
+      changes:
+        # Create personel_unit table (many-to-many relationship)
+        - createTable:
+            schemaName: dbpersonel
+            tableName: personel_unit
+            columns:
+              - column:
+                  name: personel_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_personel_unit_personel
+                    references: dbpersonel.personel(personel_id)
+              - column:
+                  name: unit_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_personel_unit_unit
+                    references: dbpersonel.unit(unit_id)
+
+  - changeSet:
+      id: 9
+      author: liquibase
+      changes:
+        # Create gate table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: gate
+            columns:
+              - column:
+                  name: gate_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.gateSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: gate_name
+                  type: VARCHAR(255)
+              - column:
+                  name: main_entrance
+                  type: BOOLEAN
+              - column:
+                  name: fk_unit_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_gate_unit
+                    references: dbpersonel.unit(unit_id)
+
+  - changeSet:
+      id: 10
+      author: liquibase
+      changes:
+        # Create turnstile table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: turnstile
+            columns:
+              - column:
+                  name: turnstile_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.turnstileSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: turnstile_name
+                  type: VARCHAR(255)
+              - column:
+                  name: fk_gate_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_turnstile_gate
+                    references: dbpersonel.gate(gate_id)
+
+  - changeSet:
+      id: 11
+      author: liquibase
+      changes:
+        # Create turnstile_registration_log table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: turnstile_registration_log
+            columns:
+              - column:
+                  name: turnstile_registration_log_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.turnstileRegistrationLogSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fk_personel_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_turnstile_reg_log_personel
+                    references: dbpersonel.personel(personel_id)
+              - column:
+                  name: fk_turnstile_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_turnstile_reg_log_turnstile
+                    references: dbpersonel.turnstile(turnstile_id)
+              - column:
+                  name: operation_time
+                  type: TIMESTAMP
+              - column:
+                  name: operation_type
+                  type: VARCHAR(10)
+
+  - changeSet:
+      id: 12
+      author: liquibase
+      changes:
+        # Create working_hours table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: working_hours
+            columns:
+              - column:
+                  name: working_hours_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.workingHoursSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: check_in_time
+                  type: TIME
+              - column:
+                  name: check_out_time
+                  type: TIME
+              - column:
+                  name: fk_personel_type_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_working_hours_personel_type
+                    references: dbpersonel.personel_type(personel_type_id)
+
+  - changeSet:
+      id: 13
+      author: liquibase
+      changes:
+        # Create salary table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: salary
+            columns:
+              - column:
+                  name: salary_id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.salarySeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fk_personel_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_salary_personel
+                    references: dbpersonel.personel(personel_id)
+              - column:
+                  name: salary_month
+                  type: VARCHAR(7)
+                  remarks: YYYY-MM formatında
+              - column:
+                  name: base_amount
+                  type: DOUBLE PRECISION
+              - column:
+                  name: late_days
+                  type: INTEGER
+              - column:
+                  name: late_penalty_amount
+                  type: DOUBLE PRECISION
+              - column:
+                  name: final_amount
+                  type: DOUBLE PRECISION
+              - column:
+                  name: calculation_date
+                  type: DATE
+              - column:
+                  name: is_paid
+                  type: BOOLEAN
+
+  - changeSet:
+      id: 14
+      author: liquibase
+      changes:
+        # Create user table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: user
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.userSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: username_unique
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: email_unique
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+
+  - changeSet:
+      id: 15
+      schemaName: dbpersonel
+      tableName: permission
+      author: liquibase
+      changes:
+        # Create permission table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: permission
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.permissionSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: resource
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: method
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: path_pattern
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(500)
+
+
+  - changeSet:
+      id: 16
+      schemaName: dbpersonel
+      tableName: role_permission
+      author: liquibase
+      changes:
+        # Create role_permission table
+        - createTable:
+            schemaName: dbpersonel
+            tableName: role_permission
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  defaultValueComputed: nextval('dbpersonel.rolePermissionSeq'::regclass)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: permission_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_role_permission_permission
+                    references: dbpersonel.permission(id)
+   
+
+  - changeSet:
+      id: 17
+      author: liquibase
+      changes:
+        # PersonelType - 3 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.personelTypeSeq', 3, true);
+        - sql:
+            sql: SELECT setval('personel_type_seq', 3, true);
+            
+        # Building - 3 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.buildingSeq', 3, true);
+        - sql:
+            sql: SELECT setval('building_seq', 3, true);
+            
+        # Floor - 46 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.floorSeq', 46, true);
+        - sql:
+            sql: SELECT setval('floor_seq', 46, true);
+            
+        # Personel - 6 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.personelSeq', 6, true);
+        - sql:
+            sql: SELECT setval('personel_seq', 6, true);
+            
+        # Unit - 4 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.unitSeq', 4, true);
+        - sql:
+            sql: SELECT setval('unit_seq', 4, true);
+            
+        # Gate - 12 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.gateSeq', 12, true);
+        - sql:
+            sql: SELECT setval('gate_seq', 12, true);
+            
+        # Turnstile - 10 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.turnstileSeq', 10, true);
+        - sql:
+            sql: SELECT setval('turnstile_seq', 10, true);
+            
+        # Working Hours - 3 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.workingHoursSeq', 3, true);
+        - sql:
+            sql: SELECT setval('working_hours_seq', 3, true);
+            
+        # Diğer sekanslar için başlangıç değerleri
+        # Salary - henüz kayıt yok
+        - sql:
+            sql: SELECT setval('dbpersonel.salarySeq', 1, false);
+        - sql:
+            sql: SELECT setval('salary_seq', 1, false);
+            
+        # User - henüz kayıt yok
+        - sql:
+            sql: SELECT setval('dbpersonel.userSeq', 1, false);
+        - sql:
+            sql: SELECT setval('user_seq', 2, true);
+            
+        # Permission - 5 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.permissionSeq', 5, true);
+        - sql:
+            sql: SELECT setval('permission_seq', 5, true);
+            
+        # RolePermission - 5 kayıt
+        - sql:
+            sql: SELECT setval('dbpersonel.rolePermissionSeq', 5, true);
+        - sql:
+            sql: SELECT setval('role_permission_seq', 5, true);
+            
+        # TurnstileRegistrationLog - henüz kayıt yok
+        - sql:
+            sql: SELECT setval('dbpersonel.turnstileRegistrationLogSeq', 1, false);
+        - sql:
+            sql: SELECT setval('turnstile_registration_log_seq', 1, false); 
