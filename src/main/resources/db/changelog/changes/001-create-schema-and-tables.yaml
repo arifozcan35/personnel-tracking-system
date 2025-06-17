@@ -10,7 +10,7 @@ databaseChangeLog:
       id: 2
       author: liquibase
       changes:
-        # Şema içinde tanımlı sekanslar (entity'lerde tanımlı)
+        # entity
         - sql:
             sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.personelTypeSeq START WITH 1 INCREMENT BY 1 CACHE 1;
         
@@ -49,8 +49,9 @@ databaseChangeLog:
             
         - sql:
             sql: CREATE SEQUENCE IF NOT EXISTS dbpersonel.rolePermissionSeq START WITH 1 INCREMENT BY 1 CACHE 1;
-        
-        # Hibernate'in aradığı şema olmayan sekanslar
+
+
+        # not hibernate
         - sql:
             sql: CREATE SEQUENCE IF NOT EXISTS user_seq START WITH 1 INCREMENT BY 1 CACHE 1;
             
@@ -94,7 +95,6 @@ databaseChangeLog:
       id: 3
       author: liquibase
       changes:
-        # Create personel_type table
         - createTable:
             schemaName: dbpersonel
             tableName: personel_type
@@ -117,7 +117,6 @@ databaseChangeLog:
       id: 4
       author: liquibase
       changes:
-        # Create building table
         - createTable:
             schemaName: dbpersonel
             tableName: building
@@ -137,7 +136,6 @@ databaseChangeLog:
       id: 5
       author: liquibase
       changes:
-        # Create floor table
         - createTable:
             schemaName: dbpersonel
             tableName: floor
@@ -163,7 +161,6 @@ databaseChangeLog:
       id: 6
       author: liquibase
       changes:
-        # Create personel table (önce unit'siz oluştur, döngüsel bağımlılığı önlemek için)
         - createTable:
             schemaName: dbpersonel
             tableName: personel
@@ -194,7 +191,6 @@ databaseChangeLog:
       id: 7
       author: liquibase
       changes:
-        # Create unit table
         - createTable:
             schemaName: dbpersonel
             tableName: unit
@@ -227,7 +223,6 @@ databaseChangeLog:
       id: 8
       author: liquibase
       changes:
-        # Create personel_unit table (many-to-many relationship)
         - createTable:
             schemaName: dbpersonel
             tableName: personel_unit
@@ -253,7 +248,6 @@ databaseChangeLog:
       id: 9
       author: liquibase
       changes:
-        # Create gate table
         - createTable:
             schemaName: dbpersonel
             tableName: gate
@@ -282,7 +276,6 @@ databaseChangeLog:
       id: 10
       author: liquibase
       changes:
-        # Create turnstile table
         - createTable:
             schemaName: dbpersonel
             tableName: turnstile
@@ -308,7 +301,6 @@ databaseChangeLog:
       id: 11
       author: liquibase
       changes:
-        # Create turnstile_registration_log table
         - createTable:
             schemaName: dbpersonel
             tableName: turnstile_registration_log
@@ -343,7 +335,6 @@ databaseChangeLog:
       id: 12
       author: liquibase
       changes:
-        # Create working_hours table
         - createTable:
             schemaName: dbpersonel
             tableName: working_hours
@@ -372,7 +363,6 @@ databaseChangeLog:
       id: 13
       author: liquibase
       changes:
-        # Create salary table
         - createTable:
             schemaName: dbpersonel
             tableName: salary
@@ -417,7 +407,6 @@ databaseChangeLog:
       id: 14
       author: liquibase
       changes:
-        # Create user table
         - createTable:
             schemaName: dbpersonel
             tableName: user
@@ -464,7 +453,6 @@ databaseChangeLog:
       tableName: permission
       author: liquibase
       changes:
-        # Create permission table
         - createTable:
             schemaName: dbpersonel
             tableName: permission
@@ -508,7 +496,6 @@ databaseChangeLog:
       tableName: role_permission
       author: liquibase
       changes:
-        # Create role_permission table
         - createTable:
             schemaName: dbpersonel
             tableName: role_permission
@@ -543,7 +530,7 @@ databaseChangeLog:
             sql: SELECT setval('dbpersonel.personelTypeSeq', 3, true);
         - sql:
             sql: SELECT setval('personel_type_seq', 3, true);
-            
+
         # Building - 3 kayıt
         - sql:
             sql: SELECT setval('dbpersonel.buildingSeq', 3, true);

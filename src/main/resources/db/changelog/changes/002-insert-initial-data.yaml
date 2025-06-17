@@ -160,16 +160,16 @@ databaseChangeLog:
             columns:
               - column:
                   name: personel_id
-                  value: 4
+                  value: 6
               - column:
                   name: name
-                  value: İlker Dursun
+                  value: Talha Ünal
               - column:
                   name: email
-                  value: ilker.dursun@gelirler.gov.tr
+                  value: talha.unal@gelirler.gov.tr
               - column:
                   name: fk_personel_type_id
-                  value: 1
+                  value: 3
         - insert:
             schemaName: dbpersonel
             tableName: personel
@@ -192,16 +192,16 @@ databaseChangeLog:
             columns:
               - column:
                   name: personel_id
-                  value: 6
+                  value: 4
               - column:
                   name: name
-                  value: Talha Ünal
+                  value: İlker Dursun
               - column:
                   name: email
-                  value: talha.unal@gelirler.gov.tr
+                  value: ilker.dursun@gelirler.gov.tr
               - column:
                   name: fk_personel_type_id
-                  value: 3
+                  value: 1
 
   - changeSet:
       id: 5
@@ -272,6 +272,22 @@ databaseChangeLog:
               - column:
                   name: fk_administrator_personel_id
                   value: 4
+        - insert:
+            schemaName: dbpersonel
+            tableName: unit
+            columns:
+              - column:
+                  name: unit_id
+                  value: 5
+              - column:
+                  name: unit_name
+                  value: Product Team
+              - column:
+                  name: fk_floor_id
+                  value: 4
+              - column:
+                  name: fk_administrator_personel_id
+                  value: 5
 
   - changeSet:
       id: 6
@@ -287,7 +303,7 @@ databaseChangeLog:
                   value: 1
               - column:
                   name: unit_id
-                  value: 1
+                  value: 5
         - insert:
             schemaName: dbpersonel
             tableName: personel_unit
@@ -318,16 +334,6 @@ databaseChangeLog:
               - column:
                   name: unit_id
                   value: 4
-        - insert:
-            schemaName: dbpersonel
-            tableName: personel_unit
-            columns:
-              - column:
-                  name: personel_id
-                  value: 1
-              - column:
-                  name: unit_id
-                  value: 2
 
   - changeSet:
       id: 7
