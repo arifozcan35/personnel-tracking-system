@@ -6,6 +6,7 @@ import com.personneltrackingsystem.dto.event.TurnstilePassageEvent;
 import com.personneltrackingsystem.exception.BaseException;
 import com.personneltrackingsystem.exception.ValidationException;
 import com.personneltrackingsystem.service.cache.RedisCacheService;
+import com.personneltrackingsystem.service.impl.TurnstileServiceImpl;
 import com.personneltrackingsystem.service.kafka.KafkaProducerService;
 import com.personneltrackingsystem.mapper.TurnstileMapper;
 import com.personneltrackingsystem.repository.TurnstileRepository;

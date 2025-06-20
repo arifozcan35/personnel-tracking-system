@@ -40,6 +40,7 @@ import com.personneltrackingsystem.repository.PersonelRepository;
 import com.personneltrackingsystem.repository.SalaryRepository;
 import com.personneltrackingsystem.repository.TurnstileRegistrationLogRepository;
 import com.personneltrackingsystem.service.PersonelService;
+import com.personneltrackingsystem.service.impl.SalaryServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class SalaryServiceImplTest {

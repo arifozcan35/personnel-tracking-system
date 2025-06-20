@@ -115,7 +115,7 @@ databaseChangeLog:
                   value: 1
               - column:
                   name: name
-                  value: Arif Özcan
+                  value: Arif Ozcan
               - column:
                   name: email
                   value: zcanarif@gmail.com
@@ -131,10 +131,10 @@ databaseChangeLog:
                   value: 2
               - column:
                   name: name
-                  value: Ahmet Arslan
+                  value: Cem Baydogan
               - column:
                   name: email
-                  value: ahmetarslan764@gmail.com
+                  value: vcbaydogan@firat.edu.tr
               - column:
                   name: fk_personel_type_id
                   value: 1
@@ -147,61 +147,13 @@ databaseChangeLog:
                   value: 3
               - column:
                   name: name
-                  value: Mustafa Aşçı
+                  value: Beyzanur Durmus
               - column:
                   name: email
-                  value: mustafa.asci@gelirler.gov.tr
-              - column:
-                  name: fk_personel_type_id
-                  value: 1
-        - insert:
-            schemaName: dbpersonel
-            tableName: personel
-            columns:
-              - column:
-                  name: personel_id
-                  value: 6
-              - column:
-                  name: name
-                  value: Talha Ünal
-              - column:
-                  name: email
-                  value: talha.unal@gelirler.gov.tr
+                  value: bdurmus@firat.edu.tr
               - column:
                   name: fk_personel_type_id
                   value: 3
-        - insert:
-            schemaName: dbpersonel
-            tableName: personel
-            columns:
-              - column:
-                  name: personel_id
-                  value: 5
-              - column:
-                  name: name
-                  value: Ahmet Selçuk Özçelik
-              - column:
-                  name: email
-                  value: aozcelik@gelirler.gov.tr
-              - column:
-                  name: fk_personel_type_id
-                  value: 2
-        - insert:
-            schemaName: dbpersonel
-            tableName: personel
-            columns:
-              - column:
-                  name: personel_id
-                  value: 4
-              - column:
-                  name: name
-                  value: İlker Dursun
-              - column:
-                  name: email
-                  value: ilker.dursun@gelirler.gov.tr
-              - column:
-                  name: fk_personel_type_id
-                  value: 1
 
   - changeSet:
       id: 5
@@ -223,7 +175,7 @@ databaseChangeLog:
                   value: 1
               - column:
                   name: fk_administrator_personel_id
-                  value: 1
+                  value: 2
         - insert:
             schemaName: dbpersonel
             tableName: unit
@@ -239,7 +191,7 @@ databaseChangeLog:
                   value: 1
               - column:
                   name: fk_administrator_personel_id
-                  value: 2
+                  value: 1
         - insert:
             schemaName: dbpersonel
             tableName: unit
@@ -256,38 +208,6 @@ databaseChangeLog:
               - column:
                   name: fk_administrator_personel_id
                   value: 3
-        - insert:
-            schemaName: dbpersonel
-            tableName: unit
-            columns:
-              - column:
-                  name: unit_id
-                  value: 4
-              - column:
-                  name: unit_name
-                  value: Security
-              - column:
-                  name: fk_floor_id
-                  value: 5
-              - column:
-                  name: fk_administrator_personel_id
-                  value: 4
-        - insert:
-            schemaName: dbpersonel
-            tableName: unit
-            columns:
-              - column:
-                  name: unit_id
-                  value: 5
-              - column:
-                  name: unit_name
-                  value: Product Team
-              - column:
-                  name: fk_floor_id
-                  value: 4
-              - column:
-                  name: fk_administrator_personel_id
-                  value: 5
 
   - changeSet:
       id: 6
@@ -303,7 +223,7 @@ databaseChangeLog:
                   value: 1
               - column:
                   name: unit_id
-                  value: 5
+                  value: 3
         - insert:
             schemaName: dbpersonel
             tableName: personel_unit
@@ -323,17 +243,8 @@ databaseChangeLog:
                   value: 3
               - column:
                   name: unit_id
-                  value: 3
-        - insert:
-            schemaName: dbpersonel
-            tableName: personel_unit
-            columns:
-              - column:
-                  name: personel_id
-                  value: 4
-              - column:
-                  name: unit_id
-                  value: 4
+                  value: 1
+
 
   - changeSet:
       id: 7
